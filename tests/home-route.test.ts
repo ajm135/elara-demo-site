@@ -1,0 +1,27 @@
+import { describe, expect, it } from "vitest";
+import HomePage from "../src/app/page";
+import {
+  getHomeHeading,
+  getHomeSummary,
+  getSiteTitle,
+} from "../src/lib/site";
+
+describe("home route", () => {
+  it("exports a function component from the home page module", () => {
+    expect(typeof HomePage).toBe("function");
+    const rendered = HomePage();
+    expect(rendered).toBeTruthy();
+  });
+
+  it("renders the home heading as the page heading", () => {
+    expect(getHomeHeading()).toBe("A hopeful look at AI and human health");
+  });
+
+  it("keeps the demo clearly educational, not medical advice", () => {
+    expect(getHomeSummary()).toMatch(/not medical advice/i);
+  });
+
+  it("provides the site title used by metadata", () => {
+    expect(getSiteTitle()).toBe("Demo Site");
+  });
+});
