@@ -1,3 +1,5 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import HomePage from "../src/app/page";
 import {
@@ -23,5 +25,15 @@ describe("home route", () => {
 
   it("provides the site title used by metadata", () => {
     expect(getSiteTitle()).toBe("Demo Site");
+  });
+
+  it("renders the home story into a main with a heading, an image, and the core claims", () => {
+    const html = renderToStaticMarkup(createElement(HomePage));
+    expect(html).toContain("<main id=\"main-content\">");
+    expect(html).toContain("<h1>");
+    expect(html).toContain('src="/images/hopeful-future.svg"');
+    expect(html).toContain("cancer");
+    expect(html).toContain("110");
+    expect(html).toContain("120");
   });
 });

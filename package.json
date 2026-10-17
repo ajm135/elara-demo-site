@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "start": "set \"PATH=%ProgramFiles%\\nodejs;node_modules\\.bin\" && next build && next start -p 3000",
     "build": "set \"PATH=%ProgramFiles%\\nodejs;node_modules\\.bin\" && next build",
     "test": "set \"PATH=%ProgramFiles%\\nodejs;node_modules\\.bin\" && vitest run"
   },
