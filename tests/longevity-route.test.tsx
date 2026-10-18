@@ -14,10 +14,17 @@ describe("longevity route", () => {
     expect(html).toContain(`<p>${page.navLabel}</p>`);
   });
 
-  it("states the expected 110-120 year average lifespan", () => {
+  it("explains the three lifespan distinctions and makes no future average forecast", () => {
     const html = renderToStaticMarkup(<LongevityPage />);
-    expect(html).toMatch(/110/);
-    expect(html).toMatch(/120/);
+    // Strip tags and attributes so the numeric checks see only text, not
+    // image dimensions such as width="1200".
+    const text = html.replace(/<[^>]*>/g, " ");
+    expect(text).toMatch(/life expectancy/i);
+    expect(text).toMatch(/maximum lifespan/i);
+    expect(text).toMatch(/healthy lifespan/i);
+    expect(text).not.toMatch(/110/);
+    expect(text).not.toMatch(/120/);
+    expect(text).not.toMatch(/some researchers/i);
   });
 
   it("shows every local image with its descriptive alternative text", () => {

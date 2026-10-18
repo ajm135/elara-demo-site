@@ -20,3 +20,7 @@ Milestone 3 of the Demo Site needs the five stories from `src/lib/site-content.t
 
 - Tests in `tests/` cover the shared `StoryPage` markup (one `main`, one `h1`, images with alt text, sections, disclaimer) and each route's component and metadata, so every new route has a test.
 - Copy and image references are synthetic and non-personal: no real patient names, photos, or claims about named products.
+
+## Superseded (medical assertions only)
+
+The statement in this ADR that "the longevity page states that the 110-120 year average lifespan is an expectation held by some researchers, not a guaranteed forecast" is superseded by ADR 0005 (evidence-led health claims, 2026-10-18): the shipped copy no longer carries any 110–120 year figure, and the evidence policy for health claims is recorded there. All other decisions in this ADR — the five App Router routes, the shared `StoryPage` markup, the metadata, and the local-only rendering — remain in force.

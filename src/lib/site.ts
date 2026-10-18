@@ -8,6 +8,7 @@ export function getHomeHeading(): string {
 
 export function getHomeSummary(): string {
   return "This is an educational demo exploring how AI is expected to help " +
-    "diagnose, treat, and eventually cure cancer and many other diseases. " +
-    "It is not medical advice.";
+    "doctors find disease earlier, choose treatments more carefully, and " +
+    "move research along faster. It is not medical advice, not a diagnosis, " +
+    "and not a guarantee.";
 }

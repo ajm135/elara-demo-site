@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     template: "%s | AI and longer lives",
   },
   description:
-    "An educational demo exploring how AI may help humanity diagnose, treat, and cure disease.",
+    "An educational demo exploring how AI is expected to help doctors find disease earlier, choose treatments more carefully, and move research along faster. It is not medical advice, not a diagnosis, and not a guarantee.",
 };
 
 export default function RootLayout({

@@ -19,3 +19,7 @@ Milestone 2 of the Demo Site needs the story — how AI is expected to help huma
 
 - Tests in `tests/site-content.test.ts` cover the content shape — the five page ids and paths, the cancer and longevity copy, the disclaimers, and the image references — so pages can render the module without a database.
 - Copy is synthetic and non-personal: no real patient names, photos, or claims about named products.
+
+## Superseded (medical assertions only)
+
+The statements in this ADR that the story is "how AI is expected to help humanity diagnose, treat, and eventually cure cancer and many other diseases" and that "some researchers expect average human lifespan to reach about 110–120 years" (Context, and the matching 110–120 expectation in the Decision) are superseded by ADR 0005 (evidence-led health claims, 2026-10-18), the policy of record for the shipped health content. All other decisions in this ADR — the static content model in `src/lib/site-content.ts` and its tests — remain in force.

@@ -22,3 +22,7 @@ The Demo Site is a public demo for a general audience that presents, in hopeful 
 - ADR 0001 already notes the local-only build and test setup; ADR 0004 extends that to the hosting decision itself: no deployment target is part of this project.
 - The loopback-only startup, binding, and verification steps are documented in `docs/runbooks/local-start.md`.
 - Keeping content static and hosting local means there is nothing to protect with credentials: no environment secrets are required, and none are listed in `.env.example`.
+
+## Superseded (medical assertions only)
+
+The statements in this ADR's Context and Decision that the site presents "how AI is expected to help humanity diagnose, treat, and eventually cure cancer and many other diseases" and that "the copy presents cures and a 110-120 year average lifespan as expectations held by some researchers, not as certainties" are superseded by ADR 0005 (evidence-led health claims, 2026-10-18), the policy of record for the shipped health content. Every other decision in this ADR — no sign-in, no database, loopback-only local hosting and its verification, WCAG 2.2 Level AA, and current Chrome, Edge, Firefox, and Safari support — remains in force unchanged.

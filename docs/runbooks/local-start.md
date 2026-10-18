@@ -83,4 +83,4 @@ From the project root:
 
 ## A note about the content
 
-The site is a public educational demo that presents hopeful, research-inspired ideas about AI, medicine, and human longevity. It is not medical advice, not a diagnosis, and not a promise that any cure or a 110–120 year average lifespan is certain.
+The site is a public educational demo that presents hopeful, research-inspired ideas about AI, medicine, and human longevity. It is not medical advice, not a diagnosis, and not a guarantee: it does not promise that any cure is coming, and it makes no forecast of what the average human lifespan will be in the future.

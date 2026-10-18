@@ -27,13 +27,19 @@ describe("home route", () => {
     expect(getSiteTitle()).toBe("Demo Site");
   });
 
-  it("renders the home story into a main with a heading, an image, and the core claims", () => {
+  it("renders the home story into a main with a heading, an image, and the balanced copy", () => {
     const html = renderToStaticMarkup(createElement(HomePage));
+    // Strip tags and attributes so the numeric checks see only text, not
+    // image dimensions such as width="1200".
+    const text = html.replace(/<[^>]*>/g, " ");
     expect(html).toContain("<main id=\"main-content\">");
     expect(html).toContain("<h1>");
     expect(html).toContain('src="/images/hopeful-future.svg"');
-    expect(html).toContain("cancer");
-    expect(html).toContain("110");
-    expect(html).toContain("120");
+    expect(text).toContain("cancer");
+    expect(text).toMatch(/life expectancy/i);
+    expect(text).toMatch(/not a guarantee/i);
+    expect(text).not.toMatch(/110/);
+    expect(text).not.toMatch(/120/);
+    expect(text).not.toMatch(/cure cancer/i);
   });
 });

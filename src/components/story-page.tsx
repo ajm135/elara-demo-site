@@ -1,4 +1,7 @@
+import { Fragment } from "react";
 import type { SitePage } from "../lib/site-content";
+import { claimsForParagraph } from "../lib/site-content";
+import ClaimEvidence from "./claim-evidence";
 
 /**
  * One illustrated story page, rendered from static site content.
@@ -13,10 +16,13 @@ import type { SitePage } from "../lib/site-content";
  * 4. one native `<img>` per image reference (src, alt, width, height; no
  *    empty alt, no next/image, no external images),
  * 5. one `<section>` per section, with an `<h2>` and a `<p>` per paragraph,
- * 6. the page disclaimer.
+ *    and — immediately after any paragraph that makes a consequential
+ *    claim — one `ClaimEvidence` block per claim showing its evidence
+ *    stage, last-reviewed date, and linked publications,
+ * 6. the page disclaimer, which stays the last element of main.
  *
- * No client hooks, no fetched data, no second navigation: the header nav from
- * the layout is the way between pages.
+ * No client hooks, no fetched data, no second navigation: the header nav
+ * from the layout is the way between pages.
  */
 export default function StoryPage({ page }: { page: SitePage }) {
   return (
@@ -37,7 +43,12 @@ export default function StoryPage({ page }: { page: SitePage }) {
         <section key={section.id}>
           <h2>{section.heading}</h2>
           {section.paragraphs.map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
+            <Fragment key={index}>
+              <p>{paragraph}</p>
+              {claimsForParagraph(page.id, section.id, paragraph).map((claim) => (
+                <ClaimEvidence key={claim.id} claim={claim} />
+              ))}
+            </Fragment>
           ))}
         </section>
       ))}

@@ -36,6 +36,28 @@ function pageCopy(page: SitePage): string {
   ].join(" ");
 }
 
+/**
+ * The obsolete forecasts and unverified attributions removed by the
+ * October 18 review. None of them may appear in shipped copy: the
+ * balanced replacement text is asserted separately, and these patterns
+ * must stay absent.
+ */
+const obsoletePatterns: ReadonlyArray<{ name: string; pattern: RegExp }> = [
+  { name: "cure-for-cancer forecast", pattern: /cure cancer/i },
+  { name: "eventual-cure forecast", pattern: /eventually cure/i },
+  { name: "110-120 population-average forecast (110)", pattern: /110/ },
+  { name: "110-120 population-average forecast (120)", pattern: /120/ },
+  { name: "couple-of-generations forecast", pattern: /couple of generations/i },
+  {
+    name: "unverified 'some researchers' attribution",
+    pattern: /some researchers/i,
+  },
+  {
+    name: "unverified 'many researchers' attribution",
+    pattern: /many researchers/i,
+  },
+];
+
 describe("site-content", () => {
   it("exports the five pages in order with their ids and paths", () => {
     expect(sitePages.map((page) => page.id)).toEqual([...expectedPageIds]);
@@ -62,25 +84,84 @@ describe("site-content", () => {
     }
   });
 
-  it("tells the cancer story and says AI is expected to help cure it", () => {
+  it("tells the cancer story with AI help, without promising a cure", () => {
     const copy = pageCopy(getSitePage("cancer"));
     expect(copy).toMatch(/cancer/i);
     expect(copy).toMatch(/ai is expected to help/i);
-    expect(copy).toMatch(/cure cancer/i);
+    expect(copy).toMatch(/clinical use/i);
+    expect(copy).toMatch(/experimental research/i);
+    for (const { name, pattern } of obsoletePatterns) {
+      expect(copy, `cancer page must not contain the ${name}`).not.toMatch(
+        pattern,
+      );
+    }
   });
 
-  it("states the expected lifespan range as an expectation, not a guarantee", () => {
+  it("explains life expectancy, maximum lifespan, and healthy lifespan without a future average", () => {
     const copy = pageCopy(getSitePage("longevity"));
-    expect(copy).toMatch(/110/);
-    expect(copy).toMatch(/120/);
-    expect(copy).toMatch(/some researchers expect/i);
-    expect(copy).toMatch(/not a guaranteed forecast/i);
+    expect(copy).toMatch(/life expectancy/i);
+    expect(copy).toMatch(/maximum lifespan/i);
+    expect(copy).toMatch(/healthy lifespan/i);
+    expect(copy).toMatch(/not a forecast/i);
+    for (const { name, pattern } of obsoletePatterns) {
+      expect(copy, `longevity page must not contain the ${name}`).not.toMatch(
+        pattern,
+      );
+    }
   });
 
-  it("keeps every page clearly an educational demo, not medical advice", () => {
+  it("keeps every page free of the obsolete forecasts and unverified attributions", () => {
+    for (const page of sitePages) {
+      const copy = pageCopy(page);
+      for (const { name, pattern } of obsoletePatterns) {
+        expect(copy, `${page.id} must not contain the ${name}`).not.toMatch(
+          pattern,
+        );
+      }
+    }
+  });
+
+  it("distinguishes clinical use, experimental research, and speculation in the medical stories", () => {
+    for (const pageId of ["how-ai-helps", "cancer", "diseases"] as const) {
+      const copy = pageCopy(getSitePage(pageId));
+      expect(copy, `${pageId}: clinical use`).toMatch(/clinical use/i);
+      expect(copy, `${pageId}: experimental research`).toMatch(
+        /experimental research/i,
+      );
+      expect(copy, `${pageId}: speculation`).toMatch(/speculation/i);
+    }
+  });
+
+  it("explains the trade-offs behind earlier detection and faster treatment", () => {
+    for (const pageId of ["how-ai-helps", "cancer", "diseases"] as const) {
+      const copy = pageCopy(getSitePage(pageId));
+      expect(copy, `${pageId}: false positives`).toMatch(/false positives/i);
+      expect(copy, `${pageId}: missed diagnoses`).toMatch(/missed/i);
+      expect(copy, `${pageId}: uneven performance`).toMatch(
+        /(less well|not all perform the same)/i,
+      );
+      expect(copy, `${pageId}: clinician oversight`).toMatch(/clinician/i);
+      if (pageId === "how-ai-helps" || pageId === "cancer") {
+        expect(copy, `${pageId}: overdiagnosis`).toMatch(/overdiagnosis/i);
+      }
+    }
+  });
+
+  it("says an approved device is not universal availability or approval for every use", () => {
+    expect(pageCopy(getSitePage("how-ai-helps"))).toMatch(
+      /approval for one specific use is not approval for every use/i,
+    );
+    expect(pageCopy(getSitePage("cancer"))).toMatch(
+      /not the same as approval for everything the device could do/i,
+    );
+  });
+
+  it("keeps every page clearly an educational demo, not medical advice, not a diagnosis, and not a guarantee", () => {
     for (const page of sitePages) {
       expect(page.disclaimer.length).toBeGreaterThan(0);
       expect(page.disclaimer).toMatch(/not medical advice/i);
+      expect(page.disclaimer).toMatch(/not a diagnosis/i);
+      expect(page.disclaimer).toMatch(/not a guarantee/i);
     }
   });
 
