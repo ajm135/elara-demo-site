@@ -1,0 +1,149 @@
+{
+  "name": "reading-experience",
+  "version": 2,
+  "description": "Reusable browser-level check definitions for the five-story reading experience. Elara runs these as page checks against the loopback-only production server (npm start, http://127.0.0.1:3000). Every route is checked at each viewport: the skip-link keyboard flow, the server-rendered reading progress (exactly one aria-current link, the exact 'Story N of 5' position, the next-story cue or the story-five ending), the landmarks, evidence and citation rendering, and clean console, request and scroll behaviour. This file is data, not an executable test: npm run verify:reading (scripts/verify-reading.mjs) only checks that these definitions are complete, and it never launches a browser.",
+  "server": {
+    "startCommand": "npm start",
+    "hostname": "127.0.0.1",
+    "port": 3000,
+    "baseUrl": "http://127.0.0.1:3000",
+    "loopbackOnly": true
+  },
+  "viewportsPx": [320, 375, 768, 1280, 1920],
+  "perRoute": {
+    "skipLinkFlow": {
+      "steps": [
+        { "action": "press", "key": "Tab" },
+        { "waitForFocus": ".skip-link:focus" },
+        { "action": "press", "key": "Enter" },
+        { "waitForFocus": "#main-content:focus" }
+      ],
+      "skipLinkText": "Skip to main content"
+    },
+    "globalExpectations": {
+      "noConsoleErrors": true,
+      "noHorizontalScroll": true,
+      "noFailedRequestsToOwnServer": true,
+      "exactlyOneMainLandmark": true,
+      "exactlyOneLabeledMainNav": true,
+      "exactlyOneActiveNavLink": {
+        "selector": "header nav[aria-label='Main'] a[aria-current='page']"
+      }
+    }
+  },
+  "routes": [
+    {
+      "path": "/",
+      "expectedTitleContains": ["AI and longer lives"],
+      "expectedText": ["Story 1 of 5", "not medical advice"],
+      "expectedElements": [
+        "main#main-content h1",
+        "header nav[aria-label='Main'] a[href='/'][aria-current='page']",
+        "main time[datetime]",
+        "main a[href^='https://']",
+        "main img[alt]"
+      ],
+      "nextStoryCue": { "href": "/how-ai-helps", "text": "How AI helps" }
+    },
+    {
+      "path": "/how-ai-helps",
+      "expectedTitleContains": [
+        "AI and longer lives",
+        "How AI is expected to help medicine"
+      ],
+      "expectedText": ["Story 2 of 5", "not medical advice"],
+      "expectedElements": [
+        "main#main-content h1",
+        "header nav[aria-label='Main'] a[href='/how-ai-helps'][aria-current='page']",
+        "main time[datetime]",
+        "main a[href^='https://']",
+        "main img[alt]"
+      ],
+      "nextStoryCue": { "href": "/cancer", "text": "Cancer" }
+    },
+    {
+      "path": "/cancer",
+      "expectedTitleContains": [
+        "AI and longer lives",
+        "The hopeful fight against cancer"
+      ],
+      "expectedText": ["Story 3 of 5", "not medical advice"],
+      "expectedElements": [
+        "main#main-content h1",
+        "header nav[aria-label='Main'] a[href='/cancer'][aria-current='page']",
+        "main time[datetime]",
+        "main a[href^='https://']",
+        "main img[alt]"
+      ],
+      "nextStoryCue": { "href": "/diseases", "text": "Other diseases" }
+    },
+    {
+      "path": "/diseases",
+      "expectedTitleContains": [
+        "AI and longer lives",
+        "Beyond cancer: AI and the other diseases"
+      ],
+      "expectedText": ["Story 4 of 5", "not medical advice"],
+      "expectedElements": [
+        "main#main-content h1",
+        "header nav[aria-label='Main'] a[href='/diseases'][aria-current='page']",
+        "main time[datetime]",
+        "main a[href^='https://']",
+        "main img[alt]"
+      ],
+      "nextStoryCue": { "href": "/longevity", "text": "Longer lives" }
+    },
+    {
+      "path": "/longevity",
+      "expectedTitleContains": [
+        "AI and longer lives",
+        "Longer lives: what the lifespan numbers mean"
+      ],
+      "expectedText": [
+        "Story 5 of 5",
+        "Life expectancy",
+        "Maximum lifespan",
+        "Healthy lifespan",
+        "End of the stories",
+        "not medical advice"
+      ],
+      "expectedElements": [
+        "main#main-content h1",
+        "header nav[aria-label='Main'] a[href='/longevity'][aria-current='page']",
+        "main time[datetime]",
+        "main a[href^='https://']",
+        "main img[alt]"
+      ],
+      "endingState": "End of the stories",
+      "nextStoryCue": null
+    }
+  ],
+  "unverifiedGaps": [
+    {
+      "id": "native-safari",
+      "check": "Skip-link flow, progress rendering, zoom, reflow and navigation in native Safari on macOS and iOS (the documented supported browser, not WebKit in general).",
+      "status": "unverified",
+      "note": "WebKit is not native Safari: a WebKit-engine result is not represented here as native Safari coverage."
+    },
+    {
+      "id": "screen-reader",
+      "check": "Screen reader navigation: landmark and heading structure, the skip link, and the reading-progress cue announced correctly with assistive technology.",
+      "status": "unverified"
+    },
+    {
+      "id": "zoom-200",
+      "check": "200% page zoom: content stays readable, the skip link still reaches main, and no sideways scrolling appears at or beyond the viewport widths above.",
+      "status": "unverified"
+    },
+    {
+      "id": "reflow-beyond-viewports",
+      "check": "Reflow at viewport widths and aspect ratios beyond the listed widths (320, 375, 768, 1280, 1920 px).",
+      "status": "unverified"
+    }
+  ],
+  "notes": [
+    "Browser behaviour is exercised only by Elara page checks against the loopback production server; this file is data, not an executable test, and nothing in it runs under a Node script.",
+    "npm run verify:reading (scripts/verify-reading.mjs) is a Node-only completeness check of this definition file: it starts nothing, opens no socket, and never launches a browser.",
+    "No unverified gap above is marked as passed, and browser behaviour is not a completed WCAG 2.2 AA or cross-browser verification claim."
+  ]
+}

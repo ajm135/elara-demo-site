@@ -1,20 +1,61 @@
 /*
- * Base styles for the Demo Site.
+ * Demo Site: token-driven editorial design system.
  *
- * These rules style semantic elements only (html, body, header, nav, main,
- * links, images, and the skip link), so pages never need special class
- * names. Requirements covered here:
- * - no sideways scrolling at 375, 768, or 1280 px: border-box everywhere,
- *   width 100%, no 100vw, no min-width larger than 320 px, no overflowing
+ * A light, contemporary science-editorial identity: warm neutral surfaces,
+ * dark ink text, a restrained teal accent, generous spacing, and an
+ * expressive type scale set by the local Inter typefaces (loaded with
+ * next/font/local, exposed as the --font-body and --font-heading CSS custom
+ * properties in src/app/layout.tsx; the var() fallbacks below keep text
+ * readable even if the properties are missing).
+ *
+ * Everything visual is driven by the custom properties in :root, so the
+ * palette, ink, accent, and rules are one place to look and one place for
+ * tests to check. Colour decisions are verified, not asserted:
+ * tests/design-tokens.test.ts parses these tokens and computes the WCAG
+ * 2.2 contrast ratios (4.5:1 for normal text, 3:1 for UI boundaries).
+ *
+ * Structural rules covered here:
+ * - no sideways scrolling at 320 to 1920 px: border-box everywhere, width
+ *   100%, no 100vw, no min-width larger than 320 px, no overflowing
  *   negative margins;
- * - WCAG 2.2 AA: #1a1a1a text on #fffdfb, underlined #0b3d91 links (colour is
- *   never the only cue), a :focus-visible outline of at least 2 px, a skip
- *   link that is hidden off-screen until focused, and nav targets at least
- *   24x24 px;
- * - line-height at least 1.5, font-size at least 1rem, system-ui font stack;
- * - no animation and no text-transform, so link text stays exactly the
- *   navigation labels.
+ * - WCAG 2.2 AA: underlined links (colour is never the only cue), a
+ *   :focus-visible outline of at least 2 px in the accent with an offset,
+ *   a skip link that is off-screen until focused, navigation targets of at
+ *   least 44x44 px, and comfortable reading rhythm (line-height at least
+ *   1.5, body font-size at least 1rem, long-form measure of about 40rem);
+ * - no required animation, no text-transform on navigation labels, and no
+ *   hover-only information: every state that matters is visible in the
+ *   default and focus states;
+ * - reusable rules for the header progress cluster, a composed hero
+ *   (text plus framed illustration), evidence panels, and the content
+ *   stack. There is exactly one navigation (header-only): no hamburger,
+ *   no second nav, nothing that needs JavaScript.
  */
+
+:root {
+  /* Warm neutral surfaces: the page is a warm cream, raised chrome is a
+     lighter warm off-white, and evidence panels sit on a slightly
+     different, faintly teal-tinted surface so they read apart from the
+     page. None of them is pure white. */
+  --surface-page: #f6f1e7;
+  --surface-raised: #fdfbf6;
+  --surface-evidence: #e9efe9;
+  /* Dark warm ink: strong ink for headings, body ink for running text,
+     and a muted ink that still clears 4.5:1 on every surface. */
+  --ink-heading: #171310;
+  --ink-body: #262119;
+  --ink-muted: #5a5344;
+  /* Restrained teal accent: links, keyboard focus, and the active-story
+     indicator, in a depth step for visited links. */
+  --accent-teal: #0e6b63;
+  --accent-teal-deep: #0a544e;
+  /* Muted warm rules: a soft hairline for decorative dividers and a
+     stronger rule that clears 3:1 where a boundary carries meaning. */
+  --rule-warm: #d5c9b2;
+  --rule-strong: #8a7b58;
+  /* Long-form measure: about 60 to 75 characters per line. */
+  --measure: 40rem;
+}
 
 *,
 *::before,
@@ -30,30 +71,57 @@ body {
   margin: 0;
   width: 100%;
   min-width: 0;
-  background-color: #fffdfb;
-  color: #1a1a1a;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--surface-page);
+  color: var(--ink-body);
+  font-family: var(
+    --font-body,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif
+  );
   font-size: 1rem;
   line-height: 1.6;
   overflow-wrap: break-word;
 }
 
+/* Headings set in the heading typeface, in the stronger ink. */
+h1,
+h2,
+h3 {
+  font-family: var(
+    --font-heading,
+    var(--font-body, system-ui, -apple-system, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif)
+  );
+  color: var(--ink-heading);
+}
+
+/* Links stay underlined so colour is never the only cue. */
 a {
-  color: #0b3d91;
+  color: var(--accent-teal);
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 a:visited {
-  color: #0b3d91;
+  color: var(--accent-teal-deep);
 }
 
+/* A solid, offset accent outline for keyboard focus, at least 2 px. */
 :focus-visible {
-  outline: 3px solid #0b3d91;
+  outline: 3px solid var(--accent-teal);
   outline-offset: 2px;
 }
 
-/* Skip link: positioned off-screen until it receives keyboard focus. */
+/*
+ * Skip link: off-screen until it receives keyboard focus, then visible at
+ * the top-left of the page. The skip target is main#main-content, which
+ * the layout makes focusable (tabindex="-1").
+ */
 .skip-link {
   position: absolute;
   left: -9999px;
@@ -61,8 +129,9 @@ a:visited {
   z-index: 100;
   display: inline-block;
   padding: 0.5rem 1rem;
-  background-color: #fffdfb;
-  border: 2px solid #0b3d91;
+  background-color: var(--surface-raised);
+  color: var(--ink-body);
+  border: 2px solid var(--accent-teal);
 }
 
 .skip-link:focus {
@@ -70,10 +139,15 @@ a:visited {
   top: 0.5rem;
 }
 
+/*
+ * Header and the single site navigation (header-only, no hamburger, no
+ * second nav). The header sits on the raised surface with a soft warm
+ * rule under it.
+ */
 header {
   width: 100%;
-  background-color: #fffdfb;
-  border-bottom: 1px solid #1a1a1a;
+  background-color: var(--surface-raised);
+  border-bottom: 1px solid var(--rule-warm);
 }
 
 nav {
@@ -87,24 +161,280 @@ nav ul {
   gap: 0.25rem;
   list-style: none;
   margin: 0 auto;
-  padding: 0;
-  max-width: 42rem;
+  padding: 0 1rem;
+  max-width: 46rem;
 }
 
-/* Padding keeps every navigation target at least 24x24 px. */
+/*
+ * Padding keeps every navigation target at least 44x44 CSS px. Links stay
+ * underlined here too: colour is never the only cue, and the underline is
+ * the same cue readers learn on the page.
+ */
 nav a {
-  display: inline-block;
-  min-width: 24px;
-  min-height: 24px;
-  padding: 0.5rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem 0.875rem;
 }
 
+/*
+ * The one active link in the header. The inset bar under the label and the
+ * heavier weight mean colour is never the only indicator of the current
+ * story.
+ */
+nav a[aria-current="page"] {
+  color: var(--accent-teal-deep);
+  font-weight: 700;
+  box-shadow: inset 0 -2px 0 var(--accent-teal);
+}
+
+/*
+ * Header progress cluster: the "Story N of 5" position, the current
+ * story's label, and the next-story cue (or the ending state on the last
+ * story) live in one small group beside the navigation.
+ */
+.progress-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  margin: 0 auto;
+  padding: 0 1rem 0.5rem;
+  max-width: 46rem;
+  font-size: 0.875rem;
+}
+
+.progress-cluster .story-position {
+  color: var(--ink-muted);
+}
+
+.progress-cluster .next-story-cue {
+  color: var(--accent-teal);
+}
+
+.progress-cluster .progress-ending {
+  color: var(--ink-muted);
+}
+
+/*
+ * Content stack: the reading column. Generous side padding, a capped
+ * measure of about 40rem for comfortable line lengths, and open spacing
+ * between blocks. The stack is the home of the long-form text on every
+ * story page.
+ */
 main {
   display: block;
   width: 100%;
-  max-width: 42rem;
+  max-width: var(--measure);
   margin-inline: auto;
-  padding: 1.25rem;
+  padding: 2rem 1rem 3rem;
+}
+
+main p {
+  margin: 0 0 1rem;
+}
+
+main img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+main h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.875rem, 1.25rem + 2.5vw, 3rem);
+  line-height: 1.15;
+}
+
+main h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.375rem;
+  line-height: 1.3;
+}
+
+main section {
+  margin-top: 2.5rem;
+}
+
+/* The per-page disclaimer: set apart by a soft warm rule. */
+main > p:last-child {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule-warm);
+  color: var(--ink-muted);
+}
+
+/*
+ * Composed hero: the kicker, heading, summary, and review date on one
+ * side, the page's framed illustration on the other. Stacked below 768px,
+ * two columns at 768px and up. The frame is a raised surface with a
+ * meaningful rule, so the illustration reads as a composed element.
+ */
+.hero {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .hero {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: center;
+  }
+}
+
+/* The hero's text column, in reading order. */
+.hero-text {
+  min-width: 0;
+}
+
+/* The kicker: the story's nav label, set small and in the accent. No
+   text-transform — navigation labels stay exactly their copy. */
+.hero-kicker {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent-teal);
+}
+
+/* The hero summary: one step up from body text, still inside the measure. */
+.hero-summary {
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+/* The review date line: quiet meta text beside a <time datetime>. */
+.hero-review {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+}
+
+.hero-media {
+  margin: 0;
+  background-color: var(--surface-raised);
+  border: 1px solid var(--rule-strong);
+  padding: 1rem;
+}
+
+.hero-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/*
+ * A page's further illustrations (beyond the hero's): the same frame as
+ * the hero media, set apart in the content stack.
+ */
+.story-illustration {
+  margin: 2.5rem 0;
+  background-color: var(--surface-raised);
+  border: 1px solid var(--rule-strong);
+  padding: 1rem;
+}
+
+/* The next-story cue link keeps a comfortable target in the small
+   progress cluster. */
+.next-story-cue a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/*
+ * The home page's sources block: the site-wide evidence base, rendered
+ * after the reading map and before the disclaimer. It sits on the raised
+ * surface with a soft warm rule, so it reads as a composed block in the
+ * content stack rather than a footnote. The long publication URLs wrap
+ * through the inherited overflow-wrap, so 320 px viewports never scroll
+ * sideways.
+ */
+.sources {
+  padding: 1rem 1.25rem;
+  background-color: var(--surface-raised);
+  border: 1px solid var(--rule-warm);
+}
+
+.sources ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.sources li {
+  margin: 0.5rem 0;
+}
+
+/*
+ * Evidence panel: the readable home of a claim's evidence stage,
+ * last-reviewed date, and linked publications. It sits on the distinct
+ * evidence surface with a strong left edge in the accent, so it is
+ * recognisable at a glance and legible without colour alone.
+ */
+.claim-evidence {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  background-color: var(--surface-evidence);
+  border: 1px solid var(--rule-strong);
+  border-left: 4px solid var(--accent-teal);
+}
+
+.claim-evidence figcaption {
+  margin: 0 0 0.5rem;
+  color: var(--ink-heading);
+}
+
+.claim-evidence ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.claim-evidence li {
+  margin: 0.25rem 0;
+}
+
+/*
+ * The lifespan-terms definition list (longevity story only): the three
+ * lifespan distinctions as exact, visible term labels beside the
+ * paragraphs that already explain them. It sits on the distinct evidence
+ * surface with the same strong left edge as the evidence panels. Terms
+ * are set in the heading ink at the heavier weight (so the cue is never
+ * colour-only), definitions in the body ink; both clear 4.5:1 on the
+ * evidence surface. The list flows in the normal content column — no
+ * min-width, no nowrap, no negative overflow — so 320 px viewports never
+ * scroll sideways, and no animation is required.
+ */
+.lifespan-terms {
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.25rem;
+  background-color: var(--surface-evidence);
+  border: 1px solid var(--rule-strong);
+  border-left: 4px solid var(--accent-teal);
+}
+
+.lifespan-terms dt {
+  margin: 0.75rem 0 0.125rem;
+  font-family: var(
+    --font-heading,
+    var(--font-body, system-ui, -apple-system, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif)
+  );
+  font-weight: 700;
+  color: var(--ink-heading);
+}
+
+.lifespan-terms dt:first-child {
+  margin-top: 0;
+}
+
+.lifespan-terms dd {
+  margin: 0 0 0.5rem;
+  color: var(--ink-body);
+}
+
+.lifespan-terms dd:last-child {
+  margin-bottom: 0;
 }
 
 img,

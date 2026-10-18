@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import SiteHeader from "../components/site-header";
+import { bodyFont, headingFont } from "../lib/fonts";
 
 export const metadata: Metadata = {
   title: {
@@ -17,9 +17,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    // The font classes set the --font-body and --font-heading CSS custom
+    // properties on <html>; globals.css consumes them from there.
+    //
+    // The shared header (skip link + main nav + reading progress) is not
+    // rendered here: it must know the current page to mark exactly one
+    // link with aria-current="page", and a shared layout cannot know which
+    // child page is being rendered. Each route is a static server
+    // component that knows its own path, so it renders <SiteHeader
+    // currentPath={...} /> immediately before its <StoryPage>, keeping the
+    // skip link first in keyboard order. See docs/adr/0006-science-
+    // editorial-reading-progress.md.
+    <html lang="en" className={`${bodyFont.variable} ${headingFont.variable}`}>
       <body>
-        <SiteHeader />
         {children}
       </body>
     </html>

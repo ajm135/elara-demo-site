@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getSitePage } from "../lib/site-content";
+import SiteHeader from "../components/site-header";
 import StoryPage from "../components/story-page";
 
 const homePage = getSitePage("home");
@@ -12,5 +13,13 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <StoryPage page={homePage} />;
+  // The route renders the shared header with its own path so the server
+  // always knows the current page for the one aria-current="page" link and
+  // the "Story N of 5" progress cue.
+  return (
+    <>
+      <SiteHeader currentPath={homePage.path} />
+      <StoryPage page={homePage} />
+    </>
+  );
 }

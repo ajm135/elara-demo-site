@@ -3,11 +3,19 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import CancerPage from "../src/app/cancer/page";
+import {
+  getSitePage,
+  nextStory,
+  storyPositionLabel,
+} from "../src/lib/site-content";
+
+const page = getSitePage("cancer");
+const next = nextStory(page.id);
 
 describe("cancer page", () => {
-  it("renders the story in a main with a single heading and an image", () => {
+  it("renders the story in a focusable main with a single heading and an image", () => {
     const html = renderToStaticMarkup(createElement(CancerPage));
-    expect(html).toContain("<main id=\"main-content\">");
+    expect(html).toContain('<main id="main-content" tabindex="-1">');
     expect(html).toContain("<h1>");
     expect(html).toContain("<img");
   });
@@ -16,6 +24,23 @@ describe("cancer page", () => {
     const html = renderToStaticMarkup(createElement(CancerPage));
     expect(html).toContain("Cancer");
     expect(html).toContain("AI");
+  });
+
+  it("shows its own active navigation link and reading position", () => {
+    const html = renderToStaticMarkup(createElement(CancerPage));
+    expect(html.match(/aria-current="page"/g)).toHaveLength(1);
+    expect(html).toContain(
+      `<a aria-current="page" href="${page.path}">${page.navLabel}</a>`,
+    );
+    expect(html).toContain(storyPositionLabel(page.id));
+    if (next === null) {
+      expect(html).toContain("End of the stories");
+      expect(html).not.toContain("next-story-cue");
+    } else {
+      expect(html).toContain(
+        `Next story: <a href="${next.path}">${next.navLabel}</a>`,
+      );
+    }
   });
 
   it("shows both cancer illustrations that ship under public/", () => {

@@ -15,6 +15,11 @@ This register is the evidence trail for every consequential health claim the Dem
 - Claims are staged as clinical-use, experimental-research, or speculation. A claim that a source does not support at its stated stage is narrowed or removed from `src/lib/site-content.ts`, never kept and re-labeled.
 - The site's copy never promises a cure and makes no forecast of the future population-average human lifespan.
 
+## Where the sources appear on the pages
+
+- The four story pages cite their sources in the per-claim evidence panels (`figure.claim-evidence`) that `src/components/story-page.tsx` renders immediately after the claiming paragraph, still inside that section.
+- The home page makes no consequential claim of its own, so it carries the site-wide evidence base instead: a sources block (`section.sources`) rendered after the reading map and before the disclaimer, listing the complete `referenceCatalogue` in catalogue order. The block introduces the evidence base; it asserts nothing the catalogue entries do not already state, so it adds no claim to this register and no new source to the catalogue.
+
 ## Sources in the catalogue
 
 ### who-cancer-fact-sheet

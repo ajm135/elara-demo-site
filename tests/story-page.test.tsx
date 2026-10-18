@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import StoryPage from "../src/components/story-page";
 import { sitePages, type SitePage } from "../src/lib/site-content";
 
-const mainOpen = '<main id="main-content">';
+const mainOpen = '<main id="main-content" tabindex="-1">';
 
 /** Escape text the same way React escapes it in server-rendered HTML. */
 function escapeHtml(text: string): string {
@@ -25,7 +25,7 @@ function mainHtml(page: SitePage): string {
 }
 
 describe("story page", () => {
-  it("renders exactly one main with id main-content and exactly one h1", () => {
+  it("renders exactly one focusable main with id main-content and exactly one h1", () => {
     for (const page of sitePages) {
       const html = renderToStaticMarkup(<StoryPage page={page} />);
       expect(html.match(/<main/g)).toHaveLength(1);
@@ -35,11 +35,61 @@ describe("story page", () => {
     }
   });
 
-  it("starts main with the navigation label paragraph, then the summary paragraph", () => {
+  it("opens main with the composed hero: kicker, single h1, summary, in that order", () => {
     for (const page of sitePages) {
       const body = mainHtml(page);
-      expect(body.startsWith(`<p>${escapeHtml(page.navLabel)}</p>`)).toBe(true);
-      expect(body).toContain(`<p>${escapeHtml(page.summary)}</p>`);
+      expect(body.startsWith('<div class="hero">')).toBe(true);
+
+      const heroTextStart = body.indexOf('<div class="hero-text">');
+      const kicker = `<p class="hero-kicker">${escapeHtml(page.navLabel)}</p>`;
+      const heading = `<h1>${escapeHtml(page.heading)}</h1>`;
+      const summary = `<p class="hero-summary">${escapeHtml(page.summary)}</p>`;
+      const kickerStart = body.indexOf(kicker);
+      const headingStart = body.indexOf(heading);
+      const summaryStart = body.indexOf(summary);
+
+      // The hero text block leads with the story's navigation label as a
+      // kicker, then the single h1, then the summary — the editorial
+      // hierarchy replaces the old flat label-first paragraph stack.
+      expect(heroTextStart).toBeGreaterThan(-1);
+      expect(kickerStart).toBeGreaterThan(heroTextStart);
+      expect(headingStart).toBeGreaterThan(kickerStart);
+      expect(summaryStart).toBeGreaterThan(headingStart);
+
+      // The review date is a <time datetime> element inside the hero
+      // (the hero always ends where the first section begins).
+      if (page.reviewedOn !== undefined) {
+        const hero = body.slice(0, body.indexOf("<section"));
+        expect(hero).toMatch(
+          new RegExp(`<time datetime="${page.reviewedOn}"`, "i"),
+        );
+      }
+    }
+  });
+
+  it("keeps the heading hierarchy intact: every h2 after the h1, no skipped level", () => {
+    for (const page of sitePages) {
+      const html = renderToStaticMarkup(<StoryPage page={page} />);
+      const h1Index = html.indexOf("<h1");
+      expect(h1Index).toBeGreaterThan(-1);
+
+      const h2Indexes = [...html.matchAll(/<h2[\s>]/g)].map(
+        (match) => match.index ?? -1,
+      );
+      expect(h2Indexes.length).toBeGreaterThan(0);
+      for (const index of h2Indexes) {
+        expect(index).toBeGreaterThan(h1Index);
+      }
+
+      // No h3 or deeper appears before the first h2: the hero introduces
+      // no skipped heading level.
+      const firstH2 = h2Indexes[0];
+      for (const tag of ["<h3", "<h4", "<h5", "<h6"]) {
+        const deeper = html.indexOf(tag);
+        if (deeper !== -1) {
+          expect(deeper).toBeGreaterThan(firstH2);
+        }
+      }
     }
   });
 
@@ -74,9 +124,27 @@ describe("story page", () => {
     }
   });
 
-  it("ends main with the disclaimer paragraph and adds no navigation inside main", () => {
+  it("renders at least one external citation link inside main on every page", () => {
+    // Node-level guard for the browser check `main a[href^='https://']` in
+    // tests/e2e/reading-experience.json: every route's main must carry a
+    // stable https link a reader can open, on the story pages via the
+    // claim evidence panels and on home via its sources block.
+    for (const page of sitePages) {
+      const html = renderToStaticMarkup(<StoryPage page={page} />);
+      const mainStart = html.indexOf("<main");
+      expect(mainStart, `${page.id}: main exists`).toBeGreaterThan(-1);
+      const mainBody = html.slice(mainStart);
+      expect(
+        mainBody,
+        `${page.id}: main contains an https citation link`,
+      ).toMatch(/<a href="https:\/\/[^"]+">/);
+    }
+  });
+
+  it("ends main with the 'not medical advice' disclaimer paragraph and adds no navigation inside main", () => {
     for (const page of sitePages) {
       const body = mainHtml(page);
+      expect(page.disclaimer).toMatch(/not medical advice/);
       expect(body.endsWith(`<p>${escapeHtml(page.disclaimer)}</p>`)).toBe(true);
       expect(body).not.toContain("<nav");
     }

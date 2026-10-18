@@ -14,6 +14,7 @@ import {
   referenceHref,
   referenceLocatorLabel,
   resolveClaimReferences,
+  resolvePageSourceReferences,
   type ConsequentialClaim,
   type EvidenceStage,
   type PublicationReference,
@@ -251,6 +252,49 @@ describe("claim-linked references", () => {
         kind: "doi",
         value: "10.1117/1.jmi.13.4.040901",
       });
+    });
+  });
+
+  describe("resolvePageSourceReferences", () => {
+    it("resolves the home page's sources block in display order, covering the whole catalogue", () => {
+      const home = getSitePage("home");
+      expect(home.sources, "home must carry a sources block").toBeDefined();
+      if (home.sources === undefined) {
+        throw new Error("home sources block is missing");
+      }
+      const resolved = resolvePageSourceReferences(home.sources.referenceIds);
+      expect(resolved.map((reference) => reference.id)).toEqual(
+        home.sources.referenceIds,
+      );
+      expect(resolved.map((reference) => reference.id)).toEqual(
+        referenceCatalogue.map((reference) => reference.id),
+      );
+    });
+
+    it("leaves the four story pages without a sources block", () => {
+      for (const pageId of [
+        "how-ai-helps",
+        "cancer",
+        "diseases",
+        "longevity",
+      ] as const) {
+        expect(getSitePage(pageId).sources, `${pageId}`).toBeUndefined();
+      }
+    });
+
+    it("rejects a sources block that lists no references", () => {
+      expect(() => resolvePageSourceReferences([])).toThrow(
+        ClaimReferenceError,
+      );
+      expect(() => resolvePageSourceReferences([])).toThrow(
+        /at least one reference/,
+      );
+    });
+
+    it("rejects a sources block with an id that does not resolve", () => {
+      expect(() =>
+        resolvePageSourceReferences(["not-a-real-reference"]),
+      ).toThrow(/unknown reference id/);
     });
   });
 

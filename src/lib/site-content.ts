@@ -53,6 +53,14 @@ export interface SiteImageRef {
   readonly height: number;
 }
 
+/** One entry of a section's optional definition list. */
+export interface SectionTerm {
+  /** The exact visible term label, e.g. "Life expectancy". */
+  readonly term: string;
+  /** One short plain-language definition in the section's own words. */
+  readonly definition: string;
+}
+
 /** One section of page copy. */
 export interface SiteSection {
   /** Kebab-case identifier for the section. */
@@ -61,6 +69,17 @@ export interface SiteSection {
   readonly heading: string;
   /** The section's paragraphs, in reading order. */
   readonly paragraphs: readonly string[];
+  /**
+   * Optional ordered list of term/definition pairs, rendered by
+   * `story-page.tsx` as a definition list right after the section's
+   * heading. Only the longevity page carries one: its three lifespan
+   * distinctions are also visible as exact term labels ("Life
+   * expectancy", "Maximum lifespan", "Healthy lifespan") so a reader can
+   * find them without reading the paragraphs. The cited sentences in the
+   * section's paragraphs stay unchanged, so the claim evidence register
+   * still attaches to the exact same copy.
+   */
+  readonly terms?: readonly SectionTerm[];
 }
 
 /** A full story page: its copy, its images, and its disclaimer. */
@@ -83,6 +102,33 @@ export interface SitePage {
   readonly images: readonly SiteImageRef[];
   /** Reminds readers the site is an educational demo, not medical advice. */
   readonly disclaimer: string;
+  /**
+   * The ISO YYYY-MM-DD date the page's cited sources were last inspected
+   * for the claim evidence register (docs/runbooks/content-evidence.md).
+   * Optional so the model keeps working for a page with no claims, but
+   * every shipped page carries the real inspection date 2026-10-18 — the
+   * date every source in `referenceCatalogue` was actually opened — and
+   * no other date.
+   */
+  readonly reviewedOn?: string;
+  /**
+   * Optional sources block rendered after the page's sections and before
+   * the disclaimer. Only the home page carries one: it is the site's front
+   * door and its reading map, and the one page that makes no consequential
+   * claim of its own, so instead of per-claim evidence panels it lists the
+   * site-wide evidence base — the complete `referenceCatalogue`, in
+   * catalogue order — with a heading and a short reader-language intro.
+   * The four story pages leave this undefined and rely on their per-claim
+   * evidence panels.
+   */
+  readonly sources?: {
+    /** The visible heading for the sources block. */
+    readonly heading: string;
+    /** One or two sentences introducing the block in reader language. */
+    readonly intro: string;
+    /** Ids from `referenceCatalogue`, in the order to display them. */
+    readonly referenceIds: readonly string[];
+  };
 }
 
 /* ------------------------------------------------------------------ *
@@ -479,6 +525,42 @@ export function resolveClaimReferences(
   return resolved;
 }
 
+/**
+ * Resolve the reference ids of a page's optional sources block to their
+ * catalogue entries, in display order.
+ *
+ * Pure: no side effects and no I/O. Throws `ClaimReferenceError` when the
+ * block lists no references or when an id does not resolve in the
+ * catalogue, the same way `resolveClaimReferences` does for claims, and
+ * validates each resolved reference's publication metadata.
+ */
+export function resolvePageSourceReferences(
+  referenceIds: readonly string[],
+  catalogue: readonly PublicationReference[] = referenceCatalogue,
+): readonly PublicationReference[] {
+  if (referenceIds.length === 0) {
+    throw new ClaimReferenceError(
+      "A page sources block must list at least one reference.",
+    );
+  }
+  const byId = new Map<string, PublicationReference>();
+  for (const reference of catalogue) {
+    byId.set(reference.id, reference);
+  }
+  const resolved: PublicationReference[] = [];
+  for (const referenceId of referenceIds) {
+    const reference = byId.get(referenceId);
+    if (reference === undefined) {
+      throw new ClaimReferenceError(
+        `A page sources block links an unknown reference id: "${referenceId}".`,
+      );
+    }
+    validatePublicationReference(reference);
+    resolved.push(reference);
+  }
+  return resolved;
+}
+
 /* ------------------------------------------------------------------ *
  * Rendering helpers for the claim evidence blocks
  * ------------------------------------------------------------------ */
@@ -614,6 +696,19 @@ const homePage: SitePage = {
   ],
   disclaimer:
     "This site is a hopeful educational demo. It is not medical advice, not a diagnosis, and not a guarantee: it does not promise that any cure is coming, and it makes no forecast of how long people will live.",
+  reviewedOn: "2026-10-18",
+  sources: {
+    heading: "Where the evidence comes from",
+    intro:
+      "The stories on this site keep their evidence visible: every consequential claim is tied to a real, inspectable publication, and the sources listed here are the complete set the site cites. Each story's evidence panels say how strong the evidence is — clinical use, experimental research, or speculation.",
+    referenceIds: [
+      "who-cancer-fact-sheet",
+      "fda-ai-enabled-devices",
+      "who-ageing-and-health",
+      "who-ncd-fact-sheet",
+      "jmi-2026-imaging-ai-bias-review",
+    ],
+  },
 };
 
 const howAiHelpsPage: SitePage = {
@@ -673,6 +768,7 @@ const howAiHelpsPage: SitePage = {
   ],
   disclaimer:
     "This site is a hopeful educational demo. It is not medical advice, not a diagnosis, and not a guarantee that any particular tool, treatment, or cure is certain.",
+  reviewedOn: "2026-10-18",
 };
 
 const cancerPage: SitePage = {
@@ -729,6 +825,7 @@ const cancerPage: SitePage = {
   ],
   disclaimer:
     "This site is a hopeful educational demo. It is not medical advice, not a diagnosis, and not a guarantee that any particular treatment will work for a specific person.",
+  reviewedOn: "2026-10-18",
 };
 
 const diseasesPage: SitePage = {
@@ -778,6 +875,7 @@ const diseasesPage: SitePage = {
   ],
   disclaimer:
     "This site is a hopeful educational demo. It is not medical advice, not a diagnosis, and not a guarantee that a treatment for any particular disease is certain.",
+  reviewedOn: "2026-10-18",
 };
 
 const longevityPage: SitePage = {
@@ -801,6 +899,23 @@ const longevityPage: SitePage = {
     {
       id: "three-lifespan-numbers",
       heading: "Three numbers, three different things",
+      terms: [
+        {
+          term: "Life expectancy",
+          definition:
+            "A population average: the number of years a person is expected to live at birth.",
+        },
+        {
+          term: "Maximum lifespan",
+          definition:
+            "The longest individual human life ever observed — a fact about the longest lives on record, not a population forecast.",
+        },
+        {
+          term: "Healthy lifespan",
+          definition:
+            "The proportion of life a person spends in good health.",
+        },
+      ],
       paragraphs: [
         "The first number is life expectancy: the average number of years a person in a population is expected to live at birth. It is a population average, shaped by infant mortality, clean water, and medicine, and it moves up slowly as those things improve.",
         "The second number is maximum lifespan: the longest a human has ever been observed to live. That is a fact about the longest individual lives on record, not a prediction about what a population will average in the future, and no research program can promise it will move.",
@@ -827,6 +942,7 @@ const longevityPage: SitePage = {
   ],
   disclaimer:
     "This site is a hopeful educational demo. It is not medical advice, not a diagnosis, and not a guarantee: it offers no forecast of what the average human lifespan will be in the future.",
+  reviewedOn: "2026-10-18",
 };
 
 /**
@@ -851,4 +967,62 @@ export function getSitePage(id: SitePageId): SitePage {
     throw new Error(`Unknown site page: ${id}`);
   }
   return page;
+}
+
+/**
+ * Map a route path to the page it is served from, or `null` when the path is
+ * not one of the five story routes (for example "", "/unknown", or a path
+ * with a trailing slash).
+ *
+ * Pure: no side effects, no I/O. This is the testable half of the
+ * header's current-page detection: a server component hands the header the
+ * path it is being rendered for, and the header resolves it with this
+ * helper, so Node tests need no browser and no request simulation.
+ */
+export function sitePageForPath(path: string): SitePage | null {
+  const page = sitePages.find((candidate) => candidate.path === path);
+  return page === undefined ? null : page;
+}
+
+/* ------------------------------------------------------------------ *
+ * Reading-progress helpers
+ * ------------------------------------------------------------------ */
+
+/**
+ * The 1-based position of a page in the `sitePages` reading order: home is
+ * 1 and the last story is `sitePages.length`.
+ *
+ * Pure: no side effects, no I/O. Throws for ids that are not part of the
+ * content model, the same way `getSitePage` does.
+ */
+export function storyIndex(pageId: SitePageId): number {
+  const index = sitePages.findIndex((candidate) => candidate.id === pageId);
+  if (index === -1) {
+    throw new Error(`Unknown site page: ${pageId}`);
+  }
+  return index + 1;
+}
+
+/**
+ * The reader-facing position label for a page, exactly
+ * "Story N of 5": the page's 1-based index over the five-story sequence.
+ *
+ * Pure: no side effects, no I/O. Throws for ids that are not part of the
+ * content model.
+ */
+export function storyPositionLabel(pageId: SitePageId): string {
+  return `Story ${storyIndex(pageId)} of ${sitePages.length}`;
+}
+
+/**
+ * The page that follows a given page in the `sitePages` reading order, or
+ * `null` on the final story (`longevity`), where the sequence ends.
+ *
+ * Pure: no side effects, no I/O. Throws for ids that are not part of the
+ * content model.
+ */
+export function nextStory(pageId: SitePageId): SitePage | null {
+  const index = storyIndex(pageId) - 1;
+  const next = sitePages[index + 1];
+  return next === undefined ? null : next;
 }
