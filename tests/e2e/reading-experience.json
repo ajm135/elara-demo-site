@@ -1,13 +1,74 @@
 {
   "name": "reading-experience",
   "version": 2,
-  "description": "Reusable browser-level check definitions for the five-story reading experience. Elara runs these as page checks against the loopback-only production server (npm start, http://127.0.0.1:3000). Every route is checked at each viewport: the skip-link keyboard flow, the server-rendered reading progress (exactly one aria-current link, the exact 'Story N of 5' position, the next-story cue or the story-five ending), the landmarks, evidence and citation rendering, and clean console, request and scroll behaviour. This file is data, not an executable test: npm run verify:reading (scripts/verify-reading.mjs) only checks that these definitions are complete, and it never launches a browser.",
+  "description": "Reusable browser-level check definitions for the five-story reading experience. Elara runs these as page checks against the loopback-only production server (npm start, http://127.0.0.1:3000). Every route is checked at each viewport: the skip-link keyboard flow, the server-rendered reading progress (exactly one aria-current link, the exact 'Story N of 5' position, the next-story cue or the story-five ending), the landmarks, evidence and citation rendering, and clean console, request and scroll behaviour. This file remains reusable browser-check definition data that Elara's page checks consume: the browser steps run only as Elara page checks. npm run verify:reading (scripts/verify-reading.mjs) starts and stops its own loopback production server and checks the five server-rendered HTTP responses for the essential story content, local illustrations, citations, disclaimers, ordinary navigation links, and the correct current-page state, using the serverContract object below; it never executes page JavaScript and never launches a browser, and those checks are safeguards, not proof of complete no-JavaScript browser behaviour or WCAG 2.2 AA conformance.",
   "server": {
     "startCommand": "npm start",
     "hostname": "127.0.0.1",
     "port": 3000,
     "baseUrl": "http://127.0.0.1:3000",
     "loopbackOnly": true
+  },
+  "serverContract": {
+    "description": "The server-rendered reading contract that scripts/verify-reading.mjs enforces over plain HTTP. The script starts and stops its own loopback production server (npm start), fetches all five routes without executing JavaScript or launching a browser, and checks each response: exactly one main#main-content with exactly one h1 (heading) and a body paragraph, the title substrings in the document <title>, at least one local illustration (imageSrcPrefix) that answers HTTP 200 with an image content type, at least one https:// citation anchor inside main, the visible disclaimer, the header nav with exactly the five story links in reading order, exactly one aria-current on this route's link, the 'Story N of 5' label, the skip link before the header, and a main time with a datetime. Story 5 carries endingState and visibleStrings and no next-story link; stories 1 to 4 carry a next-story cue to the following route. Where this object is incomplete the script falls back to its built-in copy of the same contract, so the enforced contract never weakens.",
+    "imageSrcPrefix": "/images/",
+    "citationHrefPrefix": "https://",
+    "disclaimerText": "not medical advice",
+    "navAriaLabel": "Main",
+    "skipLink": {
+      "className": "skip-link",
+      "href": "#main-content",
+      "text": "Skip to main content"
+    },
+    "routes": [
+      {
+        "path": "/",
+        "heading": "A hopeful look at AI and human health",
+        "titleContains": ["AI and longer lives"],
+        "navLabel": "Home",
+        "position": 1,
+        "nextPath": "/how-ai-helps",
+        "nextLabel": "How AI helps"
+      },
+      {
+        "path": "/how-ai-helps",
+        "heading": "How AI is expected to help medicine",
+        "titleContains": ["How AI is expected to help medicine", "AI and longer lives"],
+        "navLabel": "How AI helps",
+        "position": 2,
+        "nextPath": "/cancer",
+        "nextLabel": "Cancer"
+      },
+      {
+        "path": "/cancer",
+        "heading": "The hopeful fight against cancer",
+        "titleContains": ["The hopeful fight against cancer", "AI and longer lives"],
+        "navLabel": "Cancer",
+        "position": 3,
+        "nextPath": "/diseases",
+        "nextLabel": "Other diseases"
+      },
+      {
+        "path": "/diseases",
+        "heading": "Beyond cancer: AI and the other diseases",
+        "titleContains": ["Beyond cancer: AI and the other diseases", "AI and longer lives"],
+        "navLabel": "Other diseases",
+        "position": 4,
+        "nextPath": "/longevity",
+        "nextLabel": "Longer lives"
+      },
+      {
+        "path": "/longevity",
+        "heading": "Longer lives",
+        "titleContains": ["Longer lives: what the lifespan numbers mean", "AI and longer lives"],
+        "navLabel": "Longer lives",
+        "position": 5,
+        "nextPath": null,
+        "nextLabel": null,
+        "endingState": "End of the stories",
+        "visibleStrings": ["Life expectancy", "Maximum lifespan", "Healthy lifespan"]
+      }
+    ]
   },
   "viewportsPx": [320, 375, 768, 1280, 1920],
   "perRoute": {
@@ -143,7 +204,7 @@
   ],
   "notes": [
     "Browser behaviour is exercised only by Elara page checks against the loopback production server; this file is data, not an executable test, and nothing in it runs under a Node script.",
-    "npm run verify:reading (scripts/verify-reading.mjs) is a Node-only completeness check of this definition file: it starts nothing, opens no socket, and never launches a browser.",
+    "npm run verify:reading (scripts/verify-reading.mjs) is a Node-only loopback HTTP safeguard: it starts and stops its own loopback production server (npm start) and checks the five server-rendered HTTP responses for the essential story content, local illustrations, citations, disclaimers, ordinary navigation links, and the correct current-page state, using the serverContract object above. It never executes page JavaScript and never launches a browser, and its results are safeguards, not proof of complete no-JavaScript browser behaviour or WCAG 2.2 AA conformance.",
     "No unverified gap above is marked as passed, and browser behaviour is not a completed WCAG 2.2 AA or cross-browser verification claim."
   ]
 }

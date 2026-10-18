@@ -80,6 +80,8 @@ From the project root:
 
 - `npm test` runs the automated tests.
 - `npm run build` builds the project without starting the server.
+- `npm run verify:reading` runs the loopback HTTP reading safeguard (`scripts/verify-reading.mjs`): it starts and stops its own loopback production server and checks the five server-rendered HTTP responses for essential story content, local illustrations, citations, disclaimers, the navigation links, and the correct current-page state without executing JavaScript. Its results are safeguards, not proof of complete no-JavaScript browser behaviour or WCAG 2.2 AA conformance.
+- `docs/runbooks/accessibility-validation.md` records the project's accessibility and browser evidence: it separates the checks that were actually executed from the ones that remain explicitly unverified.
 
 ## A note about the content
 
