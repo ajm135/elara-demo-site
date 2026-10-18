@@ -12,6 +12,7 @@ The Demo Site is a public demo for a general audience that presents, in hopeful 
 - No sign-in: the site is a public demo anyone can open. There is no authentication, no session, and no permission logic in the project, so no security check exists that would need to be enabled, disabled, or worked around.
 - No database: all page copy and image references stay in `src/lib/site-content.ts` as static content compiled into the site, per ADR 0002. There is no data layer, no migrations, and no runtime content storage.
 - Local-only hosting: the site runs on this computer with Next.js (`npm start` builds and serves it on port 3000). It is not deployed to any external host, and no deployment configuration is added to the project.
+- The local-only boundary is enforced, not just stated: the Next.js development (`npm run dev`) and production (`npm start`) servers are bound explicitly to `127.0.0.1:3000`, and `scripts/verify-local-only.mjs` verifies the OS-reported listener on port 3000 is loopback-only (`127.0.0.1` / `::1`), rejecting wildcard or other non-loopback listeners. Opening a localhost URL is not itself the boundary, and a failed connection from another machine is not proof of loopback binding.
 - Every public page must meet WCAG 2.2 Level AA: unique page titles, one `main` landmark, labeled navigation, meaningful image alternative text, logical heading order, sufficient color contrast, and visible keyboard focus, in the supported browsers and at phone, tablet, and desktop widths.
 - The site is a hopeful educational demo, not medical advice, a diagnosis, or a promise: the copy presents cures and a 110-120 year average lifespan as expectations held by some researchers, not as certainties, and every page carries the content module's disclaimer.
 
@@ -19,4 +20,5 @@ The Demo Site is a public demo for a general audience that presents, in hopeful 
 
 - The decisions above record the operator's confirmed choices (no sign-in, no database, local-only) as accepted ADRs so later milestones have a single place to point when the question of accounts, storage, or deployment arises.
 - ADR 0001 already notes the local-only build and test setup; ADR 0004 extends that to the hosting decision itself: no deployment target is part of this project.
+- The loopback-only startup, binding, and verification steps are documented in `docs/runbooks/local-start.md`.
 - Keeping content static and hosting local means there is nothing to protect with credentials: no environment secrets are required, and none are listed in `.env.example`.
