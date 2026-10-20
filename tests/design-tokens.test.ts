@@ -19,10 +19,12 @@
  *    and the page and raised surfaces read warm (red over blue); the
  *    dark palette is a deep surface set: the surfaces are pairwise
  *    distinct and darker than every ink;
- * 3. every text/background pair used for body text, headings, muted
- *    meta, links (including visited), citations, the skip-link text, and
- *    the header progress text meets WCAG 2.2 AA in both themes: 4.5:1
- *    for normal text;
+ * 3. every text/background pair used for body text, headings (including
+ *    headings on the raised sources card), muted meta, links (including
+ *    visited), citations, the skip-link text, the header progress text,
+ *    and the painted accent pairs — the hero kicker on the raised hero
+ *    frame and the next-story cue on the raised header — meets WCAG 2.2
+ *    AA in both themes: 4.5:1 for normal text;
  * 4. UI boundaries meet the 3:1 non-text minimum in both themes: the
  *    strong rule on every surface and the accent where it carries a
  *    meaningful border or the focus outline, plus the sources card's
@@ -181,6 +183,11 @@ const textPairs = [
   ["ink-heading", "surface-page", "headings on the page"],
   [
     "ink-heading",
+    "surface-raised",
+    "headings on the raised sources card",
+  ],
+  [
+    "ink-heading",
     "surface-evidence",
     "evidence captions and lifespan terms in the panel",
   ],
@@ -191,8 +198,12 @@ const textPairs = [
     "muted progress text (story position, ending state) on the raised chrome",
   ],
   ["ink-muted", "surface-evidence", "muted meta in the evidence panel"],
-  ["accent-teal", "surface-page", "links and the hero kicker on the page"],
-  ["accent-teal", "surface-raised", "links and the next-story cue in the header"],
+  ["accent-teal", "surface-page", "links on the page surface"],
+  [
+    "accent-teal",
+    "surface-raised",
+    "links in the header, the next-story cue in the header, and the hero kicker on the raised hero frame",
+  ],
   ["accent-teal", "surface-evidence", "citations in the evidence panel"],
   ["accent-teal-deep", "surface-page", "visited links on the page"],
   [
@@ -391,6 +402,88 @@ describe("design tokens in globals.css", () => {
           contrastRatio(borderColour, background),
           `${theme.name}: the .sources card border on its raised background`,
         ).toBeGreaterThanOrEqual(3);
+      }
+    }
+  });
+
+  it("paints the hero kicker and the next-story cue at at least 4.5:1 on their raised grounds in both themes", () => {
+    // The token-level text pairs above only prove the *tokens* clear
+    // 4.5:1; this check pins the colours the rules actually paint:
+    // .hero-kicker on the .hero-media ground and
+    // .progress-cluster .next-story-cue on the header ground, each
+    // resolved per theme against the reader's effective tokens. A
+    // foreground or ground that does not resolve to a hex colour fails
+    // the check in either theme rather than being skipped.
+    const heroKicker = parseDeclarations(cssRuleBody(globalCss, ".hero-kicker"));
+    const heroMedia = parseDeclarations(cssRuleBody(globalCss, ".hero-media"));
+    const nextStoryCue = parseDeclarations(
+      cssRuleBody(globalCss, ".progress-cluster .next-story-cue"),
+    );
+    const header = parseDeclarations(cssRuleBody(globalCss, "header"));
+
+    for (const theme of themes) {
+      // The hero kicker: accent ink on the raised hero frame.
+      const kickerColour = resolveHexColor(
+        heroKicker["color"] ?? "",
+        theme.effectiveTokens,
+      );
+      expect(
+        kickerColour,
+        `the .hero-kicker colour must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      expect(
+        kickerColour,
+        `the .hero-kicker must paint the accent ink in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "accent-teal"));
+      const heroFrame = resolveHexColor(
+        heroMedia["background-color"] ?? "",
+        theme.effectiveTokens,
+      );
+      expect(
+        heroFrame,
+        `the .hero-media ground must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      expect(
+        heroFrame,
+        `the .hero-media frame must paint the raised surface in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "surface-raised"));
+      if (kickerColour !== null && heroFrame !== null) {
+        expect(
+          contrastRatio(kickerColour, heroFrame),
+          `${theme.name}: the hero kicker (accent ink) on the raised hero frame`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+
+      // The next-story cue: accent ink on the raised header.
+      const cueColour = resolveHexColor(
+        nextStoryCue["color"] ?? "",
+        theme.effectiveTokens,
+      );
+      expect(
+        cueColour,
+        `the .next-story-cue colour must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      expect(
+        cueColour,
+        `the next-story cue must paint the accent ink in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "accent-teal"));
+      const headerGround = resolveHexColor(
+        header["background-color"] ?? "",
+        theme.effectiveTokens,
+      );
+      expect(
+        headerGround,
+        `the header ground must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      expect(
+        headerGround,
+        `the header must paint the raised surface in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "surface-raised"));
+      if (cueColour !== null && headerGround !== null) {
+        expect(
+          contrastRatio(cueColour, headerGround),
+          `${theme.name}: the next-story cue (accent ink) on the raised header`,
+        ).toBeGreaterThanOrEqual(4.5);
       }
     }
   });
