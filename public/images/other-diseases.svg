@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <title>A circle of icons for a heart, a sugar shape, a virus, and a dna helix, joined by lines</title>
+  <rect x="0" y="0" width="1200" height="630" fill="#F2F6FA"/>
+  <circle cx="600" cy="315" r="210" fill="none" stroke="#C9D4E0" stroke-width="4" stroke-dasharray="10 14"/>
+  <!-- joining lines between the icons -->
+  <g stroke="#9AA5B1" stroke-width="5">
+    <line x1="600" y1="105" x2="810" y2="315"/>
+    <line x1="810" y1="315" x2="600" y2="525"/>
+    <line x1="600" y1="525" x2="390" y2="315"/>
+    <line x1="390" y1="315" x2="600" y2="105"/>
+  </g>
+  <g fill="#4E79A7">
+    <circle cx="705" cy="210" r="8"/>
+    <circle cx="705" cy="420" r="8"/>
+    <circle cx="495" cy="420" r="8"/>
+    <circle cx="495" cy="210" r="8"/>
+  </g>
+  <!-- icon: heart, top -->
+  <circle cx="600" cy="105" r="78" fill="#FFFFFF" stroke="#C44536" stroke-width="5"/>
+  <path d="M600 84 C 592 64, 560 62, 552 84 C 546 101, 566 118, 600 138 C 634 118, 654 101, 648 84 C 640 62, 608 64, 600 84 Z" fill="#C44536"/>
+  <!-- icon: virus, right -->
+  <circle cx="810" cy="315" r="78" fill="#FFFFFF" stroke="#4EA5D9" stroke-width="5"/>
+  <g stroke="#4EA5D9" stroke-width="6" stroke-linecap="round">
+    <line x1="844" y1="315" x2="860" y2="315"/>
+    <line x1="834" y1="291" x2="845" y2="280"/>
+    <line x1="810" y1="281" x2="810" y2="265"/>
+    <line x1="786" y1="291" x2="775" y2="280"/>
+    <line x1="776" y1="315" x2="760" y2="315"/>
+    <line x1="786" y1="339" x2="775" y2="350"/>
+    <line x1="810" y1="349" x2="810" y2="365"/>
+    <line x1="834" y1="339" x2="845" y2="350"/>
+  </g>
+  <g fill="#4EA5D9">
+    <circle cx="866" cy="315" r="6"/>
+    <circle cx="850" cy="275" r="6"/>
+    <circle cx="810" cy="259" r="6"/>
+    <circle cx="770" cy="275" r="6"/>
+    <circle cx="754" cy="315" r="6"/>
+    <circle cx="770" cy="355" r="6"/>
+    <circle cx="810" cy="371" r="6"/>
+    <circle cx="850" cy="355" r="6"/>
+  </g>
+  <circle cx="810" cy="315" r="34" fill="#7FC3E8"/>
+  <circle cx="798" cy="305" r="7" fill="#2E7BA8"/>
+  <circle cx="822" cy="322" r="6" fill="#2E7BA8"/>
+  <!-- icon: dna helix, left -->
+  <circle cx="390" cy="315" r="78" fill="#FFFFFF" stroke="#7A5CA8" stroke-width="5"/>
+  <g fill="none" stroke="#7A5CA8" stroke-width="7" stroke-linecap="round">
+    <path d="M372 268 C 414 292, 414 338, 372 362"/>
+    <path d="M408 268 C 366 292, 366 338, 408 362"/>
+  </g>
+  <g stroke="#A588C9" stroke-width="5" stroke-linecap="round">
+    <line x1="376" y1="280" x2="404" y2="280"/>
+    <line x1="382" y1="296" x2="398" y2="296"/>
+    <line x1="387" y1="315" x2="393" y2="315"/>
+    <line x1="382" y1="334" x2="398" y2="334"/>
+    <line x1="376" y1="350" x2="404" y2="350"/>
+  </g>
+  <!-- icon: sugar shape, bottom -->
+  <circle cx="600" cy="525" r="78" fill="#FFFFFF" stroke="#D8B96A" stroke-width="5"/>
+  <polygon points="576,505 592,488 636,488 620,505" fill="#FFFDF6" stroke="#D8B96A" stroke-width="4" stroke-linejoin="round"/>
+  <rect x="576" y="505" width="44" height="44" fill="#FFF8E8" stroke="#D8B96A" stroke-width="4"/>
+  <polygon points="620,505 636,488 636,532 620,549" fill="#F3E8CC" stroke="#D8B96A" stroke-width="4" stroke-linejoin="round"/>
+</svg>

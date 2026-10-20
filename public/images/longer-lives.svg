@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <title>A long road toward the horizon with trees growing taller along the way</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8EC9E8"/>
+      <stop offset="0.75" stop-color="#D7EDF7"/>
+      <stop offset="1" stop-color="#FFF2CF"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1200" height="400" fill="url(#sky)"/>
+  <circle cx="170" cy="120" r="52" fill="#FFD166"/>
+  <g fill="#FFFFFF" opacity="0.85">
+    <ellipse cx="420" cy="110" rx="70" ry="22"/>
+    <ellipse cx="480" cy="96" rx="50" ry="18"/>
+    <ellipse cx="880" cy="160" rx="80" ry="22"/>
+    <ellipse cx="950" cy="146" rx="48" ry="16"/>
+  </g>
+  <rect x="0" y="400" width="1200" height="230" fill="#79A85B"/>
+  <rect x="0" y="400" width="1200" height="10" fill="#5F8C46"/>
+  <!-- the long road toward the horizon -->
+  <polygon points="576,400 624,400 880,630 320,630" fill="#8A94A6"/>
+  <line x1="600" y1="410" x2="600" y2="630" stroke="#FFF8E8" stroke-width="16" stroke-dasharray="38 30"/>
+  <!-- trees, small and far, growing taller toward the viewer -->
+  <rect x="466" y="400" width="7" height="14" fill="#8B5E3C"/>
+  <circle cx="469" cy="388" r="13" fill="#5F8C46"/>
+  <rect x="727" y="400" width="7" height="14" fill="#8B5E3C"/>
+  <circle cx="731" cy="388" r="13" fill="#79A85B"/>
+  <rect x="428" y="418" width="9" height="22" fill="#8B5E3C"/>
+  <circle cx="432" cy="400" r="21" fill="#79A85B"/>
+  <rect x="763" y="418" width="9" height="22" fill="#8B5E3C"/>
+  <circle cx="768" cy="400" r="21" fill="#5F8C46"/>
+  <rect x="376" y="448" width="12" height="32" fill="#8B5E3C"/>
+  <circle cx="382" cy="420" r="34" fill="#5F8C46"/>
+  <rect x="812" y="448" width="12" height="32" fill="#8B5E3C"/>
+  <circle cx="818" cy="420" r="34" fill="#79A85B"/>
+  <rect x="300" y="500" width="16" height="45" fill="#8B5E3C"/>
+  <circle cx="308" cy="455" r="52" fill="#79A85B"/>
+  <rect x="884" y="500" width="16" height="45" fill="#8B5E3C"/>
+  <circle cx="892" cy="455" r="52" fill="#5F8C46"/>
+  <rect x="205" y="560" width="22" height="70" fill="#8B5E3C"/>
+  <circle cx="216" cy="490" r="80" fill="#5F8C46"/>
+  <rect x="973" y="560" width="22" height="70" fill="#8B5E3C"/>
+  <circle cx="984" cy="490" r="80" fill="#79A85B"/>
+</svg>

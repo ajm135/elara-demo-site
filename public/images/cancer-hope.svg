@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <title>Two simple hands holding a small light in a dark field</title>
+  <defs>
+    <linearGradient id="night" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#101527"/>
+      <stop offset="1" stop-color="#1E2742"/>
+    </linearGradient>
+    <radialGradient id="lamp" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFF3C4" stop-opacity="0.95"/>
+      <stop offset="0.4" stop-color="#FFE9A0" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#FFE9A0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="0" y="0" width="800" height="600" fill="url(#night)"/>
+  <!-- small stars in the dark field -->
+  <g fill="#8FA3C8">
+    <circle cx="120" cy="90" r="4"/>
+    <circle cx="240" cy="160" r="3"/>
+    <circle cx="660" cy="80" r="4"/>
+    <circle cx="700" cy="210" r="3"/>
+    <circle cx="90" cy="300" r="3"/>
+    <circle cx="720" cy="380" r="3"/>
+    <circle cx="60" cy="470" r="4"/>
+    <circle cx="740" cy="500" r="4"/>
+  </g>
+  <!-- the small light -->
+  <circle cx="400" cy="360" r="170" fill="url(#lamp)"/>
+  <circle cx="400" cy="360" r="24" fill="#FFE9A0"/>
+  <g stroke="#FFE9A0" stroke-width="6" stroke-linecap="round" opacity="0.9">
+    <line x1="400" y1="312" x2="400" y2="292"/>
+    <line x1="352" y1="330" x2="336" y2="316"/>
+    <line x1="448" y1="330" x2="464" y2="316"/>
+    <line x1="344" y1="368" x2="324" y2="372"/>
+    <line x1="456" y1="368" x2="476" y2="372"/>
+  </g>
+  <!-- left hand, simple cupping shape -->
+  <path d="M225 600 C 205 540, 215 485, 258 452 C 292 425, 345 415, 382 432 C 402 441, 404 462, 388 472 C 355 492, 322 505, 300 540 C 288 559, 280 580, 276 600 Z" fill="#E7B98E"/>
+  <ellipse cx="300" cy="440" rx="34" ry="18" transform="rotate(-25 300 440)" fill="#E7B98E"/>
+  <!-- right hand, simple cupping shape -->
+  <path d="M575 600 C 595 540, 585 485, 542 452 C 508 425, 455 415, 418 432 C 398 441, 396 462, 412 472 C 445 492, 478 505, 500 540 C 512 559, 520 580, 524 600 Z" fill="#E7B98E"/>
+  <ellipse cx="500" cy="440" rx="34" ry="18" transform="rotate(25 500 440)" fill="#E7B98E"/>
+</svg>
