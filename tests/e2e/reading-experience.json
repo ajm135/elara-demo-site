@@ -1,6 +1,6 @@
 {
   "name": "reading-experience",
-  "version": 2,
+  "version": 3,
   "description": "Reusable browser-level check definitions for the five-story reading experience. Elara runs these as page checks against the loopback-only production server (npm start, http://127.0.0.1:3000). Every route is checked at each viewport: the skip-link keyboard flow, the server-rendered reading progress (exactly one aria-current link, the exact 'Story N of 5' position, the next-story cue or the story-five ending), the landmarks, evidence and citation rendering, and clean console, request and scroll behaviour. This file remains reusable browser-check definition data that Elara's page checks consume: the browser steps run only as Elara page checks. npm run verify:reading (scripts/verify-reading.mjs) starts and stops its own loopback production server and checks the five server-rendered HTTP responses for the essential story content, local illustrations, citations, disclaimers, ordinary navigation links, and the correct current-page state, using the serverContract object below; it never executes page JavaScript and never launches a browser, and those checks are safeguards, not proof of complete no-JavaScript browser behaviour or WCAG 2.2 AA conformance.",
   "server": {
     "startCommand": "npm start",
@@ -10,7 +10,7 @@
     "loopbackOnly": true
   },
   "serverContract": {
-    "description": "The server-rendered reading contract that scripts/verify-reading.mjs enforces over plain HTTP. The script starts and stops its own loopback production server (npm start), fetches all five routes without executing JavaScript or launching a browser, and checks each response: exactly one main#main-content with exactly one h1 (heading) and a body paragraph, the title substrings in the document <title>, at least one local illustration (imageSrcPrefix) that answers HTTP 200 with an image content type, at least one https:// citation anchor inside main, the visible disclaimer, the header nav with exactly the five story links in reading order, exactly one aria-current on this route's link, the 'Story N of 5' label, the skip link before the header, and a main time with a datetime. Story 5 carries endingState and visibleStrings and no next-story link; stories 1 to 4 carry a next-story cue to the following route. Where this object is incomplete the script falls back to its built-in copy of the same contract, so the enforced contract never weakens.",
+    "description": "The server-rendered reading contract that scripts/verify-reading.mjs enforces over plain HTTP. The script starts and stops its own loopback production server (npm start), fetches all five routes without executing JavaScript or launching a browser, and checks each response: the wide top section (the hero, the sibling immediately before main) with exactly one h1 (heading) and a time with a datetime, exactly one main#main-content with a body paragraph, the title substrings in the document <title>, at least one local illustration (imageSrcPrefix) that answers HTTP 200 with an image content type with the page's opening illustration in the hero, at least one https:// citation anchor inside main, the visible disclaimer, the header nav with exactly the five story links in reading order, exactly one aria-current on this route's link, the 'Story N of 5' label, and the skip link before the header. Story 5 carries endingState and visibleStrings and no next-story link; stories 1 to 4 carry a next-story cue to the following route. Where this object is incomplete the script falls back to its built-in copy of the same contract, so the enforced contract never weakens.",
     "imageSrcPrefix": "/images/",
     "citationHrefPrefix": "https://",
     "disclaimerText": "not medical advice",
@@ -98,11 +98,11 @@
       "expectedTitleContains": ["AI and longer lives"],
       "expectedText": ["Story 1 of 5", "not medical advice"],
       "expectedElements": [
-        "main#main-content h1",
+        ".hero h1",
         "header nav[aria-label='Main'] a[href='/'][aria-current='page']",
-        "main time[datetime]",
+        ".hero time[datetime]",
         "main a[href^='https://']",
-        "main img[alt]"
+        ".hero img[alt]"
       ],
       "nextStoryCue": { "href": "/how-ai-helps", "text": "How AI helps" }
     },
@@ -114,11 +114,11 @@
       ],
       "expectedText": ["Story 2 of 5", "not medical advice"],
       "expectedElements": [
-        "main#main-content h1",
+        ".hero h1",
         "header nav[aria-label='Main'] a[href='/how-ai-helps'][aria-current='page']",
-        "main time[datetime]",
+        ".hero time[datetime]",
         "main a[href^='https://']",
-        "main img[alt]"
+        ".hero img[alt]"
       ],
       "nextStoryCue": { "href": "/cancer", "text": "Cancer" }
     },
@@ -130,11 +130,11 @@
       ],
       "expectedText": ["Story 3 of 5", "not medical advice"],
       "expectedElements": [
-        "main#main-content h1",
+        ".hero h1",
         "header nav[aria-label='Main'] a[href='/cancer'][aria-current='page']",
-        "main time[datetime]",
+        ".hero time[datetime]",
         "main a[href^='https://']",
-        "main img[alt]"
+        ".hero img[alt]"
       ],
       "nextStoryCue": { "href": "/diseases", "text": "Other diseases" }
     },
@@ -146,11 +146,11 @@
       ],
       "expectedText": ["Story 4 of 5", "not medical advice"],
       "expectedElements": [
-        "main#main-content h1",
+        ".hero h1",
         "header nav[aria-label='Main'] a[href='/diseases'][aria-current='page']",
-        "main time[datetime]",
+        ".hero time[datetime]",
         "main a[href^='https://']",
-        "main img[alt]"
+        ".hero img[alt]"
       ],
       "nextStoryCue": { "href": "/longevity", "text": "Longer lives" }
     },
@@ -169,11 +169,11 @@
         "not medical advice"
       ],
       "expectedElements": [
-        "main#main-content h1",
+        ".hero h1",
         "header nav[aria-label='Main'] a[href='/longevity'][aria-current='page']",
-        "main time[datetime]",
+        ".hero time[datetime]",
         "main a[href^='https://']",
-        "main img[alt]"
+        ".hero img[alt]"
       ],
       "endingState": "End of the stories",
       "nextStoryCue": null

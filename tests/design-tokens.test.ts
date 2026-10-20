@@ -25,12 +25,19 @@
  *    for normal text;
  * 4. UI boundaries meet the 3:1 non-text minimum in both themes: the
  *    strong rule on every surface and the accent where it carries a
- *    meaningful border or the focus outline;
+ *    meaningful border or the focus outline, plus the sources card's
+ *    own border checked against its raised background;
  * 5. the base interaction rules hold: underlined links, a :focus-visible
  *    outline of at least 2 px in the accent with an offset that clears
  *    3:1 on the page surface in both themes, body line-height of at
- *    least 1.5 and font-size of at least 1rem, and a long-form measure
- *    between 38rem and 42rem driving the content column width;
+ *    least 1.5 and font-size of at least 1rem, a long-form measure
+ *    between 38rem and 42rem capping the reading column, and a page
+ *    shell between 72rem and 80rem — wider than the measure — that main
+ *    and the wide top section (the hero, the first element inside main)
+ *    span, while every long-form block in main (paragraphs,
+ *    headings, sections, the later illustrations, the evidence panels,
+ *    the sources block, and the term list) and the hero's text block
+ *    stay capped at the measure and centered;
  * 6. rounded cards: the evidence panels, the framed hero and story
  *    illustrations, and the home page sources block all set a positive
  *    border-radius from the shared radius token;
@@ -346,6 +353,48 @@ describe("design tokens in globals.css", () => {
     }
   });
 
+  it("paints the sources card's own border at at least 3:1 on its raised background in both themes", () => {
+    // The token-level boundary pairs above only prove the *tokens* clear
+    // 3:1; this check pins the border the .sources rule actually paints:
+    // the colour after "solid" in the border shorthand against the card's
+    // own background, resolved per theme against the reader's effective
+    // tokens. A decorative hairline border (or any colour that does not
+    // resolve to a hex) fails the check in either theme.
+    const sources = parseDeclarations(cssRuleBody(globalCss, ".sources"));
+    const border = /(\d+(?:\.\d+)?)px\s+solid\s+(.+)$/.exec(
+      sources["border"] ?? "",
+    );
+    expect(border, ".sources must set a solid border shorthand").not.toBeNull();
+    if (border === null) {
+      return;
+    }
+
+    for (const theme of themes) {
+      const borderColour = resolveHexColor(
+        border[2].trim(),
+        theme.effectiveTokens,
+      );
+      const background = resolveHexColor(
+        sources["background-color"] ?? "",
+        theme.effectiveTokens,
+      );
+      expect(
+        borderColour,
+        `the .sources border colour must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      expect(
+        background,
+        `the .sources background must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      if (borderColour !== null && background !== null) {
+        expect(
+          contrastRatio(borderColour, background),
+          `${theme.name}: the .sources card border on its raised background`,
+        ).toBeGreaterThanOrEqual(3);
+      }
+    }
+  });
+
   it("underlines links and keeps a solid accent focus outline of at least 2 px with an offset", () => {
     const link = parseDeclarations(cssRuleBody(globalCss, "a"));
     expect(link["text-decoration"] ?? "").toContain("underline");
@@ -408,9 +457,73 @@ describe("design tokens in globals.css", () => {
       expect(rem, "--measure (about 60 to 75 characters per line)").toBeLessThanOrEqual(42);
     }
 
-    // The content column width is driven by the measure token.
+    // The page is wider than the reading column: main spans the page
+    // shell, which is a rem value between 72rem and 80rem and wider than
+    // the measure...
+    const pageShell = /^(\d+(?:\.\d+)?)rem$/.exec(
+      lightTheme.tokens["page-shell"] ?? "",
+    );
+    expect(pageShell, "--page-shell must be a rem value").not.toBeNull();
+    if (pageShell !== null) {
+      expect(
+        Number(pageShell[1]),
+        "--page-shell (the wide page, 72 to 80rem)",
+      ).toBeGreaterThanOrEqual(72);
+      expect(
+        Number(pageShell[1]),
+        "--page-shell (the wide page, 72 to 80rem)",
+      ).toBeLessThanOrEqual(80);
+      if (measure !== null) {
+        expect(
+          Number(pageShell[1]),
+          "--page-shell must be wider than --measure",
+        ).toBeGreaterThan(Number(measure[1]));
+      }
+    }
+
     const main = parseDeclarations(cssRuleBody(globalCss, "main"));
-    expect(main["max-width"] ?? "").toContain("var(--measure)");
+    expect(
+      main["max-width"] ?? "",
+      "main must span the page shell (the wider page)",
+    ).toContain("var(--page-shell)");
+
+    // The wide top section spans that wider page too: the hero is capped
+    // at the page shell, not the measure, so the large headline and the
+    // framed illustration can use the width the reading column gives up
+    // (its text block stays capped at the measure, below).
+    const hero = parseDeclarations(cssRuleBody(globalCss, ".hero"));
+    expect(
+      hero["max-width"] ?? "",
+      ".hero must span the page shell (the wider page), not the measure",
+    ).toContain("var(--page-shell)");
+
+    // ...while the reading column is driven by the measure token: every
+    // long-form block in main — paragraphs, headings, sections, the later
+    // illustrations, the evidence panels, the sources block, and the
+    // lifespan term list — and the hero's text block (the wide top
+    // section lives inside main, as its first element) are each capped at
+    // the measure and centered in the wider page.
+    const readingColumnSelectors = [
+      "main p",
+      "main h2",
+      "main section",
+      ".hero-text",
+      ".story-illustration",
+      ".claim-evidence",
+      ".lifespan-terms",
+      ".sources",
+    ];
+    for (const selector of readingColumnSelectors) {
+      const declarations = parseDeclarations(cssRuleBody(globalCss, selector));
+      expect(
+        declarations["max-width"] ?? "",
+        `${selector} must be capped at the measure`,
+      ).toContain("var(--measure)");
+      expect(
+        declarations["margin-inline"] ?? "",
+        `${selector} must center the reading column in the wider page`,
+      ).toContain("auto");
+    }
   });
 
   it("uses rounded cards for the evidence panels and the framed blocks", () => {

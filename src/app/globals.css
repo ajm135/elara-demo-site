@@ -25,10 +25,17 @@
  * the WCAG 2.2 contrast ratios (4.5:1 for normal text, 3:1 for UI
  * boundaries) in both themes.
  *
- * Layout: a wide page shell (--page-shell) carries the header chrome,
- * while the long-form reading column stays capped at --measure (about 60
- * to 75 characters per line). Evidence panels, the sources block, and
- * the illustration frames are rounded cards (--radius-card).
+ * Layout: the page is wide — the wide top section (.hero, main's first
+ * element) and the page itself (main) both span the shared page shell
+ * (--page-shell, 72 to 80 rem) — while every long-form block in main
+ * (paragraphs, headings, sections, the evidence panels, the sources
+ * block, the lifespan term list, and the later illustrations) and the
+ * hero's text block stay in a centered reading column capped at --measure
+ * (about 60 to 75 characters per line). Every page opens with the wide
+ * top section as main's first element: kicker, large display headline,
+ * summary, review date, and the page's framed illustration, which may use
+ * the width the text column gives up. Evidence panels, the sources block,
+ * and the illustration frames are rounded cards (--radius-card).
  *
  * Structural rules covered here:
  * - no sideways scrolling at 320 to 1920 px: border-box everywhere, width
@@ -80,10 +87,12 @@
      stronger rule that clears 3:1 where a boundary carries meaning. */
   --rule-warm: #d5c9b2;
   --rule-strong: #8a7b58;
-  /* Long-form measure: about 60 to 75 characters per line. */
+  /* Long-form measure: about 60 to 75 characters per line — the cap on
+     the reading column that sits inside the wider page. */
   --measure: 40rem;
-  /* Wide page shell for the header chrome (the reading column stays
-     capped at --measure). */
+  /* Wide page shell (72 to 80 rem): the page itself (main) and the
+     header chrome span it; the reading column stays capped at
+     --measure. */
   --page-shell: 76rem;
   /* Rounded card corners for evidence panels, the sources block, and
      the illustration frames. */
@@ -286,21 +295,36 @@ nav a[aria-current="page"] {
 }
 
 /*
- * Content stack: the reading column. Generous side padding, a capped
- * measure of about 40rem for comfortable line lengths, and open spacing
- * between blocks. The stack is the home of the long-form text on every
- * story page; it stays narrow inside the wider page shell.
+ * Content stack: the wider page. main spans the shared page shell
+ * (max-width --page-shell, 72 to 80 rem) and is centered; its first
+ * element, the wide top section (.hero), opens the page with its own top
+ * padding and spans main's content width with the same side inset as the
+ * rest of the page. It is not capped at the measure: the long-form text
+ * inside it stays narrow through the reading-column rules below, which
+ * cap each block at --measure and center it in the wider page.
  */
 main {
   display: block;
   width: 100%;
-  max-width: var(--measure);
+  max-width: var(--page-shell);
   margin-inline: auto;
-  padding: 2rem 1rem 3rem;
+  padding: 0 1rem 3rem;
 }
 
+/* Reading column: paragraphs (including the page's final disclaimer)
+   stay capped at the measure and centered in the wider page. The hero's
+   own paragraphs are excluded from this cap: the hero's text column
+   (.hero-text) is the only measure cap on the wide top section's text. */
 main p {
   margin: 0 0 1rem;
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+/* The wide top section's paragraphs (kicker, summary, and review date)
+   take their measure only from .hero-text, not from the rule above. */
+.hero-text p {
+  max-width: none;
 }
 
 main img {
@@ -309,20 +333,30 @@ main img {
   height: auto;
 }
 
-main h1 {
+/* The story's headline: the large display step of the page — the largest
+   type size on the page. It sits in the hero's text block, which is what
+   caps it at the reading measure. */
+.hero h1 {
   margin: 0 0 1rem;
-  font-size: clamp(2rem, 1.4rem + 2.4vw, 3.25rem);
-  line-height: 1.15;
+  font-size: clamp(2.5rem, 1.7rem + 2.4vw, 4.5rem);
+  line-height: 1.1;
 }
 
 main h2 {
   margin: 0 0 0.75rem;
+  max-width: var(--measure);
+  margin-inline: auto;
   font-size: 1.5rem;
   line-height: 1.3;
 }
 
+/* Reading column: each content section (its heading, its term list, its
+   paragraphs, and its evidence panels) stays in the measure, centered
+   in the wider page. */
 main section {
   margin-top: 2.5rem;
+  max-width: var(--measure);
+  margin-inline: auto;
 }
 
 /* The per-page disclaimer: set apart by a soft warm rule. */
@@ -334,14 +368,25 @@ main > p:last-child {
 }
 
 /*
- * Composed hero: the kicker, heading, summary, and review date on one
- * side, the page's framed illustration on the other. Stacked below 768px,
- * two columns at 768px and up. The frame is a raised, rounded card with a
- * meaningful rule, so the illustration reads as a composed element.
+ * Wide top section (the hero): the kicker, large display headline,
+ * summary, and review date on one side, the page's framed illustration
+ * on the other. It is main's first element and spans the same wider page
+ * shell as main — wider than the reading column, with no horizontal
+ * overflow — stacked below 768px and in two columns at 768px and up. Its
+ * top padding opens the page; it carries no horizontal padding of its
+ * own, so the wide top section spans main's content width with the same
+ * side inset as the rest of the page and nothing scrolls sideways from
+ * 320 to 1920 px. The frame is a raised, rounded card with a meaningful
+ * rule, so the illustration reads as a composed element and may use the
+ * remaining width the text column gives up.
  */
 .hero {
   display: grid;
   gap: 2rem;
+  width: 100%;
+  max-width: var(--page-shell);
+  margin-inline: auto;
+  padding: 2rem 0 0;
 }
 
 @media (min-width: 768px) {
@@ -351,9 +396,13 @@ main > p:last-child {
   }
 }
 
-/* The hero's text column, in reading order. */
+/* The hero's text column, in reading order: capped at the measure so the
+   headline, summary, and review date stay 60 to 75 characters, centered
+   in the space the wide top section gives it. */
 .hero-text {
   min-width: 0;
+  max-width: var(--measure);
+  margin-inline: auto;
 }
 
 /* The kicker: the story's nav label, set small and in the accent. No
@@ -368,6 +417,7 @@ main > p:last-child {
 
 /* The hero summary: one step up from body text, still inside the measure. */
 .hero-summary {
+  margin: 0 0 1rem;
   font-size: 1.25rem;
   line-height: 1.6;
 }
@@ -395,10 +445,13 @@ main > p:last-child {
 
 /*
  * A page's further illustrations (beyond the hero's): the same rounded
- * frame as the hero media, set apart in the content stack.
+ * frame as the hero media, set apart in the content stack, in the
+ * reading column.
  */
 .story-illustration {
   margin: 2.5rem 0;
+  max-width: var(--measure);
+  margin-inline: auto;
   background-color: var(--surface-raised);
   border: 1px solid var(--rule-strong);
   border-radius: var(--radius-card);
@@ -416,15 +469,18 @@ main > p:last-child {
 /*
  * The home page's sources block: the site-wide evidence base, rendered
  * after the reading map and before the disclaimer. It sits on the raised
- * surface in a rounded card with a soft warm rule, so it reads as a
+ * surface in a rounded card whose border is the strong rule, so the card
+ * boundary clears 3:1 on the raised surface in both themes. It reads as a
  * composed block in the content stack rather than a footnote. The long
  * publication URLs wrap through the inherited overflow-wrap, so 320 px
  * viewports never scroll sideways.
  */
 .sources {
   padding: 1rem 1.25rem;
+  max-width: var(--measure);
+  margin-inline: auto;
   background-color: var(--surface-raised);
-  border: 1px solid var(--rule-warm);
+  border: 1px solid var(--rule-strong);
   border-radius: var(--radius-card);
 }
 
@@ -447,6 +503,8 @@ main > p:last-child {
 .claim-evidence {
   margin: 1.5rem 0;
   padding: 1rem 1.25rem;
+  max-width: var(--measure);
+  margin-inline: auto;
   background-color: var(--surface-evidence);
   border: 1px solid var(--rule-strong);
   border-left: 4px solid var(--accent-teal);
@@ -482,6 +540,8 @@ main > p:last-child {
 .lifespan-terms {
   margin: 0 0 1.5rem;
   padding: 1rem 1.25rem;
+  max-width: var(--measure);
+  margin-inline: auto;
   background-color: var(--surface-evidence);
   border: 1px solid var(--rule-strong);
   border-left: 4px solid var(--accent-teal);

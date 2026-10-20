@@ -13,23 +13,27 @@ import ClaimEvidence from "./claim-evidence";
  * One illustrated story page, rendered from static site content.
  *
  * This is a server component (no "use client"): it takes a `SitePage` from
- * `src/lib/site-content.ts` and renders exactly one
+ * `src/lib/site-content.ts` and renders the single focusable
  * `<main id="main-content" tabindex="-1">` — the target of the skip link
- * in `site-header.tsx`. The negative tabindex makes the landmark
- * focusable by the skip link without putting it in the tab sequence.
+ * in `site-header.tsx` — as the wider page: it spans the `--page-shell`
+ * width while its long-form blocks stay in the centered `--measure`
+ * reading column. The negative tabindex makes the landmark focusable by
+ * the skip link without putting it in the tab sequence.
  *
  * Composition (the editorial hierarchy, not a flat stack):
  *
- * 1. a composed hero (`.hero`): the story's nav label as a kicker, the
- *    single `<h1>`, the summary, the review date as a visible
- *    "Stories reviewed …" line with a `<time datetime>` element (the page's
- *    real claim-register inspection date), and the page's framed
- *    illustration (`.hero-media`, a native `<img>` with the existing src,
- *    alt, width, and height — no empty alt, no next/image, no external
- *    images). At 768px and up the text sits beside the framed image;
- *    below that the hero stacks;
- * 2. any further illustrations of the page, each in its own framed
- *    figure (`.story-illustration`), in reference order;
+ * 1. the wide top section (`.hero`), main's first element and outside
+ *    the reading column: the story's nav label as a kicker, the single
+ *    `<h1>`, the summary, the review date as a visible "Stories reviewed
+ *    …" line with a `<time datetime>` element (the page's real
+ *    claim-register inspection date), and the page's framed illustration
+ *    (`.hero-media`, a native `<img>` with the existing src, alt, width,
+ *    and height — no empty alt, no next/image, no external images). It
+ *    spans the wider page (the `--page-shell` width); only its text block
+ *    (`.hero-text`) stays capped at the `--measure` reading column. At
+ *    768px and up the text sits beside the framed image;
+ * 2. any further illustrations of the page, each in its own framed figure
+ *    (`.story-illustration`), in reference order;
  * 3. one `<section>` per section, with an `<h2>`, an optional ordered
  *    definition list of exact term labels (`<dl class="lifespan-terms">`,
  *    only the longevity story's "three numbers" section carries one, so a
@@ -48,10 +52,9 @@ import ClaimEvidence from "./claim-evidence";
  * 5. the page disclaimer, a plain paragraph, which stays the last element
  *    of main.
  *
- * Long-form text stays inside the 60–75 character measure set by the
- * `--measure` token on `main`. No client hooks, no fetched data, no second
- * navigation: the header nav (rendered by the route's page) is the way
- * between pages, and everything here reads with JavaScript disabled.
+ * No client hooks, no fetched data, no second navigation: the header nav
+ * (rendered by the route's page) is the way between pages, and everything
+ * here reads with JavaScript disabled.
  */
 export default function StoryPage({ page }: { page: SitePage }) {
   const [heroImage, ...additionalImages] = page.images;

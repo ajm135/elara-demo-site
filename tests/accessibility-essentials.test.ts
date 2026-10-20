@@ -24,13 +24,15 @@
  *    ending state with no next-story link on story 5; the cue link never
  *    sits ahead of the five story links in keyboard order;
  * 4. images: every <img> has a non-empty alt that is not a filename;
- * 5. headings: each page has exactly one <h1>, every <h2> appears only
- *    after that h1, and the composed hero introduces no skipped heading
- *    level;
- * 6. evidence: every page shows its reviewedOn date in a <time datetime>
- *    element, main carries at least one stable https citation link, and the
- *    number of figure.claim-evidence panels equals the claims the content
- *    model ties to that page (home instead renders its sources block);
+ * 5. headings: each page has exactly one <h1>, inside the composed hero
+ *    (the wide top section, main's first element), every <h2> appears only
+ *    after that h1, and the hero introduces no skipped heading level
+ *    (no h2-h6 inside it, no h3 or deeper anywhere before the first h2);
+ * 6. evidence: the wide top section (the hero, main's first element)
+ *    shows the reviewedOn date in a <time datetime> element, main carries
+ *    at least one stable https citation link, and the number of
+ *    figure.claim-evidence panels equals the claims the content model
+ *    ties to that page (home instead renders its sources block);
  * 7. disclaimer: the "not medical advice" disclaimer is still the last
  *    element of main;
  * 8. styles: globals.css keeps an AA-contrast body text/background pair,
@@ -142,6 +144,22 @@ function mainBody(markup: string): string {
   const start = markup.indexOf(mainOpen);
   expect(start, "main#main-content must be present").toBeGreaterThan(-1);
   return markup.slice(start + mainOpen.length, markup.indexOf("</main>"));
+}
+
+/**
+ * The index just past the </div> that balances the <div open tag at
+ * `openIndex` (an index into `html`).
+ */
+function balancedDivEnd(html: string, openIndex: number): number {
+  const rest = html.slice(openIndex);
+  let depth = 0;
+  for (const match of rest.matchAll(/<div\b[^>]*>|<\/div>/g)) {
+    depth += match[0].startsWith("</") ? -1 : 1;
+    if (depth === 0) {
+      return openIndex + (match.index ?? 0) + match[0].length;
+    }
+  }
+  throw new Error("the div open tag never balances its closing tag");
 }
 
 /** The inner HTML of the labeled main navigation. */
@@ -386,10 +404,22 @@ describe("WCAG 2.2 AA essentials from source", () => {
         expect(h1Index).toBeGreaterThan(-1);
         expect(firstH2).toBeGreaterThan(h1Index);
 
-        // The hero holds exactly the h1 and no other heading level...
-        // (the hero always ends where the first section begins).
-        const heroStart = html.indexOf('<div class="hero">');
-        const hero = html.slice(heroStart, html.indexOf("<section", heroStart));
+        // The wide top section is main's first element: it starts at the
+        // hero div right after the main open tag and ends where its own
+        // div balances. It holds exactly the h1 and no other heading
+        // level...
+        const body = mainBody(html);
+        const heroStart = body.indexOf('<div class="hero">');
+        expect(
+          heroStart,
+          "the wide top section (.hero) must be present inside main",
+        ).toBeGreaterThan(-1);
+        expect(
+          body.slice(0, heroStart).trim(),
+          "the hero must be main's first element",
+        ).toBe("");
+        const hero = body.slice(heroStart, balancedDivEnd(body, heroStart));
+        expect(hero.endsWith("</div>")).toBe(true);
         expect(hero.match(/<h1[\s>]/g)?.length ?? 0).toBe(1);
         expect(hero).not.toMatch(/<h[2-6][\s>]/);
 
@@ -414,11 +444,18 @@ describe("WCAG 2.2 AA essentials from source", () => {
         }
         const body = mainBody(html);
 
-        // The reviewedOn date renders as a <time datetime="..."> element.
-        // React serialises the attribute as dateTime in static markup and
-        // the browser DOM normalises it to datetime, so match both.
+        // The reviewedOn date renders as a <time datetime="..."> element
+        // in the wide top section (the hero, main's first element). React
+        // serialises the attribute as dateTime in static markup and the
+        // browser DOM normalises it to datetime, so match both.
         if (page.reviewedOn !== undefined) {
-          expect(body).toMatch(
+          const heroStart = body.indexOf('<div class="hero">');
+          expect(
+            heroStart,
+            `${id}: the hero must be present inside main`,
+          ).toBeGreaterThan(-1);
+          const hero = body.slice(heroStart, balancedDivEnd(body, heroStart));
+          expect(hero).toMatch(
             new RegExp(`<time datetime="${page.reviewedOn}"`, "i"),
           );
         }
