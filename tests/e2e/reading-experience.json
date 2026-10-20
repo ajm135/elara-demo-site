@@ -1,7 +1,7 @@
 {
   "name": "reading-experience",
-  "version": 3,
-  "description": "Reusable browser-level check definitions for the five-story reading experience. Elara runs these as page checks against the loopback-only production server (npm start, http://127.0.0.1:3000). Every route is checked at each viewport: the skip-link keyboard flow, the server-rendered reading progress (exactly one aria-current link, the exact 'Story N of 5' position, the next-story cue or the story-five ending), the landmarks, evidence and citation rendering, and clean console, request and scroll behaviour. This file remains reusable browser-check definition data that Elara's page checks consume: the browser steps run only as Elara page checks. npm run verify:reading (scripts/verify-reading.mjs) starts and stops its own loopback production server and checks the five server-rendered HTTP responses for the essential story content, local illustrations, citations, disclaimers, ordinary navigation links, and the correct current-page state, using the serverContract object below; it never executes page JavaScript and never launches a browser, and those checks are safeguards, not proof of complete no-JavaScript browser behaviour or WCAG 2.2 AA conformance.",
+  "version": 4,
+  "description": "Reusable browser-level check definitions for the five-story reading experience. Elara runs these as page checks against the loopback-only production server (npm start, http://127.0.0.1:3000). Every route is checked at each viewport: the skip-link keyboard flow, the server-rendered reading progress (exactly one aria-current link, the exact 'Story N of 5' position, the next-story cue or the story-five ending), the landmarks, evidence and citation rendering, and clean console, request and scroll behaviour. This file remains reusable browser-check definition data that Elara's page checks consume: the browser steps run only as Elara page checks. In the current design the wide top section (the hero) is the first element inside main#main-content, so the checks expect main#main-content h1, a review date inside main, and the opening illustration inside main. The recorded results of Elara's page checks are in docs/runbooks/accessibility-validation.md; this file is the definition data those checks consume, not a result log. npm run verify:reading (scripts/verify-reading.mjs) starts and stops its own loopback production server and checks the five server-rendered HTTP responses for the essential story content, local illustrations, citations, disclaimers, ordinary navigation links, and the correct current-page state, using the serverContract object below; it never executes page JavaScript and never launches a browser, and those checks are safeguards, not proof of complete no-JavaScript browser behaviour or WCAG 2.2 AA conformance.",
   "server": {
     "startCommand": "npm start",
     "hostname": "127.0.0.1",
@@ -10,7 +10,7 @@
     "loopbackOnly": true
   },
   "serverContract": {
-    "description": "The server-rendered reading contract that scripts/verify-reading.mjs enforces over plain HTTP. The script starts and stops its own loopback production server (npm start), fetches all five routes without executing JavaScript or launching a browser, and checks each response: the wide top section (the hero, the sibling immediately before main) with exactly one h1 (heading) and a time with a datetime, exactly one main#main-content with a body paragraph, the title substrings in the document <title>, at least one local illustration (imageSrcPrefix) that answers HTTP 200 with an image content type with the page's opening illustration in the hero, at least one https:// citation anchor inside main, the visible disclaimer, the header nav with exactly the five story links in reading order, exactly one aria-current on this route's link, the 'Story N of 5' label, and the skip link before the header. Story 5 carries endingState and visibleStrings and no next-story link; stories 1 to 4 carry a next-story cue to the following route. Where this object is incomplete the script falls back to its built-in copy of the same contract, so the enforced contract never weakens.",
+    "description": "The server-rendered reading contract that scripts/verify-reading.mjs enforces over plain HTTP. The script starts and stops its own loopback production server (npm start), fetches all five routes without executing JavaScript or launching a browser, and checks each response: the wide top section (the hero) as the first element inside the single main#main-content (only whitespace between the main open tag and the hero open tag), with exactly one h1 (heading) and a review-date time with a non-empty datetime, exactly one main#main-content with a body paragraph, the title substrings in the document <title>, at least one local illustration (imageSrcPrefix) that answers HTTP 200 with an image content type with the page's opening illustration in the hero, at least one https:// citation anchor inside main, the visible disclaimer, the header nav with exactly the five story links in reading order, exactly one aria-current on this route's link, the 'Story N of 5' label, and the skip link before the header. Story 5 carries endingState and visibleStrings and no next-story link; stories 1 to 4 carry a next-story cue to the following route. Where this object is incomplete the script falls back to its built-in copy of the same contract, so the enforced contract never weakens.",
     "imageSrcPrefix": "/images/",
     "citationHrefPrefix": "https://",
     "disclaimerText": "not medical advice",
@@ -98,11 +98,11 @@
       "expectedTitleContains": ["AI and longer lives"],
       "expectedText": ["Story 1 of 5", "not medical advice"],
       "expectedElements": [
-        ".hero h1",
+        "main#main-content h1",
         "header nav[aria-label='Main'] a[href='/'][aria-current='page']",
-        ".hero time[datetime]",
+        "main time[datetime]",
         "main a[href^='https://']",
-        ".hero img[alt]"
+        "main img[src='/images/hopeful-future.svg'][alt]"
       ],
       "nextStoryCue": { "href": "/how-ai-helps", "text": "How AI helps" }
     },
@@ -114,11 +114,11 @@
       ],
       "expectedText": ["Story 2 of 5", "not medical advice"],
       "expectedElements": [
-        ".hero h1",
+        "main#main-content h1",
         "header nav[aria-label='Main'] a[href='/how-ai-helps'][aria-current='page']",
-        ".hero time[datetime]",
+        "main time[datetime]",
         "main a[href^='https://']",
-        ".hero img[alt]"
+        "main img[src='/images/ai-in-medicine.svg'][alt]"
       ],
       "nextStoryCue": { "href": "/cancer", "text": "Cancer" }
     },
@@ -130,11 +130,11 @@
       ],
       "expectedText": ["Story 3 of 5", "not medical advice"],
       "expectedElements": [
-        ".hero h1",
+        "main#main-content h1",
         "header nav[aria-label='Main'] a[href='/cancer'][aria-current='page']",
-        ".hero time[datetime]",
+        "main time[datetime]",
         "main a[href^='https://']",
-        ".hero img[alt]"
+        "main img[src='/images/cancer-research.svg'][alt]"
       ],
       "nextStoryCue": { "href": "/diseases", "text": "Other diseases" }
     },
@@ -146,11 +146,11 @@
       ],
       "expectedText": ["Story 4 of 5", "not medical advice"],
       "expectedElements": [
-        ".hero h1",
+        "main#main-content h1",
         "header nav[aria-label='Main'] a[href='/diseases'][aria-current='page']",
-        ".hero time[datetime]",
+        "main time[datetime]",
         "main a[href^='https://']",
-        ".hero img[alt]"
+        "main img[src='/images/other-diseases.svg'][alt]"
       ],
       "nextStoryCue": { "href": "/longevity", "text": "Longer lives" }
     },
@@ -169,11 +169,11 @@
         "not medical advice"
       ],
       "expectedElements": [
-        ".hero h1",
+        "main#main-content h1",
         "header nav[aria-label='Main'] a[href='/longevity'][aria-current='page']",
-        ".hero time[datetime]",
+        "main time[datetime]",
         "main a[href^='https://']",
-        ".hero img[alt]"
+        "main img[src='/images/longer-lives.svg'][alt]"
       ],
       "endingState": "End of the stories",
       "nextStoryCue": null
@@ -200,6 +200,30 @@
       "id": "reflow-beyond-viewports",
       "check": "Reflow at viewport widths and aspect ratios beyond the listed widths (320, 375, 768, 1280, 1920 px).",
       "status": "unverified"
+    },
+    {
+      "id": "javascript-off",
+      "check": "JavaScript-off reading in a real browser: with JavaScript disabled, all five routes must show the story heading, the opening illustration, the citations, the 'not medical advice' disclaimer, the five navigation links, and the current-page state, and remain usable.",
+      "status": "unverified",
+      "note": "npm run verify:reading is a Node-only loopback HTTP safeguard: it never executes page JavaScript and never launches a browser, so it is not a substitute for this check."
+    },
+    {
+      "id": "accessibility-audit",
+      "check": "In-browser accessibility audit (axe or Lighthouse) on each of the five routes.",
+      "status": "unverified",
+      "note": "Run by a person in the browser (axe DevTools, the Lighthouse accessibility audit, or the developer-tools accessibility pane); no npm script launches axe, Lighthouse, or any browser automation."
+    },
+    {
+      "id": "dark-theme",
+      "check": "The dark theme in a real browser: the theme follows the reader's system setting via prefers-color-scheme (no theme switch, no JavaScript), and every route must be fully readable with the dark surfaces applied throughout, a visible focus outline, and no sideways scrolling.",
+      "status": "unverified",
+      "note": "Elara's browser checks cannot switch the theme; a real browser with a dark system setting is the only way to observe the dark theme."
+    },
+    {
+      "id": "reduced-motion",
+      "check": "Reduced-motion behaviour: with the reader's reduced-motion preference on, no motion must be visible and all content must stay fully visible and readable; with no preference, the decorative motion plays once, lasts under 5 seconds, never loops, and never carries required information.",
+      "status": "unverified",
+      "note": "Elara's browser checks cannot change the reader's reduced-motion preference."
     }
   ],
   "notes": [

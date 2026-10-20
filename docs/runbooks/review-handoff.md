@@ -9,6 +9,8 @@ The five existing routes — `/`, `/how-ai-helps`, `/cancer`, `/diseases`, `/lon
 - `docs/adr/0006-editorial-design-system.md` — the token-driven design system: warm neutral surfaces, dark warm ink, a restrained teal accent, a ~60–75 character measure, underline-plus-focus-visible interaction rules, local committed type (`src/app/fonts/`, Inter, SIL OFL 1.1) wired through `next/font/local` in `src/lib/fonts.ts`, and contrast that is verified in Node by computed WCAG 2.2 ratios in `tests/design-tokens.test.ts` (4.5:1 normal-text pairs, 3:1 meaningful boundaries) instead of exact colour strings.
 - `docs/adr/0006-science-editorial-reading-progress.md` — the page composition: each route is a static server component that renders `SiteHeader` with its own path plus `StoryPage`; composed hero, framed local illustrations, evidence panels immediately after the claiming paragraph, the lifespan term list on `/longevity`, and the header-only reading-progress cluster.
 
+Since this handoff was written, the visual design has been replaced by the immersive 2026 design recorded in `docs/adr/0007-immersive-2026-design.md`: a light and a dark theme chosen only by the reader's system setting, a larger type scale, a wider page around a capped 38–42rem text column, rounded cards for the evidence panels, the six illustrations redrawn in one consistent modern style with matching alt texts, and subtle CSS-only motion that turns off when the reader prefers reduced motion. ADR 0007 supersedes only the four visual decisions of the two 0006 records; the six closed findings are not reopened, and the page text, citations, evidence-panel content, reading progress, routes, header-only navigation, loopback-only servers, and the commands in section 3 are unchanged. The recorded browser results in `docs/runbooks/accessibility-validation.md` are for this final design.
+
 Preserved boundaries (unchanged by the redesign):
 
 - Node.js, strict TypeScript, Next.js App Router, fully static server-rendered pages.
@@ -53,22 +55,27 @@ What was executed (recorded in `docs/runbooks/accessibility-validation.md`, not 
 
 What that run is, and is not: it is a **server-rendered HTTP safeguard** over the production server's rendered HTML (story content, local illustrations, citations, disclaimer, the five navigation links, current-page state). It is **not** browser evidence, **not** no-JavaScript proof, and **not** WCAG proof: a Node fetch is not a browser, and no browser was launched.
 
-Pending Elara execution (not results — a builder must not mark them passed, failed, or substituted):
+Recorded browser results (from Elara's milestone record, recorded in `docs/runbooks/accessibility-validation.md`, not re-run here):
 
-- Elara keyboard page check (skip link through the five header links, Enter on the final story) at 375, 768, and 1280 px.
-- Elara click-through reading sequence with progress updates at 375, 768, and 1280 px.
-- In-browser accessibility audit (axe / Lighthouse / accessibility pane), if Elara runs one; otherwise it stays unverified.
+- Elara's milestone 3 page checks against the final immersive 2026 design (ADR 0007), all recorded as **passed** on **2026-10-20**, the date of the milestone 3 record:
+  - the five route regressions at 320, 375, 768, 1280, and 1920 px — the skip link reaching main, the story content and reading progress, `main#main-content h1` (the wide top section is the first element inside main), the review date inside main, the opening illustration inside main, the citations, the evidence panels, and no console errors, sideways scrolling, or failed requests;
+  - the keyboard-only sequence at 375, 768, and 1280 px (skip link through the five header links, Enter on the final story);
+  - the pointer sequence at 375, 768, and 1280 px (the five header story links in reading order, with the progress updates);
+  - the next-story sequence at 375, 768, and 1280 px (the page's own next-story cues through to the story-five ending).
+- The milestone record names no browser and no version, so no browser name or version is recorded for these results.
 
-Explicitly unverified (status word is `unverified`, never "passed", each with reproduction steps in `docs/runbooks/accessibility-validation.md`):
+Manual checks still to do (each still unverified, status word `unverified`, never "passed", each with reproduction steps in `docs/runbooks/accessibility-validation.md`):
 
 - Screen-reader navigation (NVDA or VoiceOver).
 - 200% text enlargement (WCAG 2.2 AA 1.4.4).
-- 400% zoom / reflow (WCAG 2.2 AA 1.4.10).
-- JavaScript-disabled reading in a real browser.
+- 400% zoom and reflow (WCAG 2.2 AA 1.4.10).
+- JavaScript-off reading in a real browser.
 - Native Safari on macOS and iOS. **WebKit is not native Safari**: a WebKit-engine result must not be recorded as native Safari coverage.
-- In-browser axe / Lighthouse audits (if Elara does not run them).
+- In-browser accessibility audit (axe or Lighthouse).
+- The dark theme in a real browser.
+- Reduced-motion behaviour.
 
-Unchanged requirements, not completed verification: WCAG 2.2 AA, and current Chrome, Edge, Firefox, and Safari support on phone, tablet, and desktop, remain in force (ADR 0004). No browser name or version is recorded in the project except where a run actually observed it.
+Unchanged requirements, not completed verification: WCAG 2.2 AA, and current Chrome, Edge, Firefox, and Safari support on phone, tablet, and desktop, remain in force (ADR 0004). The recorded browser results and the executed safeguard are **not** complete WCAG 2.2 AA conformance or complete cross-browser verification, and no document in the project claims either. No browser name or version is recorded in the project except where a run actually observed it.
 
 ### Finding 4 — Medium: local-only operation was not enforced — **Closed**
 
@@ -132,9 +139,9 @@ Command results recorded here: only the already-recorded 2026-10-18 `verify:read
 
 - **No high findings remain.** No high finding existed in the review, and nothing introduced by the redesign is recorded as high.
 - Medium/low residuals, all explicitly disclosed gaps:
-  - The unverified browser and assistive-technology checks from finding 3: Elara keyboard and click page checks at 375/768/1280 px (pending Elara execution), screen-reader navigation, 200% text enlargement, 400% zoom/reflow, JavaScript-disabled browser reading, native Safari on macOS and iOS, and in-browser axe/Lighthouse audits (unverified).
+  - The manual browser and assistive-technology checks from finding 3, each still unverified (reproduction steps in `docs/runbooks/accessibility-validation.md`): screen-reader navigation (NVDA or VoiceOver), 200% text enlargement, 400% zoom and reflow, JavaScript-off reading in a real browser, native Safari on macOS and iOS, an in-browser accessibility audit (axe or Lighthouse), the dark theme in a real browser, and reduced-motion behaviour.
   - The JMI abstract-only inspection limitation (finding 1).
-- These are **disclosed gaps, not failures of checks that were run**: `docs/runbooks/accessibility-validation.md` records zero failures (the one executed check passed), and an unavailable check is never recorded as "passed". They are also **not dropped requirements**: WCAG 2.2 AA and current Chrome, Edge, Firefox, and Safari support on phone, tablet, and desktop remain in force as requirements.
+- These are **disclosed gaps, not failures of checks that were run**: `docs/runbooks/accessibility-validation.md` records zero failures — the recorded milestone 3 browser checks all passed, and the executed safeguard run passed — and a check that is still to do is never recorded as "passed". They are also **not dropped requirements**: WCAG 2.2 AA and current Chrome, Edge, Firefox, and Safari support on phone, tablet, and desktop remain in force as requirements, without any claim that either is fully verified.
 - No verification gap was closed by substitution: Node-rendered or string-parsed HTML, and any headless accessibility tree, are not treated as browser or assistive-technology results anywhere in the project.
 
 ## 6. Layout and hygiene
