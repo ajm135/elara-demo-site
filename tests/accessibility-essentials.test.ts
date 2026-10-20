@@ -35,12 +35,14 @@
  *    element of main;
  * 8. styles: globals.css keeps an AA-contrast body text/background pair,
  *    underlined links in an AA-contrast colour, and a :focus-visible
- *    outline of at least 2 px. The token-based editorial design replaced
- *    the old fixed colour strings (#0b3d91 / #fffdfb are gone), so these
- *    checks compute WCAG 2.2 relative-luminance contrast ratios from the
- *    design tokens in :root: 4.5:1 for body text and link text on their
- *    backgrounds, 3:1 for the focus outline against the page surface —
- *    the same or stronger safeguard, not a weaker one;
+ *    outline of at least 2 px with an offset, in both themes. The
+ *    dual-theme design declares the light palette on :root and
+ *    redeclares the same token names under the reader's system setting
+ *    (inside @media (prefers-color-scheme: dark)), so these checks
+ *    resolve each colour per theme and compute WCAG 2.2
+ *    relative-luminance contrast ratios: 4.5:1 for body text and link
+ *    text on their backgrounds, 3:1 for the focus outline against the
+ *    page surface — the same or stronger safeguard, not a weaker one;
  * 9. privacy: the rendered markup and the CSS file contain no secret-like
  *    tokens, email addresses, or personal names.
  *
@@ -69,6 +71,7 @@ import {
 } from "../src/lib/site-content";
 import {
   contrastRatio,
+  mediaBlockBody,
   parseCustomProperties,
   parseDeclarations,
   resolveHexColor,
@@ -471,48 +474,70 @@ describe("WCAG 2.2 AA essentials from source", () => {
   });
 
   describe("contrast and keyboard focus", () => {
-    // The editorial design is token-driven: the colours these checks
-    // compare are the custom properties declared in :root, resolved the
-    // same way the browser would. tests/design-tokens.test.ts asserts the
-    // full token palette; here the AA essentials of the base rules are
-    // re-checked from the rules that actually style body, links, and
-    // keyboard focus.
-    const designTokens = parseCustomProperties(cssRule(globalCss, ":root"));
-    const pageSurface = resolveHexColor("var(--surface-page)", designTokens);
+    // The design is token-driven and dual-theme: the light theme is the
+    // :root default, and the dark theme redeclares the same colour token
+    // names inside the reader's system-setting media block. The local
+    // cssRule() helper only sees flat top-level rules, so the dark
+    // tokens are parsed the same way as in the token test: the media
+    // block's inner text is extracted first, then its :root rule is read.
+    const lightTokens = parseCustomProperties(cssRule(globalCss, ":root"));
+    const darkTokens = parseCustomProperties(
+      cssRule(mediaBlockBody(globalCss, "(prefers-color-scheme: dark)"), ":root"),
+    );
+    const themes: ReadonlyArray<{
+      readonly name: string;
+      readonly tokens: Record<string, string>;
+    }> = [
+      { name: "light theme", tokens: lightTokens },
+      { name: "dark theme (prefers-color-scheme: dark)", tokens: darkTokens },
+    ];
 
-    it("keeps an AA contrast pair on the page background and text", () => {
+    it("keeps an AA contrast pair on the page background and text in both themes", () => {
       const body = parseDeclarations(cssRule(globalCss, "body"));
-      const background = resolveHexColor(body["background-color"], designTokens);
-      const text = resolveHexColor(body["color"], designTokens);
-      expect(background).not.toBeNull();
-      expect(text).not.toBeNull();
-      if (background === null || text === null) {
-        throw new Error(
-          "body background and text must resolve to hex colours from the design tokens",
-        );
+      for (const { name, tokens } of themes) {
+        const background = resolveHexColor(body["background-color"], tokens);
+        const text = resolveHexColor(body["color"], tokens);
+        expect(background, `${name}: the page background must be a hex colour`).not.toBeNull();
+        expect(text, `${name}: the body text must be a hex colour`).not.toBeNull();
+        if (background === null || text === null) {
+          throw new Error(
+            `${name}: body background and text must resolve to hex colours from the design tokens`,
+          );
+        }
+        expect(
+          contrastRatio(text, background),
+          `${name}: body text on the page surface`,
+        ).toBeGreaterThanOrEqual(4.5);
       }
-      expect(contrastRatio(text, background)).toBeGreaterThanOrEqual(4.5);
-      // The page surface is one token in a warm set, not pure white.
-      expect(background).not.toEqual([255, 255, 255]);
+      // The light page surface is one token in a warm set, not pure white.
+      const lightPage = resolveHexColor(body["background-color"], lightTokens);
+      expect(
+        lightPage,
+        "the light page surface must not be pure white",
+      ).not.toEqual([255, 255, 255]);
     });
 
-    it("underlines links in a colour that clears AA on the page surface", () => {
+    it("underlines links in a colour that clears AA on the page surface in both themes", () => {
       const link = parseDeclarations(cssRule(globalCss, "a"));
       expect(link["text-decoration"] ?? "").toContain("underline");
-      const linkColour = resolveHexColor(link["color"], designTokens);
-      expect(linkColour).not.toBeNull();
-      expect(pageSurface).not.toBeNull();
-      if (linkColour === null || pageSurface === null) {
-        throw new Error(
-          "link colour and page surface must resolve to hex colours from the design tokens",
-        );
+      for (const { name, tokens } of themes) {
+        const linkColour = resolveHexColor(link["color"], tokens);
+        const pageSurface = resolveHexColor("var(--surface-page)", tokens);
+        expect(linkColour, `${name}: the link colour must be a hex colour`).not.toBeNull();
+        expect(pageSurface, `${name}: the page surface must be a hex colour`).not.toBeNull();
+        if (linkColour === null || pageSurface === null) {
+          throw new Error(
+            `${name}: link colour and page surface must resolve to hex colours from the design tokens`,
+          );
+        }
+        expect(
+          contrastRatio(linkColour, pageSurface),
+          `${name}: links on the page surface`,
+        ).toBeGreaterThanOrEqual(4.5);
       }
-      expect(contrastRatio(linkColour, pageSurface)).toBeGreaterThanOrEqual(
-        4.5,
-      );
     });
 
-    it("keeps a visible keyboard focus outline of at least 2 px in the accent", () => {
+    it("keeps a visible keyboard focus outline of at least 2 px in the accent that clears 3:1 in both themes", () => {
       const focus = parseDeclarations(cssRule(globalCss, ":focus-visible"));
       const outline = /(\d+(?:\.\d+)?)px\s+solid\s+(.+)$/.exec(
         focus["outline"] ?? "",
@@ -523,19 +548,23 @@ describe("WCAG 2.2 AA essentials from source", () => {
       const widthPx = Number(outline[1]);
       expect(Number.isFinite(widthPx)).toBe(true);
       expect(widthPx).toBeGreaterThanOrEqual(2);
-      const outlineColour = resolveHexColor(outline[2].trim(), designTokens);
-      expect(outlineColour).not.toBeNull();
-      expect(pageSurface).not.toBeNull();
-      if (outlineColour === null || pageSurface === null) {
-        throw new Error(
-          "focus outline colour must resolve to a hex colour from the design tokens",
-        );
-      }
-      // A focus indicator is a non-text UI boundary: 3:1 at minimum.
-      expect(contrastRatio(outlineColour, pageSurface)).toBeGreaterThanOrEqual(
-        3,
-      );
       expect(focus["outline-offset"]).toBeDefined();
+      for (const { name, tokens } of themes) {
+        const outlineColour = resolveHexColor(outline[2].trim(), tokens);
+        const pageSurface = resolveHexColor("var(--surface-page)", tokens);
+        expect(outlineColour, `${name}: the focus outline colour must be a hex colour`).not.toBeNull();
+        expect(pageSurface, `${name}: the page surface must be a hex colour`).not.toBeNull();
+        if (outlineColour === null || pageSurface === null) {
+          throw new Error(
+            `${name}: focus outline colour must resolve to a hex colour from the design tokens`,
+          );
+        }
+        // A focus indicator is a non-text UI boundary: 3:1 at minimum.
+        expect(
+          contrastRatio(outlineColour, pageSurface),
+          `${name}: focus outline on the page surface`,
+        ).toBeGreaterThanOrEqual(3);
+      }
     });
   });
 

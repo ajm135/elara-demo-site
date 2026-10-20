@@ -101,6 +101,40 @@ export function cssRuleBody(css: string, selector: string): string {
 }
 
 /**
+ * Extract the inner text of the first `@media` block whose condition
+ * follows `@media ` (after normalising whitespace and stripping
+ * comments): everything between the block's opening brace and its
+ * matching closing brace, nested rules included. Returns "" when no such
+ * block exists. The result is flat-readable: the inner rules can be
+ * looked up with {@link cssRuleBody} and scanned with
+ * {@link parseCustomProperties}.
+ */
+export function mediaBlockBody(css: string, condition: string): string {
+  const normalized = css
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/\s+/g, " ");
+  const prefix = `@media ${condition} {`;
+  const start = normalized.indexOf(prefix);
+  if (start === -1) {
+    return "";
+  }
+  const open = start + prefix.length - 1;
+  let depth = 0;
+  for (let index = open; index < normalized.length; index += 1) {
+    const char = normalized[index];
+    if (char === "{") {
+      depth += 1;
+    } else if (char === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        return normalized.slice(open + 1, index);
+      }
+    }
+  }
+  return "";
+}
+
+/**
  * Split a rule body into `prop: value` pairs, keyed by lower-cased
  * property name. Repeated properties: last one wins, matching CSS.
  */

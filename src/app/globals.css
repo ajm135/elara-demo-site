@@ -1,38 +1,65 @@
 /*
- * Demo Site: token-driven editorial design system.
+ * Demo Site: token-driven immersive 2026 design system — light and dark.
  *
- * A light, contemporary science-editorial identity: warm neutral surfaces,
- * dark ink text, a restrained teal accent, generous spacing, and an
- * expressive type scale set by the local Inter typefaces (loaded with
- * next/font/local, exposed as the --font-body and --font-heading CSS custom
- * properties in src/app/layout.tsx; the var() fallbacks below keep text
- * readable even if the properties are missing).
+ * Two full palettes, chosen only by the reader's system colour setting:
+ * - the light theme (declared on :root, colour-scheme: light) is the
+ *   warm editorial set: a warm cream page, lighter warm raised chrome, a
+ *   faintly teal-tinted evidence surface, dark warm ink, and a restrained
+ *   teal accent for links, keyboard focus, and the active-story cue;
+ * - the dark theme (the same token names redeclared inside
+ *   @media (prefers-color-scheme: dark), colour-scheme: dark) is a deep
+ *   immersive surface set with light warm ink and a brightened teal
+ *   accent, so the same tokens read as links and focus on the dark
+ *   surfaces.
  *
- * Everything visual is driven by the custom properties in :root, so the
- * palette, ink, accent, and rules are one place to look and one place for
- * tests to check. Colour decisions are verified, not asserted:
- * tests/design-tokens.test.ts parses these tokens and computes the WCAG
- * 2.2 contrast ratios (4.5:1 for normal text, 3:1 for UI boundaries).
+ * There is no theme switch, no class toggle, and no JavaScript: the
+ * reader's operating-system preference is the only input, so the markup,
+ * keyboard order, and the reading experience are identical in both
+ * themes.
+ *
+ * Everything visual is driven by the custom properties, so the palette,
+ * ink, accent, and rules are one place to look and one place for tests
+ * to check. Colour decisions are verified, not asserted:
+ * tests/design-tokens.test.ts and
+ * tests/accessibility-essentials.test.ts parse these tokens and compute
+ * the WCAG 2.2 contrast ratios (4.5:1 for normal text, 3:1 for UI
+ * boundaries) in both themes.
+ *
+ * Layout: a wide page shell (--page-shell) carries the header chrome,
+ * while the long-form reading column stays capped at --measure (about 60
+ * to 75 characters per line). Evidence panels, the sources block, and
+ * the illustration frames are rounded cards (--radius-card).
  *
  * Structural rules covered here:
  * - no sideways scrolling at 320 to 1920 px: border-box everywhere, width
- *   100%, no 100vw, no min-width larger than 320 px, no overflowing
- *   negative margins;
- * - WCAG 2.2 AA: underlined links (colour is never the only cue), a
- *   :focus-visible outline of at least 2 px in the accent with an offset,
- *   a skip link that is off-screen until focused, navigation targets of at
- *   least 44x44 px, and comfortable reading rhythm (line-height at least
- *   1.5, body font-size at least 1rem, long-form measure of about 40rem);
- * - no required animation, no text-transform on navigation labels, and no
- *   hover-only information: every state that matters is visible in the
- *   default and focus states;
+ *   100%, no viewport-width units, no min-width larger than 320 px, no
+ *   overflowing negative margins;
+ * - WCAG 2.2 AA in both themes: underlined links (colour is never the
+ *   only cue), a :focus-visible outline of at least 2 px in the accent
+ *   with an offset, a skip link that is off-screen until focused,
+ *   navigation targets of at least 44x44 px, and comfortable reading
+ *   rhythm (line-height at least 1.5, body font-size at least 1rem,
+ *   long-form measure of about 40rem);
+ * - motion is CSS-only and decorative: a short one-off fade-and-rise on
+ *   the hero and the evidence panels, declared only inside
+ *   @media (prefers-reduced-motion: no-preference), so a reader who
+ *   prefers reduced motion gets no animation or transition at all, and
+ *   the content is fully visible without it;
+ * - no text-transform anywhere: navigation labels and kickers stay
+ *   exactly their copy;
  * - reusable rules for the header progress cluster, a composed hero
  *   (text plus framed illustration), evidence panels, and the content
  *   stack. There is exactly one navigation (header-only): no hamburger,
  *   no second nav, nothing that needs JavaScript.
  */
 
+/*
+ * Light theme: the warm editorial set, plus the shared non-colour layout
+ * tokens. These are the default values; the dark theme redeclares the
+ * colour tokens under the reader's system setting below.
+ */
 :root {
+  color-scheme: light;
   /* Warm neutral surfaces: the page is a warm cream, raised chrome is a
      lighter warm off-white, and evidence panels sit on a slightly
      different, faintly teal-tinted surface so they read apart from the
@@ -55,6 +82,46 @@
   --rule-strong: #8a7b58;
   /* Long-form measure: about 60 to 75 characters per line. */
   --measure: 40rem;
+  /* Wide page shell for the header chrome (the reading column stays
+     capped at --measure). */
+  --page-shell: 76rem;
+  /* Rounded card corners for evidence panels, the sources block, and
+     the illustration frames. */
+  --radius-card: 0.875rem;
+}
+
+/*
+ * Dark theme: a deep, immersive surface set with light warm ink and a
+ * brightened teal accent, applied only when the reader's system setting
+ * prefers dark colours. No switch, no class toggle, no JavaScript.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    /* Deep, low-luminance surfaces, pairwise distinct: the page is the
+       deepest, the raised chrome one step up, and the evidence surface a
+       separate faintly teal-tinted step, so panels and chrome read apart
+       from the page exactly as they do in the light theme. */
+    --surface-page: #131a1c;
+    --surface-raised: #1c2427;
+    --surface-evidence: #1f2e2c;
+    /* Light warm ink: near-white ink for headings, a softer body ink for
+       running text, and a muted ink that still clears 4.5:1 on every
+       dark surface. */
+    --ink-heading: #f1ece1;
+    --ink-body: #d8d3c8;
+    --ink-muted: #a8a294;
+    /* Brightened teal accent: links, keyboard focus, and the active-story
+       indicator, in a depth step for visited links, all clearing 4.5:1
+       on the dark surfaces. */
+    --accent-teal: #5eead4;
+    --accent-teal-deep: #2dd4bf;
+    /* Muted cool-dark rules: a soft hairline for decorative dividers and
+       a stronger rule that clears 3:1 on every dark surface where a
+       boundary carries meaning. */
+    --rule-warm: #3a4744;
+    --rule-strong: #7d8a86;
+  }
 }
 
 *,
@@ -142,7 +209,7 @@ a:visited {
 /*
  * Header and the single site navigation (header-only, no hamburger, no
  * second nav). The header sits on the raised surface with a soft warm
- * rule under it.
+ * rule under it, and its chrome spans the wide page shell.
  */
 header {
   width: 100%;
@@ -162,7 +229,7 @@ nav ul {
   list-style: none;
   margin: 0 auto;
   padding: 0 1rem;
-  max-width: 46rem;
+  max-width: var(--page-shell);
 }
 
 /*
@@ -192,7 +259,8 @@ nav a[aria-current="page"] {
 /*
  * Header progress cluster: the "Story N of 5" position, the current
  * story's label, and the next-story cue (or the ending state on the last
- * story) live in one small group beside the navigation.
+ * story) live in one small group beside the navigation, spanning the same
+ * wide page shell.
  */
 .progress-cluster {
   display: flex;
@@ -201,7 +269,7 @@ nav a[aria-current="page"] {
   gap: 0.25rem 1rem;
   margin: 0 auto;
   padding: 0 1rem 0.5rem;
-  max-width: 46rem;
+  max-width: var(--page-shell);
   font-size: 0.875rem;
 }
 
@@ -221,7 +289,7 @@ nav a[aria-current="page"] {
  * Content stack: the reading column. Generous side padding, a capped
  * measure of about 40rem for comfortable line lengths, and open spacing
  * between blocks. The stack is the home of the long-form text on every
- * story page.
+ * story page; it stays narrow inside the wider page shell.
  */
 main {
   display: block;
@@ -243,13 +311,13 @@ main img {
 
 main h1 {
   margin: 0 0 1rem;
-  font-size: clamp(1.875rem, 1.25rem + 2.5vw, 3rem);
+  font-size: clamp(2rem, 1.4rem + 2.4vw, 3.25rem);
   line-height: 1.15;
 }
 
 main h2 {
   margin: 0 0 0.75rem;
-  font-size: 1.375rem;
+  font-size: 1.5rem;
   line-height: 1.3;
 }
 
@@ -268,7 +336,7 @@ main > p:last-child {
 /*
  * Composed hero: the kicker, heading, summary, and review date on one
  * side, the page's framed illustration on the other. Stacked below 768px,
- * two columns at 768px and up. The frame is a raised surface with a
+ * two columns at 768px and up. The frame is a raised, rounded card with a
  * meaningful rule, so the illustration reads as a composed element.
  */
 .hero {
@@ -300,7 +368,7 @@ main > p:last-child {
 
 /* The hero summary: one step up from body text, still inside the measure. */
 .hero-summary {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   line-height: 1.6;
 }
 
@@ -315,6 +383,7 @@ main > p:last-child {
   margin: 0;
   background-color: var(--surface-raised);
   border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-card);
   padding: 1rem;
 }
 
@@ -325,13 +394,14 @@ main > p:last-child {
 }
 
 /*
- * A page's further illustrations (beyond the hero's): the same frame as
- * the hero media, set apart in the content stack.
+ * A page's further illustrations (beyond the hero's): the same rounded
+ * frame as the hero media, set apart in the content stack.
  */
 .story-illustration {
   margin: 2.5rem 0;
   background-color: var(--surface-raised);
   border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-card);
   padding: 1rem;
 }
 
@@ -346,15 +416,16 @@ main > p:last-child {
 /*
  * The home page's sources block: the site-wide evidence base, rendered
  * after the reading map and before the disclaimer. It sits on the raised
- * surface with a soft warm rule, so it reads as a composed block in the
- * content stack rather than a footnote. The long publication URLs wrap
- * through the inherited overflow-wrap, so 320 px viewports never scroll
- * sideways.
+ * surface in a rounded card with a soft warm rule, so it reads as a
+ * composed block in the content stack rather than a footnote. The long
+ * publication URLs wrap through the inherited overflow-wrap, so 320 px
+ * viewports never scroll sideways.
  */
 .sources {
   padding: 1rem 1.25rem;
   background-color: var(--surface-raised);
   border: 1px solid var(--rule-warm);
+  border-radius: var(--radius-card);
 }
 
 .sources ul {
@@ -369,8 +440,9 @@ main > p:last-child {
 /*
  * Evidence panel: the readable home of a claim's evidence stage,
  * last-reviewed date, and linked publications. It sits on the distinct
- * evidence surface with a strong left edge in the accent, so it is
- * recognisable at a glance and legible without colour alone.
+ * evidence surface in a rounded card with a strong left edge in the
+ * accent, so it is recognisable at a glance and legible without colour
+ * alone.
  */
 .claim-evidence {
   margin: 1.5rem 0;
@@ -378,6 +450,7 @@ main > p:last-child {
   background-color: var(--surface-evidence);
   border: 1px solid var(--rule-strong);
   border-left: 4px solid var(--accent-teal);
+  border-radius: var(--radius-card);
 }
 
 .claim-evidence figcaption {
@@ -398,12 +471,13 @@ main > p:last-child {
  * The lifespan-terms definition list (longevity story only): the three
  * lifespan distinctions as exact, visible term labels beside the
  * paragraphs that already explain them. It sits on the distinct evidence
- * surface with the same strong left edge as the evidence panels. Terms
- * are set in the heading ink at the heavier weight (so the cue is never
- * colour-only), definitions in the body ink; both clear 4.5:1 on the
- * evidence surface. The list flows in the normal content column — no
- * min-width, no nowrap, no negative overflow — so 320 px viewports never
- * scroll sideways, and no animation is required.
+ * surface in a rounded card with the same strong left edge as the
+ * evidence panels. Terms are set in the heading ink at the heavier weight
+ * (so the cue is never colour-only), definitions in the body ink; both
+ * clear 4.5:1 on the evidence surface in both themes. The list flows in
+ * the normal content column — no min-width, no nowrap, no negative
+ * overflow — so 320 px viewports never scroll sideways, and no animation
+ * is required.
  */
 .lifespan-terms {
   margin: 0 0 1.5rem;
@@ -411,6 +485,7 @@ main > p:last-child {
   background-color: var(--surface-evidence);
   border: 1px solid var(--rule-strong);
   border-left: 4px solid var(--accent-teal);
+  border-radius: var(--radius-card);
 }
 
 .lifespan-terms dt {
@@ -441,4 +516,31 @@ img,
 svg {
   max-width: 100%;
   height: auto;
+}
+
+/*
+ * Motion: decorative, CSS-only, and present only for readers who have
+ * not asked for reduced motion. A short one-off fade-and-rise settles
+ * the hero and each evidence panel into place on load. Nothing loops,
+ * nothing repeats, and nothing runs for long; with a reduced-motion
+ * preference (or without CSS support) the elements are fully visible in
+ * their final state, so the animation never carries content. This is the
+ * only place in the stylesheet where animation is declared.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .hero,
+  .claim-evidence {
+    animation: settle-in 0.6s ease-out both;
+  }
+
+  @keyframes settle-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
