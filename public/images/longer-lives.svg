@@ -1,44 +1,52 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <title>A long road toward the horizon with trees growing taller along the way</title>
-  <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#8EC9E8"/>
-      <stop offset="0.75" stop-color="#D7EDF7"/>
-      <stop offset="1" stop-color="#FFF2CF"/>
-    </linearGradient>
-  </defs>
-  <rect x="0" y="0" width="1200" height="400" fill="url(#sky)"/>
-  <circle cx="170" cy="120" r="52" fill="#FFD166"/>
-  <g fill="#FFFFFF" opacity="0.85">
-    <ellipse cx="420" cy="110" rx="70" ry="22"/>
-    <ellipse cx="480" cy="96" rx="50" ry="18"/>
-    <ellipse cx="880" cy="160" rx="80" ry="22"/>
-    <ellipse cx="950" cy="146" rx="48" ry="16"/>
-  </g>
-  <rect x="0" y="400" width="1200" height="230" fill="#79A85B"/>
-  <rect x="0" y="400" width="1200" height="10" fill="#5F8C46"/>
-  <!-- the long road toward the horizon -->
-  <polygon points="576,400 624,400 880,630 320,630" fill="#8A94A6"/>
-  <line x1="600" y1="410" x2="600" y2="630" stroke="#FFF8E8" stroke-width="16" stroke-dasharray="38 30"/>
-  <!-- trees, small and far, growing taller toward the viewer -->
-  <rect x="466" y="400" width="7" height="14" fill="#8B5E3C"/>
-  <circle cx="469" cy="388" r="13" fill="#5F8C46"/>
-  <rect x="727" y="400" width="7" height="14" fill="#8B5E3C"/>
-  <circle cx="731" cy="388" r="13" fill="#79A85B"/>
-  <rect x="428" y="418" width="9" height="22" fill="#8B5E3C"/>
-  <circle cx="432" cy="400" r="21" fill="#79A85B"/>
-  <rect x="763" y="418" width="9" height="22" fill="#8B5E3C"/>
-  <circle cx="768" cy="400" r="21" fill="#5F8C46"/>
-  <rect x="376" y="448" width="12" height="32" fill="#8B5E3C"/>
-  <circle cx="382" cy="420" r="34" fill="#5F8C46"/>
-  <rect x="812" y="448" width="12" height="32" fill="#8B5E3C"/>
-  <circle cx="818" cy="420" r="34" fill="#79A85B"/>
-  <rect x="300" y="500" width="16" height="45" fill="#8B5E3C"/>
-  <circle cx="308" cy="455" r="52" fill="#79A85B"/>
-  <rect x="884" y="500" width="16" height="45" fill="#8B5E3C"/>
-  <circle cx="892" cy="455" r="52" fill="#5F8C46"/>
-  <rect x="205" y="560" width="22" height="70" fill="#8B5E3C"/>
-  <circle cx="216" cy="490" r="80" fill="#5F8C46"/>
-  <rect x="973" y="560" width="22" height="70" fill="#8B5E3C"/>
-  <circle cx="984" cy="490" r="80" fill="#79A85B"/>
+  <title>A long road narrowing toward the horizon under a wide pale sky, with trees of stacked round canopies on both sides that grow taller toward the foreground</title>
+  <!-- full-canvas warm cream field -->
+  <rect x="0" y="0" width="1200" height="630" rx="48" fill="#f6f1e7"/>
+  <!-- wide pale mist sky -->
+  <rect x="64" y="64" width="1072" height="330" rx="40" fill="#d7e6e3"/>
+  <!-- sun and soft glow -->
+  <circle cx="250" cy="170" r="80" fill="#c9842a" opacity="0.18"/>
+  <circle cx="250" cy="170" r="46" fill="#c9842a"/>
+  <!-- soft translucent clouds -->
+  <circle cx="520" cy="150" r="34" fill="#f6f1e7" opacity="0.55"/>
+  <circle cx="566" cy="134" r="24" fill="#f6f1e7" opacity="0.55"/>
+  <circle cx="830" cy="206" r="28" fill="#f6f1e7" opacity="0.55"/>
+  <!-- wide ground, full bleed to the bottom edge -->
+  <rect x="0" y="380" width="1200" height="250" fill="#0a544e"/>
+  <!-- translucent haze along the horizon -->
+  <rect x="0" y="380" width="1200" height="44" fill="#0e6b63" opacity="0.5"/>
+  <!-- the long road narrowing toward the horizon -->
+  <path d="M 593 388 L 607 388 Q 674 516 765 630 L 435 630 Q 526 516 593 388 Z" fill="#f6f1e7"/>
+  <!-- amber centre line, bars shrinking toward the horizon -->
+  <rect x="589" y="556" width="22" height="54" rx="11" fill="#c9842a"/>
+  <rect x="591" y="486" width="18" height="42" rx="9" fill="#c9842a"/>
+  <rect x="592" y="434" width="16" height="30" rx="8" fill="#c9842a"/>
+  <rect x="593" y="398" width="14" height="20" rx="7" fill="#c9842a"/>
+  <!-- far trees, small, on both sides -->
+  <rect x="481" y="468" width="10" height="14" rx="5" fill="#f6f1e7"/>
+  <circle cx="486" cy="450" r="22" fill="#d7e6e3"/>
+  <circle cx="486" cy="424" r="15" fill="#d7e6e3"/>
+  <circle cx="486" cy="402" r="10" fill="#d7e6e3"/>
+  <rect x="709" y="468" width="10" height="14" rx="5" fill="#f6f1e7"/>
+  <circle cx="714" cy="450" r="22" fill="#d7e6e3"/>
+  <circle cx="714" cy="424" r="15" fill="#d7e6e3"/>
+  <circle cx="714" cy="402" r="10" fill="#d7e6e3"/>
+  <!-- middle trees, taller -->
+  <rect x="389" y="496" width="14" height="24" rx="7" fill="#f6f1e7"/>
+  <circle cx="396" cy="474" r="36" fill="#d7e6e3"/>
+  <circle cx="396" cy="438" r="25" fill="#d7e6e3"/>
+  <circle cx="396" cy="404" r="16" fill="#d7e6e3"/>
+  <rect x="797" y="496" width="14" height="24" rx="7" fill="#f6f1e7"/>
+  <circle cx="804" cy="474" r="36" fill="#d7e6e3"/>
+  <circle cx="804" cy="438" r="25" fill="#d7e6e3"/>
+  <circle cx="804" cy="404" r="16" fill="#d7e6e3"/>
+  <!-- near trees, tallest, framing the foreground -->
+  <rect x="260" y="572" width="20" height="44" rx="10" fill="#f6f1e7"/>
+  <circle cx="270" cy="536" r="60" fill="#d7e6e3"/>
+  <circle cx="270" cy="476" r="44" fill="#d7e6e3"/>
+  <circle cx="270" cy="418" r="28" fill="#d7e6e3"/>
+  <rect x="920" y="572" width="20" height="44" rx="10" fill="#f6f1e7"/>
+  <circle cx="930" cy="536" r="60" fill="#d7e6e3"/>
+  <circle cx="930" cy="476" r="44" fill="#d7e6e3"/>
+  <circle cx="930" cy="418" r="28" fill="#d7e6e3"/>
 </svg>

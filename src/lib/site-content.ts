@@ -689,7 +689,7 @@ const homePage: SitePage = {
     {
       id: "hopeful-future",
       src: "/images/hopeful-future.svg",
-      alt: "A bright sunrise over a landscape of laboratories and hospital buildings, symbolising a hopeful future for medicine",
+      alt: "A rising amber sun with short rays over a low landscape of rounded teal laboratory and hospital blocks, with a pale path leading toward them, symbolising a hopeful future for medicine",
       width: 1200,
       height: 630,
     },
@@ -761,7 +761,7 @@ const howAiHelpsPage: SitePage = {
     {
       id: "ai-in-medicine",
       src: "/images/ai-in-medicine.svg",
-      alt: "A glowing network of connected data points linking a stethoscope, a laboratory flask, and a medical scan",
+      alt: "A small network of connected dots linking three large rounded panels showing a stethoscope, a laboratory flask, and a medical scan with a simple waveform",
       width: 1200,
       height: 630,
     },
@@ -811,14 +811,14 @@ const cancerPage: SitePage = {
     {
       id: "cancer-research",
       src: "/images/cancer-research.svg",
-      alt: "A close-up of a cell being studied under a microscope, surrounded by a ring of data",
+      alt: "A stylized cell with a darker nucleus being studied inside a circular microscope field, with a ring of short data marks around the field",
       width: 1200,
       height: 630,
     },
     {
       id: "cancer-hope",
       src: "/images/cancer-hope.svg",
-      alt: "A small light held in two hands over a dark room, symbolising hope in the fight against cancer",
+      alt: "Two simple geometric hands cupping a small amber light with a soft glow in a deep teal field, symbolising hope in the fight against cancer",
       width: 800,
       height: 600,
     },
@@ -868,7 +868,7 @@ const diseasesPage: SitePage = {
     {
       id: "other-diseases",
       src: "/images/other-diseases.svg",
-      alt: "A circle of icons representing a heart, a sugar molecule, a virus, and a dna helix, connected by lines of data",
+      alt: "Four flat icons in a circle - a heart, a cluster of sugar circles, a spiky virus, and a dna helix - joined by lines with small data dots",
       width: 1200,
       height: 630,
     },
@@ -935,7 +935,7 @@ const longevityPage: SitePage = {
     {
       id: "longer-lives",
       src: "/images/longer-lives.svg",
-      alt: "A long winding road stretching toward the horizon under a wide sky, with taller and taller trees on each side",
+      alt: "A long road narrowing toward the horizon under a wide pale sky, with trees of stacked round canopies on both sides that grow taller toward the foreground",
       width: 1200,
       height: 630,
     },
