@@ -1,16 +1,18 @@
 /*
- * Demo Site: token-driven immersive 2026 design system — light and dark.
+ * Demo Site: token-driven design system — light and dark.
  *
- * Two full palettes, chosen only by the reader's system colour setting:
- * - the light theme (declared on :root, colour-scheme: light) is the
- *   warm editorial set: a warm cream page, lighter warm raised chrome, a
- *   faintly teal-tinted evidence surface, dark warm ink, and a restrained
- *   teal accent for links, keyboard focus, and the active-story cue;
+ * Two full palettes, chosen only by the reader's system colour setting
+ * (docs/adr/0008-reference-look.md):
+ * - the light theme (declared on :root, colour-scheme: light) copies the
+ *   reference's light palette: a white page, the reference's pale
+ *   blue-grey section band and evidence surface, the reference's dark
+ *   ink, and its blue accent (darkened only as far as contrast needs) for
+ *   links, keyboard focus, and the active-story cue;
  * - the dark theme (the same token names redeclared inside
- *   @media (prefers-color-scheme: dark), colour-scheme: dark) is a deep
- *   immersive surface set with light warm ink and a brightened teal
- *   accent, so the same tokens read as links and focus on the dark
- *   surfaces.
+ *   @media (prefers-color-scheme: dark), colour-scheme: dark) uses the
+ *   same accent colours, lightened only as far as contrast needs, over
+ *   the reference's own dark surfaces, so the same tokens read as links
+ *   and focus in the dark.
  *
  * There is no theme switch, no class toggle, and no JavaScript: the
  * reader's operating-system preference is the only input, so the markup,
@@ -27,7 +29,7 @@
  *
  * Layout: the page is wide — the wide top section (.hero, main's first
  * element) and the page itself (main) both span the shared page shell
- * (--page-shell, 72 to 80 rem) — while every long-form block in main
+ * (--page-shell) — while every long-form block in main
  * (paragraphs, headings, sections, the evidence panels, the sources
  * block, the lifespan term list, and the later illustrations) and the
  * hero's text block stay in a centered reading column capped at --measure
@@ -61,75 +63,101 @@
  */
 
 /*
- * Light theme: the warm editorial set, plus the shared non-colour layout
- * tokens. These are the default values; the dark theme redeclares the
- * colour tokens under the reader's system setting below.
+ * Light theme: the reference's own light palette (docs/adr/0008-
+ * reference-look.md), plus the shared non-colour layout tokens. These
+ * are the default values; the dark theme redeclares the colour tokens
+ * under the reader's system setting below.
  */
 :root {
   color-scheme: light;
-  /* Warm neutral surfaces: the page is a warm cream, raised chrome is a
-     lighter warm off-white, and evidence panels sit on a slightly
-     different, faintly teal-tinted surface so they read apart from the
-     page. None of them is pure white. */
-  --surface-page: #f6f1e7;
-  --surface-raised: #fdfbf6;
-  --surface-evidence: #e9efe9;
-  /* Dark warm ink: strong ink for headings, body ink for running text,
-     and a muted ink that still clears 4.5:1 on every surface. */
-  --ink-heading: #171310;
-  --ink-body: #262119;
-  --ink-muted: #5a5344;
-  /* Restrained teal accent: links, keyboard focus, and the active-story
-     indicator, in a depth step for visited links. */
-  --accent-teal: #0e6b63;
-  --accent-teal-deep: #0a544e;
-  /* Muted warm rules: a soft hairline for decorative dividers and a
-     stronger rule that clears 3:1 where a boundary carries meaning. */
-  --rule-warm: #d5c9b2;
-  --rule-strong: #8a7b58;
+  /* Surfaces copied from the reference: the page copies its white
+     background, the raised chrome its pale blue-grey band, and the
+     evidence panels the reference's second pale band, so panels and
+     chrome read apart from the page. */
+  --surface-page: #ffffff;
+  --surface-raised: #f1f3f9;
+  --surface-evidence: #edeff4;
+  /* The reference's dark ink: strong ink for headings, body ink for
+     running text, and a muted ink darkened only as far as contrast
+     needs (the reference's own #868686 reaches just 3.64:1 on white). */
+  --ink-heading: #272727;
+  --ink-body: #434445;
+  --ink-muted: #666666;
+  /* The reference's blue accent, darkened about 25% so links, the
+     keyboard focus outline, and the active-story cue clear 4.5:1 on
+     every surface; the strong step carries hover, visited links, and
+     the focus outline. */
+  --accent-primary: #1f6f99;
+  --accent-primary-strong: #1c6288;
+  /* Rules: a soft hairline for decorative dividers (copied from the
+     reference) and a stronger rule that clears 3:1 where a boundary
+     carries meaning. */
+  --rule: #858585;
+  --rule-soft: #e5e5e5;
+  /* The headline band: the reference's accent used as a large fill, with
+     the inks that sit on it. */
+  --surface-band: #1f6f99;
+  --ink-on-band: #ffffff;
+  --ink-muted-on-band: #dbeaf4;
+  /* The reference's remaining accents, kept for the illustrations and
+     the accent palette. They are decorative fills, not text colours. */
+  --accent-secondary: #8668ad;
+  --accent-tertiary: #84c450;
+  --accent-warm: #f5bf2f;
+  --accent-emphasis: #f54b0f;
   /* Long-form measure: about 60 to 75 characters per line — the cap on
      the reading column that sits inside the wider page. */
   --measure: 40rem;
-  /* Wide page shell (72 to 80 rem): the page itself (main) and the
-     header chrome span it; the reading column stays capped at
-     --measure. */
-  --page-shell: 76rem;
+  /* Wide page shell: the page itself (main) and the header chrome span
+     it; the reading column stays capped at --measure. */
+  --page-shell: 75rem;
   /* Rounded card corners for evidence panels, the sources block, and
      the illustration frames. */
   --radius-card: 0.875rem;
 }
 
 /*
- * Dark theme: a deep, immersive surface set with light warm ink and a
- * brightened teal accent, applied only when the reader's system setting
- * prefers dark colours. No switch, no class toggle, no JavaScript.
+ * Dark theme: the reference's own dark surfaces with the same accent
+ * colours, lightened only as far as contrast requires, applied only when
+ * the reader's system setting prefers dark colours. No switch, no class
+ * toggle, no JavaScript.
  */
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    /* Deep, low-luminance surfaces, pairwise distinct: the page is the
+    /* The reference's dark surfaces, pairwise distinct: the page is the
        deepest, the raised chrome one step up, and the evidence surface a
-       separate faintly teal-tinted step, so panels and chrome read apart
-       from the page exactly as they do in the light theme. */
-    --surface-page: #131a1c;
-    --surface-raised: #1c2427;
-    --surface-evidence: #1f2e2c;
-    /* Light warm ink: near-white ink for headings, a softer body ink for
-       running text, and a muted ink that still clears 4.5:1 on every
-       dark surface. */
-    --ink-heading: #f1ece1;
-    --ink-body: #d8d3c8;
-    --ink-muted: #a8a294;
-    /* Brightened teal accent: links, keyboard focus, and the active-story
-       indicator, in a depth step for visited links, all clearing 4.5:1
-       on the dark surfaces. */
-    --accent-teal: #5eead4;
-    --accent-teal-deep: #2dd4bf;
-    /* Muted cool-dark rules: a soft hairline for decorative dividers and
-       a stronger rule that clears 3:1 on every dark surface where a
-       boundary carries meaning. */
-    --rule-warm: #3a4744;
-    --rule-strong: #7d8a86;
+       separate step, so panels and chrome read apart from the page
+       exactly as they do in the light theme. */
+    --surface-page: #191919;
+    --surface-raised: #272727;
+    --surface-evidence: #2c343b;
+    /* The reference's light ink: near-white ink for headings, a softer
+       body ink for running text, and a muted ink that clears 4.5:1 on
+       every dark surface. */
+    --ink-heading: #ffffff;
+    --ink-body: #e5e5e5;
+    --ink-muted: #bdbdbd;
+    /* The same accent family, lightened as far as contrast needs: the
+       reference's own light blue for links and the active-story cue, and
+       its lighter blue for hover, visited links, and the focus outline.
+       Both clear 4.5:1 on every dark surface. */
+    --accent-primary: #55bbeb;
+    --accent-primary-strong: #79ccf2;
+    /* A mid-grey rule that holds at least 3:1 on all three dark
+       surfaces, and the reference's grey as a decorative hairline. */
+    --rule: #808080;
+    --rule-soft: #434445;
+    /* The headline band: the same accent, with the dark inks that sit
+       on it. */
+    --surface-band: #55bbeb;
+    --ink-on-band: #191919;
+    --ink-muted-on-band: #12303d;
+    /* The reference's remaining accents, unchanged in both themes. */
+    --accent-secondary: #8668ad;
+    --accent-tertiary: #84c450;
+    --accent-warm: #f5bf2f;
+    --accent-emphasis: #f54b0f;
   }
 }
 
@@ -178,18 +206,18 @@ h3 {
 
 /* Links stay underlined so colour is never the only cue. */
 a {
-  color: var(--accent-teal);
+  color: var(--accent-primary);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
 a:visited {
-  color: var(--accent-teal-deep);
+  color: var(--accent-primary-strong);
 }
 
 /* A solid, offset accent outline for keyboard focus, at least 2 px. */
 :focus-visible {
-  outline: 3px solid var(--accent-teal);
+  outline: 3px solid var(--accent-primary-strong);
   outline-offset: 2px;
 }
 
@@ -207,7 +235,7 @@ a:visited {
   padding: 0.5rem 1rem;
   background-color: var(--surface-raised);
   color: var(--ink-body);
-  border: 2px solid var(--accent-teal);
+  border: 2px solid var(--accent-primary-strong);
 }
 
 .skip-link:focus {
@@ -217,13 +245,13 @@ a:visited {
 
 /*
  * Header and the single site navigation (header-only, no hamburger, no
- * second nav). The header sits on the raised surface with a soft warm
- * rule under it, and its chrome spans the wide page shell.
+ * second nav). The header sits on the raised surface with a soft
+ * decorative rule under it, and its chrome spans the wide page shell.
  */
 header {
   width: 100%;
   background-color: var(--surface-raised);
-  border-bottom: 1px solid var(--rule-warm);
+  border-bottom: 1px solid var(--rule-soft);
 }
 
 nav {
@@ -260,9 +288,9 @@ nav a {
  * story.
  */
 nav a[aria-current="page"] {
-  color: var(--accent-teal-deep);
+  color: var(--accent-primary-strong);
   font-weight: 700;
-  box-shadow: inset 0 -2px 0 var(--accent-teal);
+  box-shadow: inset 0 -2px 0 var(--accent-primary);
 }
 
 /*
@@ -287,7 +315,7 @@ nav a[aria-current="page"] {
 }
 
 .progress-cluster .next-story-cue {
-  color: var(--accent-teal);
+  color: var(--accent-primary);
 }
 
 .progress-cluster .progress-ending {
@@ -296,7 +324,7 @@ nav a[aria-current="page"] {
 
 /*
  * Content stack: the wider page. main spans the shared page shell
- * (max-width --page-shell, 72 to 80 rem) and is centered; its first
+ * (max-width --page-shell) and is centered; its first
  * element, the wide top section (.hero), opens the page with its own top
  * padding and spans main's content width with the same side inset as the
  * rest of the page. It is not capped at the measure: the long-form text
@@ -359,11 +387,11 @@ main section {
   margin-inline: auto;
 }
 
-/* The per-page disclaimer: set apart by a soft warm rule. */
+/* The per-page disclaimer: set apart by a soft decorative rule. */
 main > p:last-child {
   margin-top: 2.5rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--rule-warm);
+  border-top: 1px solid var(--rule-soft);
   color: var(--ink-muted);
 }
 
@@ -412,7 +440,7 @@ main > p:last-child {
   font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--accent-teal);
+  color: var(--accent-primary);
 }
 
 /* The hero summary: one step up from body text, still inside the measure. */
@@ -432,7 +460,7 @@ main > p:last-child {
 .hero-media {
   margin: 0;
   background-color: var(--surface-raised);
-  border: 1px solid var(--rule-strong);
+  border: 1px solid var(--rule);
   border-radius: var(--radius-card);
   padding: 1rem;
 }
@@ -453,7 +481,7 @@ main > p:last-child {
   max-width: var(--measure);
   margin-inline: auto;
   background-color: var(--surface-raised);
-  border: 1px solid var(--rule-strong);
+  border: 1px solid var(--rule);
   border-radius: var(--radius-card);
   padding: 1rem;
 }
@@ -480,7 +508,7 @@ main > p:last-child {
   max-width: var(--measure);
   margin-inline: auto;
   background-color: var(--surface-raised);
-  border: 1px solid var(--rule-strong);
+  border: 1px solid var(--rule);
   border-radius: var(--radius-card);
 }
 
@@ -506,8 +534,8 @@ main > p:last-child {
   max-width: var(--measure);
   margin-inline: auto;
   background-color: var(--surface-evidence);
-  border: 1px solid var(--rule-strong);
-  border-left: 4px solid var(--accent-teal);
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--accent-primary);
   border-radius: var(--radius-card);
 }
 
@@ -543,8 +571,8 @@ main > p:last-child {
   max-width: var(--measure);
   margin-inline: auto;
   background-color: var(--surface-evidence);
-  border: 1px solid var(--rule-strong);
-  border-left: 4px solid var(--accent-teal);
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--accent-primary);
   border-radius: var(--radius-card);
 }
 

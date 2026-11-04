@@ -2,44 +2,48 @@
  * Design-token safeguards for the dual-theme design system in
  * src/app/globals.css.
  *
- * The milestone replaced the single editorial palette with two full
- * palettes chosen only by the reader's system setting — the light theme
- * is the :root default and the dark theme redeclares the same colour
- * token names inside @media (prefers-color-scheme: dark) — so this test
- * parses globals.css and verifies the design from the tokens of both
- * themes:
+ * The milestone replaced the 20 October palette with two full palettes
+ * taken from the reference look (docs/adr/0008-reference-look.md) and
+ * chosen only by the reader's system setting — the light theme is the
+ * :root default and the dark theme redeclares the same colour token
+ * names inside @media (prefers-color-scheme: dark) — so this test parses
+ * globals.css and verifies the design from the tokens of both themes:
  *
- * 1. the same colour token set exists in both themes — neutral surfaces
+ * 1. the same colour token set exists in both themes — the surfaces
  *    (page, raised, evidence-panel), the ink (heading, body, muted), the
- *    teal accent with a depth step, and the rules — each a hex colour,
- *    with the shared layout tokens (measure, page shell, card radius) in
- *    the base set;
- * 2. the light palette keeps its warm editorial character: none of the
- *    surfaces is pure white, the three surfaces are pairwise distinct,
- *    and the page and raised surfaces read warm (red over blue); the
- *    dark palette is a deep surface set: the surfaces are pairwise
- *    distinct and darker than every ink;
+ *    blue accent with its strong step, the rules (meaningful and
+ *    decorative), the headline band's surface and inks, and the
+ *    reference's remaining accent palette — each a hex colour, with the
+ *    shared layout tokens (measure, page shell, card radius) in the base
+ *    set;
+ * 2. the light palette copies the reference's light background (pure
+ *    white) over two distinct pale bands, so the raised chrome and the
+ *    evidence panels read apart from the page; the dark palette is a
+ *    deep surface set: the surfaces are pairwise distinct and darker
+ *    than every ink;
  * 3. every text/background pair used for body text, headings (including
  *    headings on the raised sources card), muted meta, links (including
  *    visited), citations, the skip-link text, the header progress text,
- *    and the painted accent pairs — the hero kicker on the raised hero
- *    frame and the next-story cue on the raised header — meets WCAG 2.2
- *    AA in both themes: 4.5:1 for normal text;
+ *    the headline band's inks, and the painted accent pairs — the hero
+ *    kicker on the raised hero frame and the next-story cue on the
+ *    raised header — meets WCAG 2.2 AA in both themes: 4.5:1 for normal
+ *    text;
  * 4. UI boundaries meet the 3:1 non-text minimum in both themes: the
- *    strong rule on every surface and the accent where it carries a
- *    meaningful border or the focus outline, plus the sources card's
- *    own border checked against its raised background;
+ *    meaningful rule on every surface and the accent colours where they
+ *    carry a meaningful border, the active-story indicator, or the focus
+ *    outline, plus the sources card's own border checked against its
+ *    raised background;
  * 5. the base interaction rules hold: underlined links, a :focus-visible
  *    outline of at least 2 px in the accent with an offset that clears
  *    3:1 on the page surface in both themes, body line-height of at
  *    least 1.5 and font-size of at least 1rem, a long-form measure
  *    between 38rem and 42rem capping the reading column, and a page
- *    shell between 72rem and 80rem — wider than the measure — that main
- *    and the wide top section (the hero, the first element inside main)
- *    span, while every long-form block in main (paragraphs,
- *    headings, sections, the later illustrations, the evidence panels,
- *    the sources block, and the term list) and the hero's text block
- *    stay capped at the measure and centered;
+ *    shell that is wider than the measure and spans it — main and the
+ *    wide top section (the hero, the first element inside main) — while
+ *    every long-form block in main (paragraphs, headings, sections, the
+ *    later illustrations, the evidence panels, the sources block, and the
+ *    term list) and the hero's text block stay capped at the measure and
+ *    centered;
  * 6. rounded cards: the evidence panels, the framed hero and story
  *    illustrations, and the home page sources block all set a positive
  *    border-radius from the shared radius token;
@@ -151,10 +155,17 @@ const requiredColorTokens = [
   "ink-heading",
   "ink-body",
   "ink-muted",
-  "accent-teal",
-  "accent-teal-deep",
-  "rule-warm",
-  "rule-strong",
+  "accent-primary",
+  "accent-primary-strong",
+  "rule",
+  "rule-soft",
+  "surface-band",
+  "ink-on-band",
+  "ink-muted-on-band",
+  "accent-secondary",
+  "accent-tertiary",
+  "accent-warm",
+  "accent-emphasis",
 ] as const;
 
 /** The three surfaces the text, link, and boundary colours sit on. */
@@ -198,20 +209,26 @@ const textPairs = [
     "muted progress text (story position, ending state) on the raised chrome",
   ],
   ["ink-muted", "surface-evidence", "muted meta in the evidence panel"],
-  ["accent-teal", "surface-page", "links on the page surface"],
+  ["accent-primary", "surface-page", "links on the page surface"],
   [
-    "accent-teal",
+    "accent-primary",
     "surface-raised",
     "links in the header, the next-story cue in the header, and the hero kicker on the raised hero frame",
   ],
-  ["accent-teal", "surface-evidence", "citations in the evidence panel"],
-  ["accent-teal-deep", "surface-page", "visited links on the page"],
+  ["accent-primary", "surface-evidence", "citations in the evidence panel"],
+  ["accent-primary-strong", "surface-page", "visited links on the page"],
   [
-    "accent-teal-deep",
+    "accent-primary-strong",
     "surface-raised",
     "visited links and the active-story link in the header",
   ],
-  ["accent-teal-deep", "surface-evidence", "visited citations in the panel"],
+  ["accent-primary-strong", "surface-evidence", "visited citations in the panel"],
+  ["ink-on-band", "surface-band", "the headline ink on the headline band"],
+  [
+    "ink-muted-on-band",
+    "surface-band",
+    "the muted meta ink on the headline band",
+  ],
 ] as const;
 
 /**
@@ -219,20 +236,43 @@ const textPairs = [
  * [foreground, background, where it is used].
  */
 const boundaryPairs = [
-  ["rule-strong", "surface-page", "the strong rule on the page"],
+  ["rule", "surface-page", "the meaningful rule on the page"],
   [
-    "rule-strong",
+    "rule",
     "surface-raised",
     "the evidence-panel, hero-frame, and sources-block borders on the raised chrome",
   ],
-  ["rule-strong", "surface-evidence", "the evidence-panel border on the evidence surface"],
-  ["accent-teal", "surface-page", "the focus outline on the page surface"],
+  ["rule", "surface-evidence", "the evidence-panel border on the evidence surface"],
   [
-    "accent-teal",
-    "surface-raised",
-    "the skip-link border and the active-story indicator on the raised chrome",
+    "accent-primary-strong",
+    "surface-page",
+    "the focus outline and the skip-link border on the page surface",
   ],
-  ["accent-teal", "surface-evidence", "the evidence panel's accent left edge"],
+  [
+    "accent-primary-strong",
+    "surface-raised",
+    "the focus outline and the skip-link border on the raised chrome",
+  ],
+  [
+    "accent-primary-strong",
+    "surface-evidence",
+    "the focus outline on the evidence surface",
+  ],
+  [
+    "accent-primary",
+    "surface-raised",
+    "the active-story indicator on the raised chrome",
+  ],
+  [
+    "accent-primary",
+    "surface-evidence",
+    "the evidence panel's accent left edge",
+  ],
+  [
+    "accent-primary",
+    "surface-page",
+    "the accent edge on the page surface",
+  ],
 ] as const;
 
 /** The rounded card blocks: each must carry the shared card radius. */
@@ -275,34 +315,43 @@ describe("design tokens in globals.css", () => {
     ).toBeDefined();
   });
 
-  it("keeps the light theme a warm, off-white set of distinct surfaces", () => {
+  it("keeps the light theme the reference's light set: a white page over two distinct pale bands", () => {
     const page = tokenColor(lightTheme, "surface-page");
     const raised = tokenColor(lightTheme, "surface-raised");
     const evidence = tokenColor(lightTheme, "surface-evidence");
 
-    // None of the surfaces is pure white...
+    // The light theme copies the reference's light background, so the
+    // page surface is the reference's pure white...
+    expect(
+      page,
+      "the light page surface must copy the reference's #ffffff background",
+    ).toEqual([255, 255, 255]);
+    // ...while the raised chrome and the evidence panels sit on the
+    // reference's pale bands, which are not pure white: they read apart
+    // from the page.
     for (const [name, surface] of [
-      ["surface-page", page],
       ["surface-raised", raised],
       ["surface-evidence", evidence],
     ] as const) {
-      expect(surface, `--${name} must not be pure white`).not.toEqual([
-        255, 255, 255,
-      ]);
+      expect(
+        surface,
+        `--${name} must be a pale band, not the page's pure white`,
+      ).not.toEqual([255, 255, 255]);
     }
-    // ...the three surfaces are pairwise distinct, so the evidence panel
+    // The three surfaces are pairwise distinct, so the evidence panel
     // and the raised chrome read apart from the page.
     expect(raised).not.toEqual(page);
     expect(evidence).not.toEqual(page);
     expect(evidence).not.toEqual(raised);
-    // The page and raised surfaces read warm: red channel over blue.
+    // The pale bands are lighter than the body ink that sits on them.
     for (const [name, surface] of [
-      ["surface-page", page],
       ["surface-raised", raised],
+      ["surface-evidence", evidence],
     ] as const) {
-      expect(surface[0], `--${name} must be warm (red >= blue)`).toBeGreaterThanOrEqual(
-        surface[2],
-      );
+      expect(
+        relativeLuminance(surface),
+        `--${name} must be lighter than --ink-body`,
+      ).toBeGreaterThan(relativeLuminance(tokenColor(lightTheme, "ink-body")));
     }
   });
 
@@ -434,7 +483,7 @@ describe("design tokens in globals.css", () => {
       expect(
         kickerColour,
         `the .hero-kicker must paint the accent ink in the ${theme.name} theme`,
-      ).toEqual(tokenColor(theme, "accent-teal"));
+      ).toEqual(tokenColor(theme, "accent-primary"));
       const heroFrame = resolveHexColor(
         heroMedia["background-color"] ?? "",
         theme.effectiveTokens,
@@ -466,7 +515,7 @@ describe("design tokens in globals.css", () => {
       expect(
         cueColour,
         `the next-story cue must paint the accent ink in the ${theme.name} theme`,
-      ).toEqual(tokenColor(theme, "accent-teal"));
+      ).toEqual(tokenColor(theme, "accent-primary"));
       const headerGround = resolveHexColor(
         header["background-color"] ?? "",
         theme.effectiveTokens,
@@ -485,6 +534,32 @@ describe("design tokens in globals.css", () => {
           `${theme.name}: the next-story cue (accent ink) on the raised header`,
         ).toBeGreaterThanOrEqual(4.5);
       }
+    }
+  });
+
+  it("keeps the headline band on the accent, and the decorative accents out of the text colours", () => {
+    for (const theme of themes) {
+      // The headline band is the accent itself, in both themes, so the
+      // ink that sits on it always has the accent's contrast.
+      expect(
+        tokenColor(theme, "surface-band"),
+        `the headline band must be the accent colour in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "accent-primary"));
+    }
+
+    // The reference's remaining accents are decorative fills: they carry
+    // no text, because as text colours they would fall below the 4.5:1
+    // floor.
+    for (const name of [
+      "accent-secondary",
+      "accent-tertiary",
+      "accent-warm",
+      "accent-emphasis",
+    ] as const) {
+      expect(
+        cssNoComments,
+        `--${name} must not be used as a text colour`,
+      ).not.toMatch(new RegExp(`color\\s*:\\s*var\\(--${name}\\)`));
     }
   });
 
@@ -516,8 +591,8 @@ describe("design tokens in globals.css", () => {
       if (outlineColour !== null) {
         expect(
           outlineColour,
-          `focus outline must be the accent colour in the ${theme.name} theme`,
-        ).toEqual(tokenColor(theme, "accent-teal"));
+          `focus outline must be the strong accent colour in the ${theme.name} theme`,
+        ).toEqual(tokenColor(theme, "accent-primary-strong"));
         // A focus indicator is a non-text UI boundary: 3:1 at minimum.
         expect(
           contrastRatio(outlineColour, tokenColor(theme, "surface-page")),
@@ -551,8 +626,9 @@ describe("design tokens in globals.css", () => {
     }
 
     // The page is wider than the reading column: main spans the page
-    // shell, which is a rem value between 72rem and 80rem and wider than
-    // the measure...
+    // shell, which is a rem value between 60rem and 90rem (the reference's
+    // own centred container, which ADR 0008 replaces the old 72 to 80rem
+    // shell with) and wider than the measure...
     const pageShell = /^(\d+(?:\.\d+)?)rem$/.exec(
       lightTheme.tokens["page-shell"] ?? "",
     );
@@ -560,12 +636,12 @@ describe("design tokens in globals.css", () => {
     if (pageShell !== null) {
       expect(
         Number(pageShell[1]),
-        "--page-shell (the wide page, 72 to 80rem)",
-      ).toBeGreaterThanOrEqual(72);
+        "--page-shell (the wide page, 60 to 90rem)",
+      ).toBeGreaterThanOrEqual(60);
       expect(
         Number(pageShell[1]),
-        "--page-shell (the wide page, 72 to 80rem)",
-      ).toBeLessThanOrEqual(80);
+        "--page-shell (the wide page, 60 to 90rem)",
+      ).toBeLessThanOrEqual(90);
       if (measure !== null) {
         expect(
           Number(pageShell[1]),

@@ -43,8 +43,11 @@
  *    (inside @media (prefers-color-scheme: dark)), so these checks
  *    resolve each colour per theme and compute WCAG 2.2
  *    relative-luminance contrast ratios: 4.5:1 for body text and link
- *    text on their backgrounds, 3:1 for the focus outline against the
- *    page surface — the same or stronger safeguard, not a weaker one;
+ *    text on their backgrounds (the page surface and the raised chrome),
+ *    3:1 for the focus outline against the page surface and the raised
+ *    chrome — the same or stronger safeguard, not a weaker one. The light
+ *    theme's page surface copies the reference's #ffffff background
+ *    (docs/adr/0008-reference-look.md);
  * 9. privacy: the rendered markup and the CSS file contain no secret-like
  *    tokens, email addresses, or personal names.
  *
@@ -546,12 +549,15 @@ describe("WCAG 2.2 AA essentials from source", () => {
           `${name}: body text on the page surface`,
         ).toBeGreaterThanOrEqual(4.5);
       }
-      // The light page surface is one token in a warm set, not pure white.
+      // ADR 0008 replaces the old "the page surface is not pure white"
+      // rule: the light theme now copies the reference's own #ffffff
+      // background, so the pin is that exact value, checked in both
+      // themes below.
       const lightPage = resolveHexColor(body["background-color"], lightTokens);
       expect(
         lightPage,
-        "the light page surface must not be pure white",
-      ).not.toEqual([255, 255, 255]);
+        "the light page surface must copy the reference's #ffffff background",
+      ).toEqual([255, 255, 255]);
     });
 
     it("underlines links in a colour that clears AA on the page surface in both themes", () => {
@@ -560,16 +566,32 @@ describe("WCAG 2.2 AA essentials from source", () => {
       for (const { name, tokens } of themes) {
         const linkColour = resolveHexColor(link["color"], tokens);
         const pageSurface = resolveHexColor("var(--surface-page)", tokens);
+        const raisedSurface = resolveHexColor("var(--surface-raised)", tokens);
         expect(linkColour, `${name}: the link colour must be a hex colour`).not.toBeNull();
         expect(pageSurface, `${name}: the page surface must be a hex colour`).not.toBeNull();
-        if (linkColour === null || pageSurface === null) {
+        expect(
+          raisedSurface,
+          `${name}: the raised surface must be a hex colour`,
+        ).not.toBeNull();
+        if (
+          linkColour === null ||
+          pageSurface === null ||
+          raisedSurface === null
+        ) {
           throw new Error(
-            `${name}: link colour and page surface must resolve to hex colours from the design tokens`,
+            `${name}: link colour and surfaces must resolve to hex colours from the design tokens`,
           );
         }
         expect(
           contrastRatio(linkColour, pageSurface),
           `${name}: links on the page surface`,
+        ).toBeGreaterThanOrEqual(4.5);
+        // The same link colour also sits on the raised chrome (the
+        // header) and on the evidence surface, so it must clear AA on
+        // those too.
+        expect(
+          contrastRatio(linkColour, raisedSurface),
+          `${name}: links on the raised chrome`,
         ).toBeGreaterThanOrEqual(4.5);
       }
     });
@@ -589,9 +611,18 @@ describe("WCAG 2.2 AA essentials from source", () => {
       for (const { name, tokens } of themes) {
         const outlineColour = resolveHexColor(outline[2].trim(), tokens);
         const pageSurface = resolveHexColor("var(--surface-page)", tokens);
+        const raisedSurface = resolveHexColor("var(--surface-raised)", tokens);
         expect(outlineColour, `${name}: the focus outline colour must be a hex colour`).not.toBeNull();
         expect(pageSurface, `${name}: the page surface must be a hex colour`).not.toBeNull();
-        if (outlineColour === null || pageSurface === null) {
+        expect(
+          raisedSurface,
+          `${name}: the raised surface must be a hex colour`,
+        ).not.toBeNull();
+        if (
+          outlineColour === null ||
+          pageSurface === null ||
+          raisedSurface === null
+        ) {
           throw new Error(
             `${name}: focus outline colour must resolve to a hex colour from the design tokens`,
           );
@@ -600,6 +631,12 @@ describe("WCAG 2.2 AA essentials from source", () => {
         expect(
           contrastRatio(outlineColour, pageSurface),
           `${name}: focus outline on the page surface`,
+        ).toBeGreaterThanOrEqual(3);
+        // The outline also sits on the raised chrome, so it must clear
+        // 3:1 there too.
+        expect(
+          contrastRatio(outlineColour, raisedSurface),
+          `${name}: focus outline on the raised chrome`,
         ).toBeGreaterThanOrEqual(3);
       }
     });
