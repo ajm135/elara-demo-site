@@ -31,10 +31,17 @@ import ClaimEvidence from "./claim-evidence";
  *    and height — no empty alt, no next/image, no external images). It
  *    spans the wider page (the `--page-shell` width); only its text block
  *    (`.hero-text`) stays capped at the `--measure` reading column. At
- *    768px and up the text sits beside the framed image;
- * 2. any further illustrations of the page, each in its own framed figure
+ *    768px and up the text sits beside the framed image. The page's
+ *    original full-bleed background image is painted behind it by
+ *    globals.css (docs/adr/0009-background-images.md);
+ * 2. one empty, decorative `div.image-band` (`aria-hidden="true"`), right
+ *    after the hero and not inside it: the page's one later full-bleed
+ *    image band, painted by globals.css from the route's `.story-frame-*`
+ *    wrapper. It holds no heading, text, link, or img, so it adds nothing
+ *    to the reading or keyboard order;
+ * 3. any further illustrations of the page, each in its own framed figure
  *    (`.story-illustration`), in reference order;
- * 3. one `<section>` per section, with an `<h2>`, an optional ordered
+ * 4. one `<section>` per section, with an `<h2>`, an optional ordered
  *    definition list of exact term labels (`<dl class="lifespan-terms">`,
  *    only the longevity story's "three numbers" section carries one, so a
  *    reader can find the three lifespan distinctions without reading the
@@ -46,14 +53,14 @@ import ClaimEvidence from "./claim-evidence";
  *    full-width section bands (docs/adr/0008-reference-look.md): the
  *    band holds no text of its own, so the reading order, the headings,
  *    and the keyboard order are unchanged;
- * 4. the page's optional sources block (`section.sources`): rendered only
+ * 5. the page's optional sources block (`section.sources`): rendered only
  *    when the page data carries one (currently the home page, which makes
  *    no consequential claim of its own), with the block's heading, its
  *    intro paragraph, and one `<li>` per resolved catalogue reference
  *    (title, publishing body or journal, publication date, and the same
  *    stable https URL or DOI anchor the evidence panels use). It sits
  *    before the disclaimer and is a list, not a navigation;
- * 5. the page disclaimer, a plain paragraph, which stays the last element
+ * 6. the page disclaimer, a plain paragraph, which stays the last element
  *    of main.
  *
  * No client hooks, no fetched data, no second navigation: the header nav
@@ -100,6 +107,7 @@ export default function StoryPage({ page }: { page: SitePage }) {
           />
         </figure>
       </div>
+      <div className="image-band" aria-hidden="true"></div>
       {additionalImages.map((image) => (
         <figure key={image.id} className="story-illustration">
           <img
