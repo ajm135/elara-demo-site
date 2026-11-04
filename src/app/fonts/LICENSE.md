@@ -4,7 +4,9 @@ Both font files in this folder are **Inter** (the "Inter 18pt" build,
 version 4.0001), by Rasmus Andersson and the Inter Project authors.
 
 - Files: `inter-regular.ttf` (body text, weight 400) and
-  `inter-bold.ttf` (headings, weight 700).
+  `inter-bold.ttf` (the family's bold weight, kept with the body
+  face; the headings are set in Asap — see `OFL.txt` and
+  `asap-note.md`).
 - Copyright, as recorded in the font files' own `name` tables:
   "Copyright 2016 The Inter Project Authors";
   "Inter UI and Inter is a trademark of rsms".
@@ -19,5 +21,6 @@ version 4.0001), by Rasmus Andersson and the Inter Project authors.
 Provenance: the files were copied on 2026-10-18 from a local installation
 on this computer (Alienware Command Center's bundled `Inter_18pt-*.ttf`
 files) and verified by reading their embedded `name` tables. No font was
-fetched from the network, and the site never loads fonts remotely: these
-committed files are the only source of the site's typography.
+fetched from the network, and the site never loads fonts remotely: the
+committed files in this folder are the only source of the site's
+typography.
