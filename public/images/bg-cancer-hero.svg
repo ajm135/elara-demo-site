@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img">
+  <title>A warm sunrise ring on a pale horizon with two rising ribbons</title>
+  <defs>
+    <linearGradient id="dawn" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f1f3f9"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1600" height="900" fill="url(#dawn)"/>
+  <circle cx="1240" cy="430" r="140" fill="#f5bf2f" opacity="0.85"/>
+  <circle cx="1240" cy="430" r="195" fill="#f54b0f" opacity="0.18"/>
+  <circle cx="1240" cy="430" r="255" fill="#f54b0f" opacity="0.10"/>
+  <path d="M0 560 H 1600" stroke="#e5e5e5" stroke-width="4"/>
+  <path d="M0 560 Q 400 440 800 560 T 1600 540 V 900 H 0 Z" fill="#79ccf2" opacity="0.35"/>
+  <path d="M0 700 Q 420 580 860 700 T 1600 680 V 900 H 0 Z" fill="#23d5ae" opacity="0.35"/>
+  <path d="M120 480 C 340 300 620 520 840 240" stroke="#2a93c9" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <path d="M260 620 C 480 460 720 640 980 380" stroke="#8668ad" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <circle cx="840" cy="240" r="10" fill="#2a93c9"/>
+  <circle cx="980" cy="380" r="9" fill="#8668ad"/>
+  <circle cx="340" cy="352" r="6" fill="#84c450" opacity="0.8"/>
+  <circle cx="580" cy="290" r="5" fill="#84c450" opacity="0.7"/>
+  <path d="M120 820 q 220 -70 440 0" stroke="#e5e5e5" stroke-width="8" stroke-linecap="round" fill="none"/>
+</svg>

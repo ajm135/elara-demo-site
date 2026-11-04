@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img">
+  <title>A dark grid of faint guide lines with layered arcs rising to the right</title>
+  <rect x="0" y="0" width="1600" height="900" fill="#191919"/>
+  <rect x="0" y="560" width="1600" height="340" fill="#272727"/>
+  <g stroke="#2c343b" stroke-width="3" opacity="0.9">
+    <path d="M120 60 V 840"/>
+    <path d="M420 60 V 840"/>
+    <path d="M720 60 V 840"/>
+    <path d="M1020 60 V 840"/>
+    <path d="M1320 60 V 840"/>
+  </g>
+  <g stroke="#2c343b" stroke-width="3" opacity="0.9">
+    <path d="M0 200 H 1600"/>
+    <path d="M0 400 H 1600"/>
+    <path d="M0 600 H 1600"/>
+  </g>
+  <path d="M0 700 A 900 900 0 0 1 1600 300" stroke="#55bbeb" stroke-width="8" fill="none" opacity="0.85"/>
+  <path d="M0 840 A 1100 1100 0 0 1 1600 470" stroke="#79ccf2" stroke-width="5" fill="none" opacity="0.55"/>
+  <circle cx="1600" cy="300" r="12" fill="#55bbeb"/>
+  <circle cx="720" cy="526" r="7" fill="#79ccf2" opacity="0.8"/>
+  <circle cx="1320" cy="392" r="9" fill="#f5bf2f" opacity="0.85"/>
+  <circle cx="420" cy="626" r="6" fill="#f5bf2f" opacity="0.5"/>
+  <path d="M140 120 h 90" stroke="#2a93c9" stroke-width="6" stroke-linecap="round" opacity="0.7"/>
+</svg>
