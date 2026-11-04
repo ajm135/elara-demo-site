@@ -10,7 +10,7 @@ Milestone 3's record is one additional entry that is **not a browser result**: i
 
 The browser results in this file are for the **new design** (the reference look) and supersede the earlier recorded browser results, which were for the previous look of 20 October (`docs/adr/0007-immersive-2026-design.md`). No results of that earlier design are carried forward in this file: those runs are not results of this Goal. The 2026-10-18 `npm run verify:reading` run is kept in this file as a server-rendered safeguard record, not as a browser result.
 
-A **failure** is a check that was run and did not meet its expectation. This record contains **zero failures**: every check that was actually run passed — the two recorded browser checks (2026-11-04), the recorded milestone 3 review (2026-11-04), and the recorded Node-only safeguard run (2026-10-18, exit code 0) — and the manual checks still to do are not failures. Nothing in this file, or anywhere else in the project, claims complete WCAG 2.2 AA conformance or complete cross-browser verification.
+A **failure** is a check that was run and did not meet its expectation. This record contains **zero failures**: every check that was actually run passed — the two recorded browser checks (2026-11-04), the recorded milestone 3 review (2026-11-04), and the recorded Node-only safeguard run (2026-10-18, exit code 0) — while the background-image browser page checks of [Background-image browser checks (ADR 0009)](#background-image-browser-checks-adr-0009) are not run (not-run is not a failure) and the manual checks still to do are not failures. Nothing in this file, or anywhere else in the project, claims complete WCAG 2.2 AA conformance or complete cross-browser verification.
 
 ## Environment
 
@@ -18,7 +18,7 @@ A **failure** is a check that was run and did not meet its expectation. This rec
 - Server: the loopback-only production server started with `npm start`, which serves an existing current production build (`.next/`) immediately and runs `next build` first only when that build is missing or older than the source inputs it depends on; the listener is always `next start --hostname 127.0.0.1 --port 3000`. Base URL `http://127.0.0.1:3000/`. Loopback binding is documented in [local-start.md](local-start.md) and is not re-proved here.
 - Design under test: the reference look recorded in `docs/adr/0008-reference-look.md` (dated 2026-11-04), which replaces the visual design of 20 October (`docs/adr/0007-immersive-2026-design.md`). Described only as that record describes it:
   - light and dark themes chosen **only** by the reader's system setting (`prefers-color-scheme`) — no switch, no toggle, no JavaScript; the theme closest to the reference's background (the light theme) copies it, and the dark theme uses the same accent colours;
-  - a full-width **colour band behind each page's headline**, with the header sitting above it in the same band; since `docs/adr/0009-background-images.md` the opening is instead an original full-bleed background image with the header sitting on it and the headline text on a solid scrim, plus one later decorative image band per page — a change the browser checks recorded below predate, so it is not verified by them;
+  - a full-width **colour band behind each page's headline**, with the header sitting above it in the same band; since `docs/adr/0009-background-images.md` the opening is instead an original full-bleed background image with the header sitting on it and the headline text on a solid scrim, plus one later decorative image band per page — a change the browser checks recorded in [Recorded browser results](#recorded-browser-results-this-goals-milestone-2-the-new-look) predate, so it is not verified by them; Elara browser page checks of this treatment are recorded as not run in [Background-image browser checks (ADR 0009)](#background-image-browser-checks-adr-0009);
   - **pill-shaped story links** in the header navigation;
   - **5 px rounded cards** for the evidence panels, the sources block, and the illustration frames;
   - **alternating section bands** (the page surface and the pale band), separated by whitespace;
@@ -34,6 +34,7 @@ A **failure** is a check that was run and did not meet its expectation. This rec
 | Finished home page, including the skip link reaching main (milestone 2, browser) | 375, 768, 1280 | 2026-11-04 | passed |
 | Reading journey from Home through every story to "End of the stories" (milestone 2, browser) | 375, 768, 1280 | 2026-11-04 | passed |
 | Review of the six redrawn illustrations (milestone 3 — a review, not a browser run) | not applicable (not a browser run) | 2026-11-04 | passed (review) |
+| Background-image browser page checks (ADR 0009; home page and five-route reading journey) | 375, 768, 1280 | 2026-11-04 | not run |
 | Server-rendered reading contract over loopback HTTP, all five routes (`npm run verify:reading`, Node-only, no browser) | not applicable (HTTP responses) | 2026-10-18 | executed — pass (exit code 0); predates the new design |
 | Screen-reader navigation (NVDA or VoiceOver) | — | — | still to do (manual) |
 | 200% text enlargement (WCAG 2.2 AA 1.4.4) | — | — | still to do (manual) |
@@ -109,6 +110,15 @@ What the review states: the six drawings in `public/images/` share one ADR 0008 
 - **Date:** **2026-11-04**, the date of the milestone record.
 - **Outcome: passed** (review of the drawings).
 
+## Background-image browser checks (ADR 0009)
+
+This section is only for Elara browser page checks of the ADR 0009 background-image treatment ([docs/adr/0009-background-images.md](../../adr/0009-background-images.md)): the header sitting on each story's original full-bleed hero image, text on the solid scrim, and one later full-bleed image band. **No pass or fail is entered here** because this Goal has no Elara page-check result for the background-image pages: the earlier 2026-11-04 browser results above checked the colour-band design and predate this treatment, so they are not carried into this section. A not-run check is not a failure and is not passed. This section does not claim complete WCAG 2.2 AA conformance or complete cross-browser verification; support for current Chrome, Edge, Firefox, and Safari on phone, tablet, and desktop remains a requirement, not a completed check.
+
+| Check | Route | Widths (px) | Date | Outcome |
+| --- | --- | --- | --- | --- |
+| Finished home page, including the skip link reaching main, on the background-image hero | `/` | 375, 768, 1280 | 2026-11-04 | not run |
+| Reading journey from Home through every story to "End of the stories" on the background-image pages | `/`, `/how-ai-helps`, `/cancer`, `/diseases`, `/longevity` | 375, 768, 1280 | 2026-11-04 | not run |
+
 ## Executed safeguard: Node-only server-rendered reading contract (2026-10-18)
 
 This is a server-rendered HTTP safeguard, **not a browser result**, and it **predates the new design**: it ran against the previous look — the design in force on 2026-10-18 — before the reference look in `docs/adr/0008-reference-look.md` was built.
@@ -120,6 +130,8 @@ This is a server-rendered HTTP safeguard, **not a browser result**, and it **pre
   > `[verify-reading] PASS: all five routes (/, /how-ai-helps, /cancer, /diseases, /longevity) served the complete server-rendered reading contract over loopback HTTP — story content, local illustration, citations, disclaimer, the five story links, and the correct current-page state on every route; the listener was loopback-only and the started process tree was cleaned up. These are Node-only HTTP safeguards against the production server's rendered HTML, not proof of complete no-JavaScript browser behaviour or WCAG 2.2 AA conformance.`
 - **What this is, and is not:** these are **server-rendered HTTP safeguards** against the production server's rendered HTML. They are **not** browser results: a Node HTTP fetch is not a browser, and the script not executing JavaScript does not show that a real browser reads the page without JavaScript. They are **not** proof of keyboard focus or focus visibility, and **not** WCAG conformance.
 - **Where the command stands now:** the same command is part of this Goal's **milestone 4 final regression**, which Elara runs. This file records no result for that run, because the author of this record did not make it; no new exit code is recorded here for it.
+
+A further note, separate from the 2026-10-18 record: on **2026-11-04** `npm run verify:reading` was run again from the project root (Node.js 22.16.0, npm 10.9.2). It exited **0**, fetched all five routes (`/`, `/how-ai-helps`, `/cancer`, `/diseases`, `/longevity`), each HTTP 200, reported "port 3000 listeners: 127.0.0.1:3000" (loopback-only, per the script's own output), stopped the process tree it had started, and closed with the same final line quoted above. This remains a **server-rendered HTTP safeguard, not a browser result**, and it is not evidence of the background-image treatment in a browser.
 
 ## Manual checks still to do
 
@@ -133,7 +145,7 @@ Reproduction:
 
 1. Start the loopback production server: `npm start`.
 2. Launch NVDA (Windows) or VoiceOver (macOS/iOS) and open `http://127.0.0.1:3000/` in a supported browser.
-3. Navigate by landmark and heading structure: confirm the skip link is the first focus stop, that the `header` landmark with `nav[aria-label='Main']` and the `main#main-content` landmark are announced, and that the heading order follows the story structure (the single `h1` inside the colour band behind the headline — `div.hero`, main's first element — then the section `h2`s).
+3. Navigate by landmark and heading structure: confirm the skip link is the first focus stop, that the `header` landmark with `nav[aria-label='Main']` and the `main#main-content` landmark are announced, and that the heading order follows the story structure (the single `h1` inside the colour band behind the headline — `div.hero`, main's first element — then the section `h2`s). The current opening is an original full-bleed background image, the header sits on that image, and the headline text sits on a solid scrim (docs/adr/0009-background-images.md); this check is still to do.
 4. Activate the skip link (Enter) and confirm focus lands on the main content.
 5. Move through the five pill-shaped header story links in order (`/`, `/how-ai-helps`, `/cancer`, `/diseases`, `/longevity`) and confirm that the current page (the `aria-current` state, whose active state is not colour alone) and the "Story N of 5" position are announced correctly on each page.
 6. Record the screen reader name and version, the browser name and version, the date, the routes, and pass/fail per step.
