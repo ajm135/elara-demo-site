@@ -43,11 +43,12 @@
  *    (inside @media (prefers-color-scheme: dark)), so these checks
  *    resolve each colour per theme and compute WCAG 2.2
  *    relative-luminance contrast ratios: 4.5:1 for body text and link
- *    text on their backgrounds (the page surface and the raised chrome),
- *    3:1 for the focus outline against the page surface and the raised
- *    chrome — the same or stronger safeguard, not a weaker one. The light
- *    theme's page surface copies the reference's #ffffff background
- *    (docs/adr/0008-reference-look.md);
+ *    text on their backgrounds (the page surface, the raised chrome,
+ *    and the evidence surface, where the citation links and their
+ *    visited colour sit), 3:1 for the focus outline against the page
+ *    surface and the raised chrome — the same or stronger safeguard,
+ *    not a weaker one. The light theme's page surface copies the
+ *    reference's #ffffff background (docs/adr/0008-reference-look.md);
  * 9. privacy: the rendered markup and the CSS file contain no secret-like
  *    tokens, email addresses, or personal names.
  *
@@ -562,24 +563,37 @@ describe("WCAG 2.2 AA essentials from source", () => {
 
     it("underlines links in a colour that clears AA on the page surface in both themes", () => {
       const link = parseDeclarations(cssRule(globalCss, "a"));
+      const linkVisited = parseDeclarations(cssRule(globalCss, "a:visited"));
       expect(link["text-decoration"] ?? "").toContain("underline");
       for (const { name, tokens } of themes) {
         const linkColour = resolveHexColor(link["color"], tokens);
+        const visitedColour = resolveHexColor(linkVisited["color"], tokens);
         const pageSurface = resolveHexColor("var(--surface-page)", tokens);
         const raisedSurface = resolveHexColor("var(--surface-raised)", tokens);
+        const evidenceSurface = resolveHexColor("var(--surface-evidence)", tokens);
         expect(linkColour, `${name}: the link colour must be a hex colour`).not.toBeNull();
+        expect(
+          visitedColour,
+          `${name}: the visited link colour must be a hex colour`,
+        ).not.toBeNull();
         expect(pageSurface, `${name}: the page surface must be a hex colour`).not.toBeNull();
         expect(
           raisedSurface,
           `${name}: the raised surface must be a hex colour`,
         ).not.toBeNull();
+        expect(
+          evidenceSurface,
+          `${name}: the evidence surface must be a hex colour`,
+        ).not.toBeNull();
         if (
           linkColour === null ||
+          visitedColour === null ||
           pageSurface === null ||
-          raisedSurface === null
+          raisedSurface === null ||
+          evidenceSurface === null
         ) {
           throw new Error(
-            `${name}: link colour and surfaces must resolve to hex colours from the design tokens`,
+            `${name}: link colours and surfaces must resolve to hex colours from the design tokens`,
           );
         }
         expect(
@@ -587,11 +601,22 @@ describe("WCAG 2.2 AA essentials from source", () => {
           `${name}: links on the page surface`,
         ).toBeGreaterThanOrEqual(4.5);
         // The same link colour also sits on the raised chrome (the
-        // header) and on the evidence surface, so it must clear AA on
-        // those too.
+        // header) and on the evidence surface (the citation links in
+        // figure.claim-evidence), so it must clear AA on those too.
         expect(
           contrastRatio(linkColour, raisedSurface),
           `${name}: links on the raised chrome`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(linkColour, evidenceSurface),
+          `${name}: citation links on the evidence surface`,
+        ).toBeGreaterThanOrEqual(4.5);
+        // The visited citations (a:visited, --accent-primary-strong)
+        // sit on the same evidence surface, so they must clear AA
+        // there too.
+        expect(
+          contrastRatio(visitedColour, evidenceSurface),
+          `${name}: visited citation links on the evidence surface`,
         ).toBeGreaterThanOrEqual(4.5);
       }
     });
