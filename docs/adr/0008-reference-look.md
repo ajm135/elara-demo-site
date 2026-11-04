@@ -110,7 +110,7 @@ Only the values below differ from the reference's own values. Every other colour
 | `--rule-soft` (decorative separators only) | `#e5e5e5` | `#e5e5e5` | copied; decorative only, never the sole cue for a boundary | n/a |
 | `--surface-band` (band behind the headline) | `#2a93c9` | `#1f6f99` | the reference accent used as a large fill needs the darkened value to carry white text | white on it 5.54 |
 | `--ink-on-band` | `#ffffff` | `#ffffff` | copied | 5.54 |
-| `--ink-muted-on-band` | — | `#dbeaf4` | new value needed for the band; the reference's `#868686` on `#2a93c9` is only 1.06:1 | 4.51 |
+| `--ink-muted-on-band` | — | `#e3f0f9` | new value needed for the band; the reference's `#868686` on `#2a93c9` is only 1.06:1. The first value, `#dbeaf4`, reached 4.51:1 — over the floor, but with so little margin that the milestone-2 build lightened it to `#e3f0f9` | 4.77 |
 | `--accent-secondary` (purple) | `#8668ad` | `#8668ad` | copied; white text on it is 4.57:1 | 4.57 |
 | `--accent-tertiary` (green) | `#84c450` | `#84c450` | copied; **used with dark ink `#272727` (7.11:1), not white** — white on it would be only 2.10:1 | 7.11 |
 | `--accent-warm` (amber) | `#f5bf2f` | `#f5bf2f` | copied; **used with dark ink `#272727` (8.80:1), not white** — white on it would be only 1.70:1 | 8.80 |
@@ -180,6 +180,38 @@ This record replaces the following **visual** decisions, and only those:
 
 - **Everything else in ADRs 0001–0007 stays in force**, including: WCAG 2.2 Level AA as the requirement (with contrast computed in tests for both themes, without this or any document claiming complete WCAG or cross-browser verification); the header-only navigation with the skip link, exactly one labelled nav, exactly one `aria-current="page"` link whose active state is not colour alone; the header reading progress ("Story N of 5", the next-story cue, "End of the stories"); the composed hero and section structure and the home page sources block; the 38–42rem reading column; underlined links; a solid focus outline of at least 2 px with an offset; body text of at least 1rem at a line-height of 1.5 or more; no `100vw`; no min-width above 320 px; no `text-transform`; motion only where the reader has not asked for reduced motion; static content in `src/lib/site-content.ts` with the citations and evidence panels unchanged; loopback-only hosting at 127.0.0.1:3000; no sign-in; no database; no `use client` anywhere, so every page stays server-rendered and readable without JavaScript; no hamburger, second menu, slider, form or pop-up; nothing loaded from the internet; and the committed local fonts.
 - The page text, headings, titles, citations, evidence content, stage labels, dates, review dates, the lifespan terms, the disclaimers, the routes and the reading order stay word for word. Only the illustrations' alt texts and SVG titles change.
+
+## Milestone 2: the look built from this record
+
+The shared chrome (`src/app/globals.css`) and the page stack (`src/components/story-page.tsx`) now carry the look recorded above. Nothing else changed: the page text, the headings, the titles, the citations, the evidence stages and dates, the review dates, the lifespan terms, the disclaimers, the routes, and the reading order are word for word as before, and the pages stay server-rendered with no JavaScript.
+
+### The top of the page is one wide colour band
+
+- The header chrome and the wide top section (`.hero`, main's first element) sit on the same band (`--surface-band`, which is the accent itself). The `header` element paints no ground of its own — it is transparent, and the band is painted by the navigation list and the progress cluster inside it, so the chrome and the headline band read as one continuous block across the full page shell (the site's wide page, `--page-shell`), with no viewport-width units and no sideways scrolling from 320 to 1920 px.
+- Because the band *is* the accent, no accent-coloured text can sit on it (the accent on the band is 1:1). Every piece of text on the band therefore uses the band's own inks: `--ink-on-band` for the headline, the summary, the header links, the story position, and the next-story cue; `--ink-muted-on-band` for the review line, the visited header links, and the story-link borders.
+- The focus ring follows the same rule: the global `:focus-visible` outline stays in `--accent-primary-strong` everywhere else, and inside the band (`header :focus-visible, .hero :focus-visible`) it uses `--ink-on-band`, which clears 3:1 on the band in both themes (5.54:1 in the light theme, 8.12:1 in the dark theme). The accent would have reached only 1.20:1 there.
+- The active story link keeps its non-colour cues and adds the reference's accent: it is the only link with `aria-current="page"`, it is the heavier weight, it carries an inset bar, and it is the one filled pill in the row.
+
+### The reference's shapes
+
+- **Cards:** the evidence panels, the sources block, the lifespan-term list, and the illustration frames are the reference's 5 px rounded rectangle — `--radius-card: 0.3125rem`. The old 0.875rem radius is gone.
+- **Pills:** the five story links are the reference's 23 px pill — `--radius-pill: 1.4375rem` — and stay underlined and at least 44 by 44 px.
+
+### The page is an alternating stack of section bands
+
+The reference's page is one long alternating stack of full-width bands. The site's version keeps its own content and reading order: each story section (and the home page's sources block) sits in a plain, non-focusable `.band` wrapper whose background alternates between the page surface and the pale band (`--surface-raised`, the reference's own `#f1f3f9`), separated by whitespace (3.5 rem of band padding) rather than by rules, with the section headings centred as the reference centres them. The reading column inside each band is unchanged: every long-form block stays capped at `--measure` (38–42 rem) and centred, while `main` and `.hero` still span `--page-shell`.
+
+### The contrast table for the band (both themes)
+
+| Pair | Light theme | Dark theme | Floor |
+| --- | --- | --- | --- |
+| `--ink-on-band` on `--surface-band` (headline, summary, header links, progress text) | 5.54:1 | 8.12:1 | 4.5:1 |
+| `--ink-muted-on-band` on `--surface-band` (review line, visited header links, story-link borders) | 4.77:1 | 6.39:1 | 4.5:1 (3:1 for the border) |
+| `--surface-band` on `--ink-on-band` (the active story link on its own filled pill) | 5.54:1 | 8.12:1 | 4.5:1 |
+| `--ink-on-band` on `--surface-band` (the focus ring inside the band) | 5.54:1 | 8.12:1 | 3:1 |
+| `--accent-primary` on `--surface-band` (not used: the accent is the band) | 1.00:1 | 1.00:1 | — |
+
+The only token changed by this milestone is the light theme's `--ink-muted-on-band` (`#dbeaf4` → `#e3f0f9`, 4.51:1 → 4.77:1), for the reason recorded in the light-theme table above. No other palette value changed, and no colour was weakened.
 
 ## Notes
 

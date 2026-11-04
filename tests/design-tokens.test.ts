@@ -25,14 +25,15 @@
  *    headings on the raised sources card), muted meta, links (including
  *    visited), citations, the skip-link text, the header progress text,
  *    the headline band's inks, and the painted accent pairs — the hero
- *    kicker on the raised hero frame and the next-story cue on the
- *    raised header — meets WCAG 2.2 AA in both themes: 4.5:1 for normal
- *    text;
+ *    kicker, the header links and the next-story cue on the headline
+ *    band, and the active story link on its own filled pill — meets
+ *    WCAG 2.2 AA in both themes: 4.5:1 for normal text;
  * 4. UI boundaries meet the 3:1 non-text minimum in both themes: the
  *    meaningful rule on every surface and the accent colours where they
  *    carry a meaningful border, the active-story indicator, or the focus
  *    outline, plus the sources card's own border checked against its
- *    raised background;
+ *    raised background and the band's own focus ring and story-link
+ *    border checked against the band;
  * 5. the base interaction rules hold: underlined links, a :focus-visible
  *    outline of at least 2 px in the accent with an offset that clears
  *    3:1 on the page surface in both themes, body line-height of at
@@ -46,7 +47,9 @@
  *    centered;
  * 6. rounded cards: the evidence panels, the framed hero and story
  *    illustrations, and the home page sources block all set a positive
- *    border-radius from the shared radius token;
+ *    border-radius from the shared radius token, which is the
+ *    reference's 5 px rounded rectangle, while the story links are its
+ *    23 px pill;
  * 7. the themes are declared for native UI: color-scheme: light on the
  *    light root, color-scheme: dark on the dark root, and the dark
  *    palette exists only inside the prefers-color-scheme: dark media
@@ -206,28 +209,37 @@ const textPairs = [
   [
     "ink-muted",
     "surface-raised",
-    "muted progress text (story position, ending state) on the raised chrome",
+    "muted meta on the raised chrome (the raised cards and illustration frames)",
   ],
   ["ink-muted", "surface-evidence", "muted meta in the evidence panel"],
   ["accent-primary", "surface-page", "links on the page surface"],
   [
     "accent-primary",
     "surface-raised",
-    "links in the header, the next-story cue in the header, and the hero kicker on the raised hero frame",
+    "the accent on the raised chrome (the raised cards and illustration frames)",
   ],
   ["accent-primary", "surface-evidence", "citations in the evidence panel"],
   ["accent-primary-strong", "surface-page", "visited links on the page"],
   [
     "accent-primary-strong",
     "surface-raised",
-    "visited links and the active-story link in the header",
+    "the strong accent on the raised chrome (the skip-link border)",
   ],
   ["accent-primary-strong", "surface-evidence", "visited citations in the panel"],
-  ["ink-on-band", "surface-band", "the headline ink on the headline band"],
+  [
+    "ink-on-band",
+    "surface-band",
+    "the header links, the headline, and the summary on the headline band",
+  ],
   [
     "ink-muted-on-band",
     "surface-band",
-    "the muted meta ink on the headline band",
+    "the review line and the visited header links on the headline band",
+  ],
+  [
+    "surface-band",
+    "ink-on-band",
+    "the active story link's own text on its filled pill",
   ],
 ] as const;
 
@@ -261,7 +273,7 @@ const boundaryPairs = [
   [
     "accent-primary",
     "surface-raised",
-    "the active-story indicator on the raised chrome",
+    "the accent on the raised chrome (the raised cards and illustration frames)",
   ],
   [
     "accent-primary",
@@ -272,6 +284,21 @@ const boundaryPairs = [
     "accent-primary",
     "surface-page",
     "the accent edge on the page surface",
+  ],
+  [
+    "ink-on-band",
+    "surface-band",
+    "the focus outline and the story-link border on the headline band",
+  ],
+  [
+    "ink-muted-on-band",
+    "surface-band",
+    "the story-link border on the headline band",
+  ],
+  [
+    "surface-band",
+    "ink-on-band",
+    "the active-story pill's inset bar on its own filled pill",
   ],
 ] as const;
 
@@ -455,23 +482,63 @@ describe("design tokens in globals.css", () => {
     }
   });
 
-  it("paints the hero kicker and the next-story cue at at least 4.5:1 on their raised grounds in both themes", () => {
+  it("paints the header chrome and the wide top section on the headline band, with their text at least 4.5:1 on it in both themes", () => {
     // The token-level text pairs above only prove the *tokens* clear
-    // 4.5:1; this check pins the colours the rules actually paint:
-    // .hero-kicker on the .hero-media ground and
-    // .progress-cluster .next-story-cue on the header ground, each
-    // resolved per theme against the reader's effective tokens. A
-    // foreground or ground that does not resolve to a hex colour fails
-    // the check in either theme rather than being skipped.
+    // 4.5:1; this check pins the colours the rules actually paint. The
+    // top of the page is one wide colour band: the header chrome sits in
+    // it (the header itself is transparent, and the navigation list and
+    // the progress cluster paint the band), and the wide top section
+    // continues it. The accent is the band's own colour, so every text
+    // on the band uses the band's inks, each resolved per theme against
+    // the reader's effective tokens. A foreground or ground that does
+    // not resolve to a hex colour fails the check in either theme rather
+    // than being skipped.
+    const header = parseDeclarations(cssRuleBody(globalCss, "header"));
+    const navList = parseDeclarations(cssRuleBody(globalCss, "nav ul"));
+    const navLink = parseDeclarations(cssRuleBody(globalCss, "nav a"));
+    const navLinkVisited = parseDeclarations(cssRuleBody(globalCss, "nav a:visited"));
+    const hero = parseDeclarations(cssRuleBody(globalCss, ".hero"));
     const heroKicker = parseDeclarations(cssRuleBody(globalCss, ".hero-kicker"));
     const heroMedia = parseDeclarations(cssRuleBody(globalCss, ".hero-media"));
+    const progressCluster = parseDeclarations(
+      cssRuleBody(globalCss, ".progress-cluster"),
+    );
     const nextStoryCue = parseDeclarations(
       cssRuleBody(globalCss, ".progress-cluster .next-story-cue"),
     );
-    const header = parseDeclarations(cssRuleBody(globalCss, "header"));
+
+    // The header paints no ground of its own: the band comes from the
+    // navigation list and the progress cluster below it.
+    expect(
+      (header["background-color"] ?? "").trim(),
+      "the header must be transparent on the band, not the raised grey",
+    ).toBe("transparent");
 
     for (const theme of themes) {
-      // The hero kicker: accent ink on the raised hero frame.
+      const band = tokenColor(theme, "surface-band");
+
+      // The band is painted by the navigation list, the progress
+      // cluster, and the wide top section.
+      for (const [label, declarations] of [
+        ["nav ul", navList],
+        [".progress-cluster", progressCluster],
+        [".hero", hero],
+      ] as const) {
+        const ground = resolveHexColor(
+          declarations["background-color"] ?? "",
+          theme.effectiveTokens,
+        );
+        expect(
+          ground,
+          `the ${label} ground must resolve to a hex colour in the ${theme.name} theme`,
+        ).not.toBeNull();
+        expect(
+          ground,
+          `the ${label} must paint the headline band in the ${theme.name} theme`,
+        ).toEqual(band);
+      }
+
+      // The hero kicker: the band's own ink on the band.
       const kickerColour = resolveHexColor(
         heroKicker["color"] ?? "",
         theme.effectiveTokens,
@@ -482,8 +549,72 @@ describe("design tokens in globals.css", () => {
       ).not.toBeNull();
       expect(
         kickerColour,
-        `the .hero-kicker must paint the accent ink in the ${theme.name} theme`,
-      ).toEqual(tokenColor(theme, "accent-primary"));
+        `the .hero-kicker must paint a band ink in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "ink-on-band"));
+      if (kickerColour !== null) {
+        expect(
+          contrastRatio(kickerColour, band),
+          `${theme.name}: the hero kicker on the headline band`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+
+      // The header links: the band's own ink, and the muted band ink
+      // once a reader has visited them.
+      const linkColour = resolveHexColor(
+        navLink["color"] ?? "",
+        theme.effectiveTokens,
+      );
+      expect(
+        linkColour,
+        `the header link colour must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      expect(
+        linkColour,
+        `the header links must paint a band ink in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "ink-on-band"));
+      if (linkColour !== null) {
+        expect(
+          contrastRatio(linkColour, band),
+          `${theme.name}: the header links on the headline band`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+      const visitedColour = resolveHexColor(
+        navLinkVisited["color"] ?? "",
+        theme.effectiveTokens,
+      );
+      expect(
+        visitedColour,
+        `the visited header link colour must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      if (visitedColour !== null) {
+        expect(
+          contrastRatio(visitedColour, band),
+          `${theme.name}: the visited header links on the headline band`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+
+      // The next-story cue: the band's own ink on the band.
+      const cueColour = resolveHexColor(
+        nextStoryCue["color"] ?? "",
+        theme.effectiveTokens,
+      );
+      expect(
+        cueColour,
+        `the .next-story-cue colour must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      expect(
+        cueColour,
+        `the next-story cue must paint a band ink in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "ink-on-band"));
+      if (cueColour !== null) {
+        expect(
+          contrastRatio(cueColour, band),
+          `${theme.name}: the next-story cue on the headline band`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+
+      // The illustration frame keeps its own raised card, so the picture
+      // reads as a composed element on the band.
       const heroFrame = resolveHexColor(
         heroMedia["background-color"] ?? "",
         theme.effectiveTokens,
@@ -496,44 +627,98 @@ describe("design tokens in globals.css", () => {
         heroFrame,
         `the .hero-media frame must paint the raised surface in the ${theme.name} theme`,
       ).toEqual(tokenColor(theme, "surface-raised"));
-      if (kickerColour !== null && heroFrame !== null) {
-        expect(
-          contrastRatio(kickerColour, heroFrame),
-          `${theme.name}: the hero kicker (accent ink) on the raised hero frame`,
-        ).toBeGreaterThanOrEqual(4.5);
-      }
+    }
+  });
 
-      // The next-story cue: accent ink on the raised header.
-      const cueColour = resolveHexColor(
-        nextStoryCue["color"] ?? "",
+  it("paints the focus ring on the headline band with the band's ink, at 3:1 or better", () => {
+    // The accent is the band's colour, so the global accent focus ring
+    // cannot clear 3:1 there; the band carries its own ring in the
+    // band's ink.
+    const bandFocus = parseDeclarations(
+      cssRuleBody(globalCss, "header :focus-visible, .hero :focus-visible"),
+    );
+    for (const theme of themes) {
+      const outlineColour = resolveHexColor(
+        bandFocus["outline-color"] ?? "",
         theme.effectiveTokens,
       );
       expect(
-        cueColour,
-        `the .next-story-cue colour must resolve to a hex colour in the ${theme.name} theme`,
+        outlineColour,
+        `the band focus ring colour must resolve to a hex colour in the ${theme.name} theme`,
       ).not.toBeNull();
       expect(
-        cueColour,
-        `the next-story cue must paint the accent ink in the ${theme.name} theme`,
-      ).toEqual(tokenColor(theme, "accent-primary"));
-      const headerGround = resolveHexColor(
-        header["background-color"] ?? "",
-        theme.effectiveTokens,
-      );
-      expect(
-        headerGround,
-        `the header ground must resolve to a hex colour in the ${theme.name} theme`,
-      ).not.toBeNull();
-      expect(
-        headerGround,
-        `the header must paint the raised surface in the ${theme.name} theme`,
-      ).toEqual(tokenColor(theme, "surface-raised"));
-      if (cueColour !== null && headerGround !== null) {
+        outlineColour,
+        `the band focus ring must paint the band's own ink in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "ink-on-band"));
+      if (outlineColour !== null) {
         expect(
-          contrastRatio(cueColour, headerGround),
-          `${theme.name}: the next-story cue (accent ink) on the raised header`,
-        ).toBeGreaterThanOrEqual(4.5);
+          contrastRatio(outlineColour, tokenColor(theme, "surface-band")),
+          `the focus ring on the headline band (${theme.name})`,
+        ).toBeGreaterThanOrEqual(3);
       }
+    }
+  });
+
+  it("paints the alternating section bands: the page surface and the pale band, never the same tone twice", () => {
+    const band = parseDeclarations(cssRuleBody(globalCss, ".band"));
+    const bandAlt = parseDeclarations(cssRuleBody(globalCss, ".band-alt"));
+
+    for (const theme of themes) {
+      const plain = resolveHexColor(
+        band["background-color"] ?? "",
+        theme.effectiveTokens,
+      );
+      const alternate = resolveHexColor(
+        bandAlt["background-color"] ?? "",
+        theme.effectiveTokens,
+      );
+      expect(
+        plain,
+        `the .band ground must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      expect(
+        alternate,
+        `the .band-alt ground must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      expect(
+        plain,
+        `the plain band must paint the page surface in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "surface-page"));
+      expect(
+        alternate,
+        `the alternating band must paint the pale band in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "surface-raised"));
+      // The two bands read apart, so the page is an alternating stack.
+      expect(alternate).not.toEqual(plain);
+    }
+  });
+
+  it("uses the reference's two box shapes: 5 px rounded cards and 23 px pill story links", () => {
+    // The card radius token is the reference's 5 px rounded rectangle,
+    // and the story links are its 23 px pill.
+    const cardRadius = /^(\d+(?:\.\d+)?)rem$/.exec(
+      lightTheme.tokens["radius-card"] ?? "",
+    );
+    expect(cardRadius, "--radius-card must be a rem value").not.toBeNull();
+    if (cardRadius !== null) {
+      expect(
+        Number(cardRadius[1]) * 16,
+        "--radius-card must be the reference's 5 px rounded rectangle",
+      ).toBeCloseTo(5, 5);
+    }
+
+    const navLink = parseDeclarations(cssRuleBody(globalCss, "nav a"));
+    const pill = resolveCssValue(
+      navLink["border-radius"] ?? "",
+      lightTheme.effectiveTokens,
+    ).trim();
+    const pillRem = /^(\d+(?:\.\d+)?)rem$/.exec(pill);
+    expect(pillRem, "the story links must use a rem pill radius").not.toBeNull();
+    if (pillRem !== null) {
+      expect(
+        Number(pillRem[1]) * 16,
+        "the story links must use the reference's 23 px pill",
+      ).toBeCloseTo(23, 5);
     }
   });
 
