@@ -90,6 +90,18 @@ The site keeps its server-rendered, no-JavaScript, header-only navigation and it
 - **Progress and the active link:** the reference marks the active navigation item with the accent colour alone (`.rd-nav-item.active .rd-nav-link { color: #2a93c9 }`) and shows no step indicator. The site keeps its existing header progress cluster ("Story N of 5", the next-story cue, "End of the stories") and its existing active state — heavier weight plus an inset rule, so the active story is identifiable without colour — and adds the reference's accent colour to it as one further cue.
 - **Illustrations:** the six existing illustrations keep their file names, sizes and subjects and are redrawn as flat drawings in the new palette, using the reference's flat, non-photographic character, with matching alt texts.
 
+## Illustration style
+
+The six drawings in `public/images/` are already drawn in one shared style, and this section records that style as the decision any later redraw follows. It is not a request to redraw them again.
+
+- **One flat, non-photographic vector style, original to this project.** Nothing is taken from the reference: no code, no image, no icon and no text.
+- **Palette from this record only:** light field `#ffffff`, pale sky `#f1f3f9`, dark surfaces `#191919` / `#272727` / `#2c343b`, blue accent `#1f6f99` (dark theme `#55bbeb`), purple `#8668ad`, green `#84c450`, amber `#f5bf2f`, orange `#f54b0f`, dark ink `#272727` and light ink `#ffffff`. Warm and green fills sit on dark ink, never as text.
+- **Mood:** hopeful, calm and educational for general readers — the same hopeful tone as the stories, with no medical claims drawn into the pictures.
+- **Shared devices:** rounded shapes, overlapping translucent circles, short rounded strokes, and a full-canvas field. No photos, no embedded raster images, no visible text, no external references, no fonts and no scripts.
+- **Files, sizes and subjects** are kept as they are: `hopeful-future`, `ai-in-medicine`, `cancer-research`, `other-diseases` and `longer-lives` at 1200×630, and `cancer-hope` at 800×600.
+- **Both themes are handled inside each SVG:** literal light-theme fills plus class overrides in one `@media (prefers-color-scheme: dark)` block. There is no second file and no JavaScript.
+- **Alt text** in `src/lib/site-content.ts` and each SVG's own `<title>` already describe these drawings. Only those two strings may change if a later redraw changes the picture; no other copy changes.
+
 ## Colour changes made for contrast, and by how much
 
 Only the values below differ from the reference's own values. Every other colour is copied as read above. All ratios are WCAG 2.2 relative-luminance contrast ratios computed against the surface the colour actually sits on. Floors: **4.5:1** for every text and link colour on each surface, **3:1** for meaningful borders and the focus outline.
