@@ -144,6 +144,30 @@ function hrefValues(svg: string): string[] {
   );
 }
 
+/**
+ * The ten decorative backgrounds (milestone 5, docs/adr/0009-background-images.md):
+ * five hero fields and five darker image bands, used only as CSS
+ * background-image URLs under /images/, one per page for each role.
+ * Each keeps its file name, is a hand-made vector field with a
+ * full-canvas viewBox so background-size: cover shows no floating
+ * frame, carries one non-empty <title>, and contains no photos,
+ * embedded rasters, visible text, scripts, fonts or external
+ * references. The CSS scrim handles theme contrast, so a background
+ * file holds no <style> block and no second theme variant.
+ */
+const BACKGROUND_IMAGES: readonly string[] = [
+  "bg-home-hero.svg",
+  "bg-home-band.svg",
+  "bg-how-ai-helps-hero.svg",
+  "bg-how-ai-helps-band.svg",
+  "bg-cancer-hero.svg",
+  "bg-cancer-band.svg",
+  "bg-diseases-hero.svg",
+  "bg-diseases-band.svg",
+  "bg-longevity-hero.svg",
+  "bg-longevity-band.svg",
+];
+
 describe("site images", () => {
   it("ships a non-empty favicon", () => {
     expect(existsSync("public/favicon.ico")).toBe(true);
@@ -160,9 +184,12 @@ describe("site images", () => {
 });
 
 describe("the six story illustrations", () => {
-  it("keeps exactly the six file names in public/images/, one file per drawing", () => {
+  it("keeps exactly the six drawings plus the ten background-image files in public/images/, one file per drawing", () => {
     expect(readdirSync("public/images").sort()).toEqual(
-      ILLUSTRATIONS.map((drawing) => drawing.fileName).sort(),
+      [
+        ...ILLUSTRATIONS.map((drawing) => drawing.fileName),
+        ...BACKGROUND_IMAGES,
+      ].sort(),
     );
   });
 
@@ -283,6 +310,112 @@ describe("the six story illustrations", () => {
         alt,
         `${drawing.fileName}: the alt text must start with the title's picture`,
       ).toMatch(new RegExp(`^${escapeRegExp(picture)}`));
+    }
+  });
+});
+
+describe("the ten background-image assets", () => {
+  it("exists as local files committed beside the illustrations", () => {
+    for (const background of BACKGROUND_IMAGES) {
+      const path = `public/images/${background}`;
+      expect(existsSync(path), `${background}: exists`).toBe(true);
+      expect(
+        statSync(path).size,
+        `${background}: non-empty`,
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  it("keeps a full-canvas 1600 by 900 viewBox so cover shows no floating frame", () => {
+    for (const background of BACKGROUND_IMAGES) {
+      const root = rootSvgTag(readDrawing(background));
+      expect(root, `${background}: an <svg> root element`).not.toBe("");
+      expect(
+        attributeValue(root, "width"),
+        `${background}: the width attribute`,
+      ).toBe("1600");
+      expect(
+        attributeValue(root, "height"),
+        `${background}: the height attribute`,
+      ).toBe("900");
+      expect(
+        attributeValue(root, "viewBox"),
+        `${background}: the viewBox attribute`,
+      ).toBe("0 0 1600 900");
+    }
+  });
+
+  it("stays a hand-made vector field: no photos, rasters, visible text, scripts or fonts", () => {
+    for (const background of BACKGROUND_IMAGES) {
+      const svg = readDrawing(background);
+      for (const marker of FORBIDDEN_MARKERS) {
+        expect(
+          svg,
+          `${background}: must not contain ${marker.label}`,
+        ).not.toMatch(marker.pattern);
+      }
+      expect(
+        svg,
+        `${background}: must not embed a data: URI`,
+      ).not.toMatch(DATA_URI_PATTERN);
+    }
+  });
+
+  it("references nothing outside the file: no remote or protocol-relative href", () => {
+    for (const background of BACKGROUND_IMAGES) {
+      const svg = readDrawing(background);
+      for (const value of hrefValues(svg)) {
+        expect(
+          value,
+          `${background}: an href must not point outside the file`,
+        ).not.toMatch(/(https?|ftp):\/\//i);
+        expect(
+          value,
+          `${background}: an href must not be protocol-relative`,
+        ).not.toMatch(/^\//);
+      }
+    }
+  });
+
+  it("carries the theme in the CSS scrim, not in a second in-file style block", () => {
+    for (const background of BACKGROUND_IMAGES) {
+      const svg = readDrawing(background);
+      expect(
+        (svg.match(/<style[^>]*>/gi) ?? []).length,
+        `${background}: no <style> block`,
+      ).toBe(0);
+      expect(
+        (svg.match(/@media/gi) ?? []).length,
+        `${background}: no @media rule`,
+      ).toBe(0);
+    }
+  });
+
+  it("has one non-empty <title> describing the picture", () => {
+    for (const background of BACKGROUND_IMAGES) {
+      const svg = readDrawing(background);
+      const titles = (svg.match(/<title[^>]*>/gi) ?? []).length;
+      expect(
+        titles,
+        `${background}: exactly one <title> element`,
+      ).toBe(1);
+      const picture = normalizeSpaces(
+        /<title[^>]*>([\s\S]*?)<\/title\s*>/i.exec(svg)?.[1] ?? "",
+      );
+      expect(
+        picture,
+        `${background}: the <title> must not be empty`,
+      ).not.toBe("");
+    }
+  });
+
+  it("is not listed in .gitignore, so the background-image files stay committed", () => {
+    const ignore = readFileSync(".gitignore", "utf-8");
+    for (const background of BACKGROUND_IMAGES) {
+      expect(
+        ignore,
+        `${background}: not gitignored`,
+      ).not.toMatch(new RegExp(escapeRegExp(`images/${background}`)));
     }
   });
 });
