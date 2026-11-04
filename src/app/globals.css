@@ -1,5 +1,5 @@
 /*
- * Demo Site: token-driven design system — light and dark.
+ * Demo Site: token-driven design system â€” light and dark.
  *
  * Two full palettes, chosen only by the reader's system colour setting
  * (docs/adr/0008-reference-look.md):
@@ -27,17 +27,21 @@
  * the WCAG 2.2 contrast ratios (4.5:1 for normal text, 3:1 for UI
  * boundaries) in both themes.
  *
- * Layout (the look recorded in docs/adr/0008-reference-look.md):
- * - the top of the page is one wide colour band (--surface-band): the
- *   header chrome sits in it, and the wide top section (.hero, main's
- *   first element) continues it with the kicker, the single h1, the
- *   summary, the review date, and the page's framed illustration. The
- *   band's own inks (--ink-on-band, --ink-muted-on-band) are the only
- *   colours that may carry text there, because the accent itself is the
- *   band;
+ * Layout (the look recorded in docs/adr/0008-reference-look.md, with the
+ * opening replaced by docs/adr/0009-background-images.md):
+ * - the top of the page is one original full-bleed background image per
+ *   story (--hero-image, set by the route's .story-frame-* wrapper and
+ *   painted as a CSS background-image on the transparent header and on
+ *   the wide top section .hero, main's first element). Text never sits
+ *   on image pixels: the hero's text block, the story-link pills, and
+ *   the progress chips each carry a solid, opaque scrim (--scrim) whose
+ *   inks (--ink-on-scrim, --ink-muted-on-scrim) are the only colours
+ *   that may carry text there. Right after the hero, one empty
+ *   decorative .image-band paints the page's second picture
+ *   (--band-image);
  * - below it the page is an alternating stack of full-width section
- *   bands — the page surface, then the pale band, then the page surface
- *   again — separated by whitespace rather than by rules, with centred
+ *   bands â€” the page surface, then the pale band, then the page surface
+ *   again â€” separated by whitespace rather than by rules, with centred
  *   section headings, as the reference lays its page out;
  * - the wide page (main and .hero) spans the shared page shell
  *   (--page-shell), while every long-form block in main stays in a
@@ -54,8 +58,9 @@
  *   side padding, so they end exactly at the page shell's edges);
  * - WCAG 2.2 AA in both themes: underlined links (colour is never the
  *   only cue), a :focus-visible outline of at least 2 px in the accent
- *   with an offset (and the band's own ink on the band, where the accent
- *   cannot clear 3:1), a skip link that is off-screen until focused,
+ *   with an offset (and the scrim's own ink inside the header and the
+ *   hero, where the ring sits beside a scrim), a skip link that is
+ *   off-screen until focused,
  *   navigation targets of at least 44x44 px, and comfortable reading
  *   rhythm (line-height at least 1.5, body font-size at least 1rem,
  *   long-form measure of about 40rem);
@@ -96,8 +101,8 @@
   --ink-muted: #666666;
   /* The reference's blue accent, darkened about 25% per channel, then a
      further about 6% per channel toward the recorded strong step, so
-     links — including the citation links inside the cards that sit on
-     the pale band — clear 4.5:1 on every surface with margin; the
+     links â€” including the citation links inside the cards that sit on
+     the pale band â€” clear 4.5:1 on every surface with margin; the
      strong step carries hover, visited links, and the focus outline. */
   --accent-primary: #1d6890;
   --accent-primary-strong: #1c6288;
@@ -113,13 +118,22 @@
   --surface-band: #1d6890;
   --ink-on-band: #ffffff;
   --ink-muted-on-band: #e3f0f9;
+  /* The text scrim (docs/adr/0009-background-images.md): the solid,
+     opaque ground every piece of text on the opening image sits on â€”
+     the hero's text block, the story-link pills, and the progress
+     chips â€” so its contrast never depends on image pixels. It starts
+     from the proven band pair above: white on it 6.11:1, the muted ink
+     5.27:1. Opaque hex only: no rgba, no translucent overlay. */
+  --scrim: #1d6890;
+  --ink-on-scrim: #ffffff;
+  --ink-muted-on-scrim: #e3f0f9;
   /* The reference's remaining accents, kept for the illustrations and
      the accent palette. They are decorative fills, not text colours. */
   --accent-secondary: #8668ad;
   --accent-tertiary: #84c450;
   --accent-warm: #f5bf2f;
   --accent-emphasis: #f54b0f;
-  /* Long-form measure: about 60 to 75 characters per line — the cap on
+  /* Long-form measure: about 60 to 75 characters per line â€” the cap on
      the reading column that sits inside the wider page. */
   --measure: 40rem;
   /* Wide page shell: the page itself (main), the bands, and the header
@@ -169,6 +183,13 @@
     --surface-band: #55bbeb;
     --ink-on-band: #191919;
     --ink-muted-on-band: #12303d;
+    /* The text scrim in the dark theme: the same ten images under a
+       darker solid scrim (a deep blue already in the palette) with light
+       inks â€” white on it 13.85:1, the muted ink 10.37:1. No paired dark
+       image files and no toggle: only the system setting chooses it. */
+    --scrim: #12303d;
+    --ink-on-scrim: #ffffff;
+    --ink-muted-on-scrim: #c7e3f4;
     /* The reference's remaining accents, unchanged in both themes. */
     --accent-secondary: #8668ad;
     --accent-tertiary: #84c450;
@@ -238,13 +259,14 @@ a:visited {
 }
 
 /*
- * Inside the headline band the accent cannot clear 3:1 against the band
- * itself (it is the band's colour), so the focus ring there uses the
- * band's own ink, which clears it comfortably in both themes.
+ * Inside the header and the hero every focusable control sits on a scrim
+ * pill, so the focus ring there uses the scrim's own ink, which clears
+ * 3:1 on the scrim comfortably in both themes (6.11:1 light, 13.85:1
+ * dark). It keeps the global 3 px width and 2 px offset.
  */
 header :focus-visible,
 .hero :focus-visible {
-  outline-color: var(--ink-on-band);
+  outline-color: var(--ink-on-scrim);
 }
 
 /*
@@ -272,15 +294,54 @@ header :focus-visible,
 }
 
 /*
+ * The story frame (docs/adr/0009-background-images.md): each route wraps
+ * its header and its story page in one plain div that only names the
+ * page's two original full-bleed background images. The hero image is
+ * painted by the header and by .hero below; the band image by the
+ * decorative .image-band right after the hero. All ten files are local
+ * SVGs under /images/ â€” nothing remote, nothing from the reference.
+ */
+.story-frame-home {
+  --hero-image: url("/images/bg-home-hero.svg");
+  --band-image: url("/images/bg-home-band.svg");
+}
+
+.story-frame-how-ai-helps {
+  --hero-image: url("/images/bg-how-ai-helps-hero.svg");
+  --band-image: url("/images/bg-how-ai-helps-band.svg");
+}
+
+.story-frame-cancer {
+  --hero-image: url("/images/bg-cancer-hero.svg");
+  --band-image: url("/images/bg-cancer-band.svg");
+}
+
+.story-frame-diseases {
+  --hero-image: url("/images/bg-diseases-hero.svg");
+  --band-image: url("/images/bg-diseases-band.svg");
+}
+
+.story-frame-longevity {
+  --hero-image: url("/images/bg-longevity-hero.svg");
+  --band-image: url("/images/bg-longevity-band.svg");
+}
+
+/*
  * Header and the single site navigation (header-only, no hamburger, no
- * second nav). The header itself is transparent: the band colour is
- * painted by the navigation list and the progress cluster below, so the
- * chrome, the wide top section, and the band read as one continuous
- * colour block across the top of the page, exactly the page width.
+ * second nav). The header sits on the page's opening picture, as the
+ * reference's header sits on its photograph: it paints no colour of its
+ * own (transparent) and paints the hero image edge to edge â€” it is
+ * already width 100%, so no viewport-width unit is needed. The
+ * navigation list and the progress cluster paint no bar of their own,
+ * so the picture stays visible between the scrim pills and chips.
  */
 header {
   width: 100%;
   background-color: transparent;
+  background-image: var(--hero-image);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center top;
 }
 
 nav {
@@ -295,14 +356,13 @@ nav ul {
   margin: 0 auto;
   padding: 0.75rem 1rem;
   max-width: var(--page-shell);
-  background-color: var(--surface-band);
 }
 
 /*
  * The story links: the reference's pill shape (a 23 px radius), still
- * underlined, and never smaller than 44x44 CSS px. Their ink is the
- * band's own ink, because the accent is the band's colour and could not
- * carry text there.
+ * underlined, and never smaller than 44x44 CSS px. Each pill is its own
+ * solid scrim, so the link text never sits on image pixels, and its ink
+ * is the scrim's own ink.
  */
 nav a {
   display: inline-flex;
@@ -310,63 +370,75 @@ nav a {
   min-width: 44px;
   min-height: 44px;
   padding: 0.5rem 1rem;
-  border: 1px solid var(--ink-muted-on-band);
+  border: 1px solid var(--ink-muted-on-scrim);
   border-radius: var(--radius-pill);
-  color: var(--ink-on-band);
+  background-color: var(--scrim);
+  color: var(--ink-on-scrim);
   text-decoration: underline;
 }
 
 nav a:visited {
-  color: var(--ink-muted-on-band);
+  color: var(--ink-muted-on-scrim);
 }
 
 /*
- * The one active link in the header. The filled pill and the heavier
- * weight mean colour is never the only indicator of the current story.
+ * The one active link in the header. The filled pill (the scrim's ink as
+ * the fill, the scrim colour as the text) and the heavier weight mean
+ * colour is never the only indicator of the current story.
  */
 nav a[aria-current="page"] {
-  color: var(--surface-band);
-  background-color: var(--ink-on-band);
-  border-color: var(--ink-on-band);
+  color: var(--scrim);
+  background-color: var(--ink-on-scrim);
+  border-color: var(--ink-on-scrim);
   font-weight: 700;
-  box-shadow: inset 0 -2px 0 var(--surface-band);
+  box-shadow: inset 0 -2px 0 var(--scrim);
 }
 
 /*
  * Header progress cluster: the "Story N of 5" position, the current
  * story's label, and the next-story cue (or the ending state on the last
- * story) live in one small group beside the navigation, on the same band
- * and spanning the same wide page shell.
+ * story) live in one small group beside the navigation, spanning the
+ * same wide page shell. The cluster paints no bar: each of its spans is
+ * a small scrim chip, so the text sits on the solid scrim and the
+ * picture stays visible around it.
  */
 .progress-cluster {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.25rem 1rem;
+  gap: 0.5rem 0.75rem;
   margin: 0 auto;
   padding: 0 1rem 0.75rem;
   max-width: var(--page-shell);
   font-size: 0.875rem;
-  background-color: var(--surface-band);
-  color: var(--ink-on-band);
+  color: var(--ink-on-scrim);
 }
 
 .progress-cluster .story-position {
-  color: var(--ink-on-band);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--scrim);
+  color: var(--ink-on-scrim);
   font-weight: 700;
 }
 
 .progress-cluster .next-story-cue {
-  color: var(--ink-on-band);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--scrim);
+  color: var(--ink-on-scrim);
 }
 
 .progress-cluster .next-story-cue a,
 .progress-cluster .next-story-cue a:visited {
-  color: var(--ink-on-band);
+  color: var(--ink-on-scrim);
 }
 
 .progress-cluster .progress-ending {
-  color: var(--ink-on-band);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--scrim);
+  color: var(--ink-on-scrim);
 }
 
 /*
@@ -408,14 +480,29 @@ main img {
   height: auto;
 }
 
-/* The story's headline: the large display step of the page — the largest
+/* The story's headline: the large display step of the page â€” the largest
    type size on the page. It sits in the hero's text block, which is what
    caps it at the reading measure. */
 .hero h1 {
   margin: 0 0 1rem;
-  font-size: clamp(2.5rem, 1.7rem + 2.4vw, 4.5rem);
+  font-size: 2.5rem;
   line-height: 1.1;
-  color: var(--ink-on-band);
+  color: var(--ink-on-scrim);
+}
+
+/* Stepped display sizes for wider viewports — the same large type the
+   clamp gave, in whole rem steps, with no viewport-width unit anywhere
+   in the stylesheet (docs/adr/0009-background-images.md). */
+@media (min-width: 768px) {
+  .hero h1 {
+    font-size: 3.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .hero h1 {
+    font-size: 4.5rem;
+  }
 }
 
 main h2 {
@@ -464,23 +551,32 @@ main > p:last-child {
 /*
  * Wide top section (the hero): the kicker, large display headline,
  * summary, and review date on one side, the page's framed illustration
- * on the other, all on the headline band. It is main's first element and
- * spans the same wider page shell as main — wider than the reading
- * column, with no horizontal overflow — stacked below 768px and in two
- * columns at 768px and up. Its band reaches the page shell's edges (the
- * negative side margins cancel main's padding), and its content keeps
- * the same 1 rem inset, so nothing scrolls sideways from 320 to
- * 1920 px. The frame is a 5 px rounded card with a meaningful rule, so
- * the illustration reads as a composed element.
+ * on the other, on the page's original full-bleed background image. It
+ * is main's first element and spans the same wider page shell as main â€”
+ * wider than the reading column, with no horizontal overflow â€” stacked
+ * below 768px and in two columns at 768px and up. It reaches the page
+ * shell's edges (the negative side margins cancel main's padding), and
+ * its content keeps the same 1 rem inset, so nothing scrolls sideways
+ * from 320 to 1920 px. Its width adds back the 2 rem of main padding
+ * the negative margins cancel, so the picture reaches both edges of the
+ * shell and never goes past them. The picture is the visible ground: the opaque
+ * scrim colour underneath is only a fallback while the image loads,
+ * and the image paints on top of it. The frame is a 5 px rounded card
+ * with a meaningful rule, so the illustration reads as a composed
+ * element on the picture.
  */
 .hero {
   display: grid;
   gap: 2rem;
-  width: 100%;
+  width: calc(100% + 2rem);
   max-width: var(--page-shell);
   margin-inline: -1rem;
   padding: 3rem 1rem;
-  background-color: var(--surface-band);
+  background-color: var(--scrim);
+  background-image: var(--hero-image);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center top;
 }
 
 @media (min-width: 768px) {
@@ -492,23 +588,28 @@ main > p:last-child {
 
 /* The hero's text column, in reading order: capped at the measure so the
    headline, summary, and review date stay 60 to 75 characters, centered
-   in the space the wide top section gives it. Its ink is the band's own
-   ink. */
+   in the space the wide top section gives it. It is the text scrim: a
+   solid, opaque card in the scrim colour with padding, so the kicker,
+   the h1, the summary, and the review line all sit inside it and their
+   contrast never depends on the picture behind. */
 .hero-text {
   min-width: 0;
   max-width: var(--measure);
   margin-inline: auto;
-  color: var(--ink-on-band);
+  padding: 1.5rem;
+  border-radius: var(--radius-card);
+  background-color: var(--scrim);
+  color: var(--ink-on-scrim);
 }
 
-/* The kicker: the story's nav label, set small and in the band's ink. No
-   text-transform — navigation labels stay exactly their copy. */
+/* The kicker: the story's nav label, set small and in the scrim's ink.
+   No text-transform â€” navigation labels stay exactly their copy. */
 .hero-kicker {
   margin: 0 0 0.5rem;
   font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--ink-on-band);
+  color: var(--ink-on-scrim);
 }
 
 /* The hero summary: one step up from body text, still inside the measure. */
@@ -522,7 +623,7 @@ main > p:last-child {
 .hero-review {
   margin: 0;
   font-size: 0.875rem;
-  color: var(--ink-muted-on-band);
+  color: var(--ink-muted-on-scrim);
 }
 
 .hero-media {
@@ -537,6 +638,28 @@ main > p:last-child {
   display: block;
   width: 100%;
   height: auto;
+}
+
+/*
+ * The page's one later full-bleed image band (the reference's later
+ * dark image band, adapted): an empty, decorative, aria-hidden div right
+ * after the hero that paints the page's second original background
+ * image. It spans the page shell exactly as the hero does (the same
+ * width, max-width, and cancelled 1 rem padding â€” never wider, no
+ * viewport-width unit), carries no text, heading, link, or img, and so
+ * needs no scrim. The scrim colour underneath is only the fallback while
+ * the image loads.
+ */
+.image-band {
+  width: calc(100% + 2rem);
+  max-width: var(--page-shell);
+  margin-inline: -1rem;
+  min-height: 14rem;
+  background-color: var(--scrim);
+  background-image: var(--band-image);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 /*
@@ -629,8 +752,8 @@ main > p:last-child {
  * evidence panels. Terms are set in the heading ink at the heavier weight
  * (so the cue is never colour-only), definitions in the body ink; both
  * clear 4.5:1 on the evidence surface in both themes. The list flows in
- * the normal content column — no min-width, no nowrap, no negative
- * overflow — so 320 px viewports never scroll sideways, and no animation
+ * the normal content column â€” no min-width, no nowrap, no negative
+ * overflow â€” so 320 px viewports never scroll sideways, and no animation
  * is required.
  */
 .lifespan-terms {

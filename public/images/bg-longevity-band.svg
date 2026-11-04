@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img">
+  <title>A dark horizon with rising green milestone arcs over deep charcoal space</title>
+  <rect x="0" y="0" width="1600" height="900" fill="#191919"/>
+  <path d="M0 540 Q 400 480 800 540 T 1600 520 V 900 H 0 Z" fill="#2c343b" opacity="0.75"/>
+  <path d="M0 680 Q 440 610 880 690 T 1600 660 V 900 H 0 Z" fill="#272727"/>
+  <g fill="none" stroke="#84c450" stroke-width="6" stroke-linecap="round" opacity="0.8">
+    <path d="M240 560 A 40 40 0 0 1 320 560"/>
+    <path d="M560 540 A 50 50 0 0 1 660 540"/>
+    <path d="M880 510 A 60 60 0 0 1 1000 510"/>
+  </g>
+  <g fill="none" stroke="#12303d" stroke-width="10" opacity="0.7">
+    <path d="M200 600 A 70 70 0 0 1 360 600"/>
+    <path d="M540 580 A 80 80 0 0 1 700 580"/>
+  </g>
+  <path d="M120 460 L 480 400 L 840 340 L 1200 240 L 1520 140" stroke="#f5bf2f" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.75"/>
+  <circle cx="200" cy="180" r="5" fill="#55bbeb" opacity="0.5"/>
+  <circle cx="700" cy="120" r="4" fill="#55bbeb" opacity="0.4"/>
+  <circle cx="1180" cy="90" r="5" fill="#55bbeb" opacity="0.45"/>
+  <circle cx="1520" cy="140" r="12" fill="#f5bf2f"/>
+  <path d="M300 760 q 120 -44 240 0" stroke="#2c343b" stroke-width="7" stroke-linecap="round" fill="none"/>
+</svg>

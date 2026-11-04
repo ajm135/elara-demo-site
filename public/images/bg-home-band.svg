@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img">
+  <title>A quiet dark field with a soft horizon wave and a steady blue pulse line</title>
+  <defs>
+    <linearGradient id="bandSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#191919"/>
+      <stop offset="1" stop-color="#272727"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1600" height="900" fill="url(#bandSky)"/>
+  <path d="M0 640 Q 340 520 680 640 T 1600 620 V900 H0 Z" fill="#2c343b"/>
+  <path d="M0 740 Q 420 620 860 740 T 1600 720 V900 H0 Z" fill="#12303d" opacity="0.85"/>
+  <path d="M0 380 H1600" stroke="#272727" stroke-width="4" opacity="0.9"/>
+  <path d="M0 250 H1600" stroke="#2c343b" stroke-width="3" opacity="0.7"/>
+  <path d="M0 510 H1600" stroke="#2c343b" stroke-width="3" opacity="0.7"/>
+  <path d="M180 510 L 380 510 L 430 430 L 520 560 L 600 470 L 680 510 L 1060 510 L 1120 460 L 1200 540 L 1290 490 L 1360 510 L 1420 510" stroke="#55bbeb" stroke-width="6" fill="none" stroke-linejoin="round" stroke-linecap="round" opacity="0.9"/>
+  <circle cx="380" cy="510" r="9" fill="#55bbeb"/>
+  <circle cx="1060" cy="510" r="9" fill="#55bbeb"/>
+  <circle cx="430" cy="430" r="7" fill="#79ccf2" opacity="0.8"/>
+  <circle cx="1200" cy="540" r="7" fill="#79ccf2" opacity="0.8"/>
+  <circle cx="820" cy="200" r="5" fill="#f5bf2f" opacity="0.35"/>
+  <circle cx="1180" cy="160" r="4" fill="#f5bf2f" opacity="0.3"/>
+  <circle cx="420" cy="150" r="4" fill="#79ccf2" opacity="0.35"/>
+</svg>

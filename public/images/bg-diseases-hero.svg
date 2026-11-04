@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img">
+  <title>Layered quiet mountain ridges in blue and purple under a pale open sky</title>
+  <defs>
+    <linearGradient id="ridge-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.7" stop-color="#f1f3f9"/>
+      <stop offset="1" stop-color="#edeff4"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1600" height="900" fill="url(#ridge-sky)"/>
+  <circle cx="300" cy="220" r="90" fill="#55bbeb" opacity="0.35"/>
+  <circle cx="300" cy="220" r="140" fill="#55bbeb" opacity="0.15"/>
+  <path d="M0 560 L 260 380 L 470 560 L 700 330 L 950 560 L 1180 400 L 1420 560 L 1600 460 V 900 H 0 Z" fill="#79ccf2" opacity="0.45"/>
+  <path d="M0 660 L 320 470 L 620 660 L 940 440 L 1260 660 L 1600 540 V 900 H 0 Z" fill="#2a93c9" opacity="0.6"/>
+  <path d="M0 770 L 380 590 L 740 770 L 1100 600 L 1600 740 V 900 H 0 Z" fill="#1d6890" opacity="0.65"/>
+  <path d="M0 860 L 520 720 L 1000 860 L 1600 780 V 900 H 0 Z" fill="#695999" opacity="0.6"/>
+  <path d="M700 330 L 810 560 H 700 Z" fill="#ffffff" opacity="0.5"/>
+  <path d="M940 440 L 1030 660 H 940 Z" fill="#ffffff" opacity="0.35"/>
+  <path d="M170 700 q 60 -40 120 0" stroke="#8668ad" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.5"/>
+  <circle cx="1380" cy="180" r="8" fill="#f5bf2f" opacity="0.6"/>
+  <circle cx="1180" cy="120" r="6" fill="#2a93c9" opacity="0.5"/>
+</svg>

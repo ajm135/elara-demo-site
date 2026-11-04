@@ -45,10 +45,12 @@
  *    relative-luminance contrast ratios: 4.5:1 for body text and link
  *    text on their backgrounds (the page surface, the raised chrome,
  *    the pale section band the citation cards sit on — the .band-alt
- *    ground and the .sources block's own fill — the headline band, and
- *    the evidence surface, where the citation links and their visited
- *    colour sit), 3:1 for the focus outline against the page surface,
- *    the raised chrome, and the headline band — the same or stronger
+ *    ground and the .sources block's own fill — the solid text scrim
+ *    the header links and the headline sit on over the page's original
+ *    full-bleed background image (docs/adr/0009-background-images.md),
+ *    and the evidence surface, where the citation links and their
+ *    visited colour sit), 3:1 for the focus outline against the page
+ *    surface, the raised chrome, and the scrim — the same or stronger
  *    safeguard, not a weaker one. The light theme's page surface copies
  *    the reference's #ffffff background
  *    (docs/adr/0008-reference-look.md);
@@ -657,25 +659,41 @@ describe("WCAG 2.2 AA essentials from source", () => {
       }
     });
 
-    it("underlines the header links in a colour that clears AA on the headline band in both themes", () => {
-      // The top of the page is one wide colour band: the header chrome
-      // and the wide top section sit in it. The accent is the band's own
-      // colour, so the header links use the band's ink, and that ink
-      // must clear AA on the band — as must the visited link colour.
+    it("underlines the header links on a solid scrim pill whose ink clears AA in both themes", () => {
+      // The header sits on the page's original full-bleed background
+      // image (docs/adr/0009-background-images.md), painted as a CSS
+      // background-image. Text never sits on image pixels: each story
+      // link is its own opaque scrim pill, and the hero's text block is
+      // the same scrim, so the link ink, the visited ink, and the
+      // headline ink must clear AA on the scrim the rules actually paint.
       const headerLink = parseDeclarations(cssRule(globalCss, "nav a"));
       const headerLinkVisited = parseDeclarations(
         cssRule(globalCss, "nav a:visited"),
       );
+      const heroText = parseDeclarations(cssRule(globalCss, ".hero-text"));
+      const header = parseDeclarations(cssRule(globalCss, "header"));
       expect(
         headerLink["text-decoration"] ?? "",
         "the header links stay underlined",
       ).toContain("underline");
+      expect(
+        header["background-image"] ?? "",
+        "the header paints the hero image as a CSS background-image",
+      ).toBe("var(--hero-image)");
 
       for (const { name, tokens } of themes) {
-        const band = resolveHexColor("var(--surface-band)", tokens);
-        expect(band, `${name}: the headline band must be a hex colour`).not.toBeNull();
+        const scrim = resolveHexColor("var(--scrim)", tokens);
+        const pill = resolveHexColor(headerLink["background-color"], tokens);
+        const textScrim = resolveHexColor(heroText["background-color"], tokens);
         const linkColour = resolveHexColor(headerLink["color"], tokens);
         const visitedColour = resolveHexColor(headerLinkVisited["color"], tokens);
+        const heroInk = resolveHexColor(heroText["color"], tokens);
+        expect(scrim, `${name}: the scrim must be a hex colour`).not.toBeNull();
+        expect(pill, `${name}: the story-link pill must be a hex colour`).not.toBeNull();
+        expect(
+          textScrim,
+          `${name}: the hero text scrim must be a hex colour`,
+        ).not.toBeNull();
         expect(
           linkColour,
           `${name}: the header link colour must be a hex colour`,
@@ -684,18 +702,36 @@ describe("WCAG 2.2 AA essentials from source", () => {
           visitedColour,
           `${name}: the visited header link colour must be a hex colour`,
         ).not.toBeNull();
-        if (band === null || linkColour === null || visitedColour === null) {
+        expect(heroInk, `${name}: the hero ink must be a hex colour`).not.toBeNull();
+        if (
+          scrim === null ||
+          pill === null ||
+          textScrim === null ||
+          linkColour === null ||
+          visitedColour === null ||
+          heroInk === null
+        ) {
           throw new Error(
-            `${name}: the header link colours and the band must resolve to hex colours from the design tokens`,
+            `${name}: the header link colours and the scrim must resolve to hex colours from the design tokens`,
           );
         }
+        // The pills and the hero text block paint the solid scrim, so
+        // contrast never depends on the image behind them.
+        expect(pill, `${name}: the story-link pill paints the scrim`).toEqual(scrim);
+        expect(textScrim, `${name}: the hero text block paints the scrim`).toEqual(
+          scrim,
+        );
         expect(
-          contrastRatio(linkColour, band),
-          `${name}: the header links on the headline band`,
+          contrastRatio(linkColour, scrim),
+          `${name}: the header links on the scrim`,
         ).toBeGreaterThanOrEqual(4.5);
         expect(
-          contrastRatio(visitedColour, band),
-          `${name}: the visited header links on the headline band`,
+          contrastRatio(visitedColour, scrim),
+          `${name}: the visited header links on the scrim`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(heroInk, scrim),
+          `${name}: the headline and summary on the scrim`,
         ).toBeGreaterThanOrEqual(4.5);
       }
     });
@@ -743,28 +779,26 @@ describe("WCAG 2.2 AA essentials from source", () => {
           `${name}: focus outline on the raised chrome`,
         ).toBeGreaterThanOrEqual(3);
 
-        // The headline band is the accent's own colour, so the ring
-        // there uses the band's ink, which must clear 3:1 on the band.
-        const bandFocus = parseDeclarations(
+        // Inside the header and the hero every focusable control sits on
+        // a solid scrim pill, so the ring there uses the scrim's ink,
+        // which must clear 3:1 on the scrim.
+        const scrimFocus = parseDeclarations(
           cssRule(globalCss, "header :focus-visible, .hero :focus-visible"),
         );
-        const bandOutline = resolveHexColor(
-          bandFocus["outline-color"] ?? "",
+        const scrimOutline = resolveHexColor(
+          scrimFocus["outline-color"] ?? "",
           tokens,
         );
-        const bandSurface = resolveHexColor("var(--surface-band)", tokens);
+        const scrim = resolveHexColor("var(--scrim)", tokens);
         expect(
-          bandOutline,
-          `${name}: the band focus outline colour must be a hex colour`,
+          scrimOutline,
+          `${name}: the header focus outline colour must be a hex colour`,
         ).not.toBeNull();
-        expect(
-          bandSurface,
-          `${name}: the headline band must be a hex colour`,
-        ).not.toBeNull();
-        if (bandOutline !== null && bandSurface !== null) {
+        expect(scrim, `${name}: the scrim must be a hex colour`).not.toBeNull();
+        if (scrimOutline !== null && scrim !== null) {
           expect(
-            contrastRatio(bandOutline, bandSurface),
-            `${name}: focus outline on the headline band`,
+            contrastRatio(scrimOutline, scrim),
+            `${name}: focus outline beside the scrim`,
           ).toBeGreaterThanOrEqual(3);
         }
       }

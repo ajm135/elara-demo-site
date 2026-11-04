@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img">
+  <title>An open pale sky with concentric arcs and a gentle upward curve of years</title>
+  <defs>
+    <linearGradient id="life-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f1f3f9"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1600" height="900" fill="url(#life-sky)"/>
+  <circle cx="480" cy="700" r="430" fill="#55bbeb" opacity="0.12"/>
+  <circle cx="480" cy="700" r="330" fill="#55bbeb" opacity="0.14"/>
+  <circle cx="480" cy="700" r="230" fill="#55bbeb" opacity="0.16"/>
+  <circle cx="480" cy="700" r="130" fill="#55bbeb" opacity="0.18"/>
+  <path d="M120 740 C 480 700 880 560 1480 220" stroke="#84c450" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.85"/>
+  <path d="M120 780 C 520 740 960 620 1520 320" stroke="#f5bf2f" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <circle cx="1480" cy="220" r="16" fill="#84c450"/>
+  <circle cx="1480" cy="220" r="30" fill="#84c450" opacity="0.22"/>
+  <circle cx="560" cy="690" r="9" fill="#2a93c9"/>
+  <circle cx="900" cy="560" r="9" fill="#2a93c9"/>
+  <circle cx="1220" cy="380" r="9" fill="#2a93c9"/>
+  <path d="M300 180 q 70 -46 140 0" stroke="#79ccf2" stroke-width="10" stroke-linecap="round" fill="none" opacity="0.55"/>
+  <path d="M360 240 q 55 -36 110 0" stroke="#79ccf2" stroke-width="9" stroke-linecap="round" fill="none" opacity="0.4"/>
+  <path d="M1300 720 q 80 -50 160 0" stroke="#e5e5e5" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.9"/>
+</svg>
