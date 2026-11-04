@@ -4,16 +4,16 @@
  *
  * The milestone replaced the 20 October palette with two full palettes
  * taken from the reference look (docs/adr/0008-reference-look.md) and
- * chosen only by the reader's system setting — the light theme is the
+ * chosen only by the reader's system setting â€” the light theme is the
  * :root default and the dark theme redeclares the same colour token
- * names inside @media (prefers-color-scheme: dark) — so this test parses
+ * names inside @media (prefers-color-scheme: dark) â€” so this test parses
  * globals.css and verifies the design from the tokens of both themes:
  *
- * 1. the same colour token set exists in both themes — the surfaces
+ * 1. the same colour token set exists in both themes â€” the surfaces
  *    (page, raised, evidence-panel), the ink (heading, body, muted), the
  *    blue accent with its strong step, the rules (meaningful and
  *    decorative), the headline band's surface and inks, and the
- *    reference's remaining accent palette — each a hex colour, with the
+ *    reference's remaining accent palette â€” each a hex colour, with the
  *    shared layout tokens (measure, page shell, card radius) in the base
  *    set;
  * 2. the light palette copies the reference's light background (pure
@@ -24,11 +24,11 @@
  * 3. every text/background pair used for body text, headings (including
  *    headings on the raised sources card), muted meta, links (including
  *    visited), citations, the skip-link text, the header progress text,
- *    the headline band's inks, and the painted accent pairs — the hero
+ *    the headline band's inks, and the painted accent pairs â€” the hero
  *    kicker, the header links and the next-story cue on the headline
  *    band, the active story link on its own filled pill, and the
  *    citation-link rules on the pale band the citation cards sit on
- *    (not only on the cards' own fills) — meets WCAG 2.2 AA in both
+ *    (not only on the cards' own fills) â€” meets WCAG 2.2 AA in both
  *    themes: 4.5:1 for normal text;
  * 4. UI boundaries meet the 3:1 non-text minimum in both themes: the
  *    meaningful rule on every surface and the accent colours where they
@@ -41,8 +41,8 @@
  *    3:1 on the page surface in both themes, body line-height of at
  *    least 1.5 and font-size of at least 1rem, a long-form measure
  *    between 38rem and 42rem capping the reading column, and a page
- *    shell that is wider than the measure and spans it — main and the
- *    wide top section (the hero, the first element inside main) — while
+ *    shell that is wider than the measure and spans it â€” main and the
+ *    wide top section (the hero, the first element inside main) â€” while
  *    every long-form block in main (paragraphs, headings, sections, the
  *    later illustrations, the evidence panels, the sources block, and the
  *    term list) and the hero's text block stay capped at the measure and
@@ -62,6 +62,14 @@
  *    short (at most 5 s) and never loops;
  * 9. the old navy-only treatment is gone: the legacy link colour
  *    #0b3d91 appears nowhere in the stylesheet;
+ * 11. the background-image contract (docs/adr/0009-background-images.md):
+ *     each .story-frame-* names its two local /images/ SVG backgrounds,
+ *     the transparent header and the hero paint --hero-image and the
+ *     decorative .image-band paints --band-image as CSS background-image
+ *     (cover, no-repeat, no remote URL, no 100vw), and every text on the
+ *     opening sits on the solid opaque --scrim with its inks at 4.5:1 and
+ *     the focus ring and borders at 3:1 in both themes, the dark scrim
+ *     being darker than the light one;
  * 10. structural hygiene: no 100vw, no min-width above 320 px, and no
  *     text-transform anywhere (navigation labels stay exactly their
  *     copy).
@@ -98,7 +106,7 @@ const cssNoComments = globalCss.replace(/\/\*[\s\S]*?\*\//g, " ");
  * One theme: the reader's resolved tokens and the theme's :root rule.
  * `tokens` is what the theme's own :root rule declares (the dark theme
  * redeclares only the colour tokens); `effectiveTokens` is what the
- * reader actually gets, the same way the browser computes it — the base
+ * reader actually gets, the same way the browser computes it â€” the base
  * :root set with the dark theme's redeclarations layered on top. Colour
  * values a reader inherits from the base set, including the
  * focus-outline accent, are resolved against `effectiveTokens`, so the
@@ -167,10 +175,35 @@ const requiredColorTokens = [
   "surface-band",
   "ink-on-band",
   "ink-muted-on-band",
+  "scrim",
+  "ink-on-scrim",
+  "ink-muted-on-scrim",
   "accent-secondary",
   "accent-tertiary",
   "accent-warm",
   "accent-emphasis",
+] as const;
+
+/**
+ * The five routes and the two original full-bleed background images each
+ * one names on its .story-frame-* wrapper (docs/adr/0009-background-
+ * images.md): local SVG URLs under /images/, nothing remote, nothing
+ * from the reference.
+ */
+const storyFrames = [
+  ["home", "/images/bg-home-hero.svg", "/images/bg-home-band.svg"],
+  [
+    "how-ai-helps",
+    "/images/bg-how-ai-helps-hero.svg",
+    "/images/bg-how-ai-helps-band.svg",
+  ],
+  ["cancer", "/images/bg-cancer-hero.svg", "/images/bg-cancer-band.svg"],
+  ["diseases", "/images/bg-diseases-hero.svg", "/images/bg-diseases-band.svg"],
+  [
+    "longevity",
+    "/images/bg-longevity-hero.svg",
+    "/images/bg-longevity-band.svg",
+  ],
 ] as const;
 
 /** The three surfaces the text, link, and boundary colours sit on. */
@@ -243,6 +276,21 @@ const textPairs = [
     "ink-on-band",
     "the active story link's own text on its filled pill",
   ],
+  [
+    "ink-on-scrim",
+    "scrim",
+    "the headline, kicker, summary, story links, and progress chips on the text scrim",
+  ],
+  [
+    "ink-muted-on-scrim",
+    "scrim",
+    "the review line and the visited story links on the text scrim",
+  ],
+  [
+    "scrim",
+    "ink-on-scrim",
+    "the active story link's scrim-coloured text on its own filled pill",
+  ],
 ] as const;
 
 /**
@@ -300,6 +348,21 @@ const boundaryPairs = [
   [
     "surface-band",
     "ink-on-band",
+    "the active-story pill's inset bar on its own filled pill",
+  ],
+  [
+    "ink-on-scrim",
+    "scrim",
+    "the focus outline inside the header and the hero, beside the scrim",
+  ],
+  [
+    "ink-muted-on-scrim",
+    "scrim",
+    "the story-link pill border on the scrim",
+  ],
+  [
+    "scrim",
+    "ink-on-scrim",
     "the active-story pill's inset bar on its own filled pill",
   ],
 ] as const;
@@ -484,13 +547,13 @@ describe("design tokens in globals.css", () => {
     }
   });
 
-  it("paints the citation links — and their visited colour — at least 4.5:1 on the pale band the cards sit on, as well as on the cards' own fills, in both themes", () => {
+  it("paints the citation links â€” and their visited colour â€” at least 4.5:1 on the pale band the cards sit on, as well as on the cards' own fills, in both themes", () => {
     // The token-level text pairs above only prove the *tokens* clear
     // 4.5:1; this check pins the colours the link rules actually paint.
     // The cards that carry the citation links sit on the pale section
     // band: the .sources block paints the raised surface itself, and
     // the .claim-evidence cards live inside the .band-alt sections,
-    // whose ground is the same raised surface — so the link colour and
+    // whose ground is the same raised surface â€” so the link colour and
     // the visited colour must clear 4.5:1 against that band's surface,
     // not only against the card's own fill. A foreground or ground that
     // does not resolve to a hex colour fails the check in either theme
@@ -607,47 +670,198 @@ describe("design tokens in globals.css", () => {
     }
   });
 
-  it("paints the header chrome and the wide top section on the headline band, with their text at least 4.5:1 on it in both themes", () => {
-    // The token-level text pairs above only prove the *tokens* clear
-    // 4.5:1; this check pins the colours the rules actually paint. The
-    // top of the page is one wide colour band: the header chrome sits in
-    // it (the header itself is transparent, and the navigation list and
-    // the progress cluster paint the band), and the wide top section
-    // continues it. The accent is the band's own colour, so every text
-    // on the band uses the band's inks, each resolved per theme against
-    // the reader's effective tokens. A foreground or ground that does
-    // not resolve to a hex colour fails the check in either theme rather
-    // than being skipped.
-    const header = parseDeclarations(cssRuleBody(globalCss, "header"));
-    const navList = parseDeclarations(cssRuleBody(globalCss, "nav ul"));
-    const navLink = parseDeclarations(cssRuleBody(globalCss, "nav a"));
-    const navLinkVisited = parseDeclarations(cssRuleBody(globalCss, "nav a:visited"));
-    const hero = parseDeclarations(cssRuleBody(globalCss, ".hero"));
-    const heroKicker = parseDeclarations(cssRuleBody(globalCss, ".hero-kicker"));
-    const heroMedia = parseDeclarations(cssRuleBody(globalCss, ".hero-media"));
-    const progressCluster = parseDeclarations(
-      cssRuleBody(globalCss, ".progress-cluster"),
-    );
-    const nextStoryCue = parseDeclarations(
-      cssRuleBody(globalCss, ".progress-cluster .next-story-cue"),
-    );
+  it("opens each page on an original local full-bleed background image: the transparent header and the hero paint --hero-image, and the later band paints --band-image", () => {
+    // docs/adr/0009-background-images.md: each route's .story-frame-*
+    // wrapper names the page's two original SVG backgrounds as local
+    // /images/ URLs; the header (transparent, width 100%) and the hero
+    // paint the hero image as a CSS background-image, and the empty
+    // decorative .image-band paints the band image. Nothing is remote,
+    // nothing comes from the reference, and no viewport-width unit is
+    // used.
+    const forbiddenUrl = /https?:|\/\/|templatemonster|template-help|data:/i;
+    for (const [id, heroUrl, bandUrl] of storyFrames) {
+      const frame = parseDeclarations(
+        cssRuleBody(globalCss, `.story-frame-${id}`),
+      );
+      expect(
+        frame["--hero-image"],
+        `.story-frame-${id} must name its hero background image`,
+      ).toBe(`url("${heroUrl}")`);
+      expect(
+        frame["--band-image"],
+        `.story-frame-${id} must name its later band background image`,
+      ).toBe(`url("${bandUrl}")`);
+      for (const url of [heroUrl, bandUrl]) {
+        expect(url, `${id}: a background must be a local /images/ SVG`).toMatch(
+          /^\/images\/bg-[a-z-]+-(hero|band)\.svg$/,
+        );
+        expect(
+          url,
+          `${id}: a background must not be remote or copied`,
+        ).not.toMatch(forbiddenUrl);
+      }
+    }
+    // Every url() in the stylesheet is a local /images/ file.
+    for (const match of cssNoComments.matchAll(
+      /url\(\s*["']?([^"')]+)["']?\s*\)/g,
+    )) {
+      expect(match[1], "every background url must be local").toMatch(
+        /^\/images\//,
+      );
+    }
 
-    // The header paints no ground of its own: the band comes from the
-    // navigation list and the progress cluster below it.
+    const header = parseDeclarations(cssRuleBody(globalCss, "header"));
+    const hero = parseDeclarations(cssRuleBody(globalCss, ".hero"));
+    const band = parseDeclarations(cssRuleBody(globalCss, ".image-band"));
+
+    // The header sits on the hero image: no colour of its own, the image
+    // painted edge to edge.
     expect(
       (header["background-color"] ?? "").trim(),
-      "the header must be transparent on the band, not the raised grey",
+      "the header must stay transparent so it sits on the hero image",
     ).toBe("transparent");
+    for (const [label, declarations, image] of [
+      ["header", header, "--hero-image"],
+      [".hero", hero, "--hero-image"],
+      [".image-band", band, "--band-image"],
+    ] as const) {
+      expect(
+        declarations["background-image"] ?? "",
+        `${label} must paint ${image} as a CSS background-image`,
+      ).toBe(`var(${image})`);
+      expect(
+        declarations["background-size"] ?? "",
+        `${label} must cover its box with the image`,
+      ).toBe("cover");
+      expect(
+        declarations["background-repeat"] ?? "",
+        `${label} must not tile the image`,
+      ).toBe("no-repeat");
+    }
+    expect(header["background-position"] ?? "").toBe("center top");
+    expect(hero["background-position"] ?? "").toBe("center top");
+    expect(
+      header["width"] ?? "",
+      "the header reaches the edges by width 100%, not 100vw",
+    ).toBe("100%");
+
+    // The hero and the band keep the page-shell span, never wider.
+    for (const [label, declarations] of [
+      [".hero", hero],
+      [".image-band", band],
+    ] as const) {
+      // The width adds back exactly the 2rem of main padding the
+      // negative margins cancel, and is still capped at the page shell.
+      expect(declarations["width"] ?? "", `${label} width`).toBe(
+        "calc(100% + 2rem)",
+      );
+      expect(declarations["max-width"] ?? "", `${label} max-width`).toBe(
+        "var(--page-shell)",
+      );
+      expect(
+        declarations["margin-inline"] ?? "",
+        `${label} margin-inline`,
+      ).toBe("-1rem");
+    }
+    const bandHeight = /^(\d+(?:\.\d+)?)rem$/.exec(band["min-height"] ?? "");
+    expect(bandHeight, ".image-band must set a rem min-height").not.toBeNull();
+    if (bandHeight !== null) {
+      expect(
+        Number(bandHeight[1]),
+        ".image-band min-height (about 14rem)",
+      ).toBeGreaterThanOrEqual(12);
+      expect(
+        Number(bandHeight[1]),
+        ".image-band min-height (about 14rem)",
+      ).toBeLessThanOrEqual(16);
+    }
+  });
+
+  it("paints every text on the opening image on a solid opaque scrim, at least 4.5:1 in both themes", () => {
+    // The token-level text pairs above only prove the *tokens* clear
+    // 4.5:1; this check pins the colours the rules actually paint. Text
+    // never sits on image pixels: the hero's text block, each story-link
+    // pill, and each progress chip paint the opaque --scrim, and every
+    // text on them uses the scrim's inks, each resolved per theme against
+    // the reader's effective tokens. The navigation list and the
+    // progress cluster paint no bar of their own, so the header image
+    // stays visible around the pills and chips. A foreground or ground
+    // that does not resolve to a hex colour fails the check in either
+    // theme rather than being skipped.
+    const rule = (selector: string): Record<string, string> =>
+      parseDeclarations(cssRuleBody(globalCss, selector));
+    const navList = rule("nav ul");
+    const navLink = rule("nav a");
+    const navLinkVisited = rule("nav a:visited");
+    const activeLink = rule('nav a[aria-current="page"]');
+    const hero = rule(".hero");
+    const heroText = rule(".hero-text");
+    const heroHeading = rule(".hero h1");
+    const heroKicker = rule(".hero-kicker");
+    const heroReview = rule(".hero-review");
+    const heroMedia = rule(".hero-media");
+    const progressCluster = rule(".progress-cluster");
+    const chips = [
+      [".progress-cluster .story-position", rule(".progress-cluster .story-position")],
+      [".progress-cluster .next-story-cue", rule(".progress-cluster .next-story-cue")],
+      [".progress-cluster .progress-ending", rule(".progress-cluster .progress-ending")],
+    ] as const;
+
+    // No opaque full-width bars hide the header image.
+    for (const [label, declarations] of [
+      ["nav ul", navList],
+      [".progress-cluster", progressCluster],
+    ] as const) {
+      expect(
+        declarations["background-color"] ?? "",
+        `${label} must not paint an opaque bar over the header image`,
+      ).toBe("");
+      expect(
+        declarations["background-image"] ?? "",
+        `${label} paints no image`,
+      ).toBe("");
+    }
+    // The text scrim has padding so the hero text sits inside it, and
+    // nothing on the opening is translucent.
+    expect(
+      heroText["padding"] ?? "",
+      ".hero-text needs padding around its text",
+    ).not.toBe("");
+    for (const [label, declarations] of [
+      [".hero", hero],
+      [".hero-text", heroText],
+      ["nav a", navLink],
+      ...chips,
+    ] as const) {
+      expect(
+        declarations["opacity"] ?? "",
+        `${label} must not be translucent`,
+      ).toBe("");
+      expect(
+        declarations["background-color"] ?? "",
+        `${label} must not use a translucent colour`,
+      ).not.toMatch(/rgba|hsla|transparent/i);
+    }
+    // The story links keep their underline, 44 px target, and pill.
+    expect(navLink["text-decoration"] ?? "").toContain("underline");
+    expect(navLink["min-height"] ?? "").toBe("44px");
+    expect(navLink["min-width"] ?? "").toBe("44px");
+    expect(navLink["border-radius"] ?? "").toBe("var(--radius-pill)");
+    // The active link is identifiable without colour alone.
+    expect(activeLink["font-weight"] ?? "").toBe("700");
 
     for (const theme of themes) {
-      const band = tokenColor(theme, "surface-band");
+      const scrim = tokenColor(theme, "scrim");
+      const ink = tokenColor(theme, "ink-on-scrim");
+      const mutedInk = tokenColor(theme, "ink-muted-on-scrim");
 
-      // The band is painted by the navigation list, the progress
-      // cluster, and the wide top section.
+      // The scrim is painted by the hero fallback, the hero text block,
+      // the story-link pills, and the progress chips.
       for (const [label, declarations] of [
-        ["nav ul", navList],
-        [".progress-cluster", progressCluster],
         [".hero", hero],
+        [".hero-text", heroText],
+        ["nav a", navLink],
+        ...chips,
       ] as const) {
         const ground = resolveHexColor(
           declarations["background-color"] ?? "",
@@ -659,95 +873,126 @@ describe("design tokens in globals.css", () => {
         ).not.toBeNull();
         expect(
           ground,
-          `the ${label} must paint the headline band in the ${theme.name} theme`,
-        ).toEqual(band);
+          `the ${label} must paint the solid scrim in the ${theme.name} theme`,
+        ).toEqual(scrim);
       }
 
-      // The hero kicker: the band's own ink on the band.
-      const kickerColour = resolveHexColor(
-        heroKicker["color"] ?? "",
-        theme.effectiveTokens,
-      );
-      expect(
-        kickerColour,
-        `the .hero-kicker colour must resolve to a hex colour in the ${theme.name} theme`,
-      ).not.toBeNull();
-      expect(
-        kickerColour,
-        `the .hero-kicker must paint a band ink in the ${theme.name} theme`,
-      ).toEqual(tokenColor(theme, "ink-on-band"));
-      if (kickerColour !== null) {
+      // Every text on the scrim uses the scrim's ink and clears 4.5:1.
+      for (const [label, declarations] of [
+        [".hero-text", heroText],
+        [".hero h1", heroHeading],
+        [".hero-kicker", heroKicker],
+        ["nav a", navLink],
+        ...chips,
+      ] as const) {
+        const colour = resolveHexColor(
+          declarations["color"] ?? "",
+          theme.effectiveTokens,
+        );
         expect(
-          contrastRatio(kickerColour, band),
-          `${theme.name}: the hero kicker on the headline band`,
-        ).toBeGreaterThanOrEqual(4.5);
+          colour,
+          `the ${label} colour must resolve to a hex colour in the ${theme.name} theme`,
+        ).not.toBeNull();
+        expect(
+          colour,
+          `${label} must paint the scrim ink in the ${theme.name} theme`,
+        ).toEqual(ink);
+        if (colour !== null) {
+          expect(
+            contrastRatio(colour, scrim),
+            `${theme.name}: ${label} on the scrim`,
+          ).toBeGreaterThanOrEqual(4.5);
+        }
       }
 
-      // The header links: the band's own ink, and the muted band ink
-      // once a reader has visited them.
-      const linkColour = resolveHexColor(
-        navLink["color"] ?? "",
-        theme.effectiveTokens,
-      );
-      expect(
-        linkColour,
-        `the header link colour must resolve to a hex colour in the ${theme.name} theme`,
-      ).not.toBeNull();
-      expect(
-        linkColour,
-        `the header links must paint a band ink in the ${theme.name} theme`,
-      ).toEqual(tokenColor(theme, "ink-on-band"));
-      if (linkColour !== null) {
+      // The muted ink: the review line and the visited story links.
+      for (const [label, declarations] of [
+        [".hero-review", heroReview],
+        ["nav a:visited", navLinkVisited],
+      ] as const) {
+        const colour = resolveHexColor(
+          declarations["color"] ?? "",
+          theme.effectiveTokens,
+        );
         expect(
-          contrastRatio(linkColour, band),
-          `${theme.name}: the header links on the headline band`,
-        ).toBeGreaterThanOrEqual(4.5);
-      }
-      const visitedColour = resolveHexColor(
-        navLinkVisited["color"] ?? "",
-        theme.effectiveTokens,
-      );
-      expect(
-        visitedColour,
-        `the visited header link colour must resolve to a hex colour in the ${theme.name} theme`,
-      ).not.toBeNull();
-      if (visitedColour !== null) {
+          colour,
+          `the ${label} colour must resolve to a hex colour in the ${theme.name} theme`,
+        ).not.toBeNull();
         expect(
-          contrastRatio(visitedColour, band),
-          `${theme.name}: the visited header links on the headline band`,
-        ).toBeGreaterThanOrEqual(4.5);
+          colour,
+          `${label} must paint the muted scrim ink in the ${theme.name} theme`,
+        ).toEqual(mutedInk);
+        if (colour !== null) {
+          expect(
+            contrastRatio(colour, scrim),
+            `${theme.name}: ${label} on the scrim`,
+          ).toBeGreaterThanOrEqual(4.5);
+        }
       }
 
-      // The next-story cue: the band's own ink on the band.
-      const cueColour = resolveHexColor(
-        nextStoryCue["color"] ?? "",
+      // The story-link border clears 3:1 on the pill it edges.
+      const border = /solid\s+(.+)$/.exec(navLink["border"] ?? "");
+      expect(border, "nav a must set a solid border").not.toBeNull();
+      if (border !== null) {
+        const borderColour = resolveHexColor(
+          border[1].trim(),
+          theme.effectiveTokens,
+        );
+        expect(
+          borderColour,
+          `the nav a border must be a hex colour in the ${theme.name} theme`,
+        ).not.toBeNull();
+        if (borderColour !== null) {
+          expect(
+            contrastRatio(borderColour, scrim),
+            `${theme.name}: the story-link border on the scrim`,
+          ).toBeGreaterThanOrEqual(3);
+        }
+      }
+
+      // The active story link: scrim-coloured text on the one filled
+      // pill, never the light-blue accent on white.
+      const activeColour = resolveHexColor(
+        activeLink["color"] ?? "",
+        theme.effectiveTokens,
+      );
+      const activeGround = resolveHexColor(
+        activeLink["background-color"] ?? "",
         theme.effectiveTokens,
       );
       expect(
-        cueColour,
-        `the .next-story-cue colour must resolve to a hex colour in the ${theme.name} theme`,
+        activeColour,
+        `the active link colour must be a hex colour in the ${theme.name} theme`,
       ).not.toBeNull();
       expect(
-        cueColour,
-        `the next-story cue must paint a band ink in the ${theme.name} theme`,
-      ).toEqual(tokenColor(theme, "ink-on-band"));
-      if (cueColour !== null) {
+        activeGround,
+        `the active link ground must be a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      if (activeColour !== null && activeGround !== null) {
         expect(
-          contrastRatio(cueColour, band),
-          `${theme.name}: the next-story cue on the headline band`,
+          activeColour,
+          `the active link text is the scrim colour in the ${theme.name} theme`,
+        ).toEqual(scrim);
+        expect(
+          activeGround,
+          `the active link fill is the scrim ink in the ${theme.name} theme`,
+        ).toEqual(ink);
+        expect(
+          contrastRatio(activeColour, activeGround),
+          `${theme.name}: the active story link on its own filled pill`,
         ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          activeColour,
+          "#55bbeb must never be text on white",
+        ).not.toEqual([85, 187, 235]);
       }
 
       // The illustration frame keeps its own raised card, so the picture
-      // reads as a composed element on the band.
+      // reads as a composed element on the image.
       const heroFrame = resolveHexColor(
         heroMedia["background-color"] ?? "",
         theme.effectiveTokens,
       );
-      expect(
-        heroFrame,
-        `the .hero-media ground must resolve to a hex colour in the ${theme.name} theme`,
-      ).not.toBeNull();
       expect(
         heroFrame,
         `the .hero-media frame must paint the raised surface in the ${theme.name} theme`,
@@ -755,10 +1000,27 @@ describe("design tokens in globals.css", () => {
     }
   });
 
-  it("paints the focus ring on the headline band with the band's ink, at 3:1 or better", () => {
-    // The accent is the band's colour, so the global accent focus ring
-    // cannot clear 3:1 there; the band carries its own ring in the
-    // band's ink.
+  it("keeps the dark scrim darker than the light scrim, with light ink on both", () => {
+    const lightScrim = tokenColor(lightTheme, "scrim");
+    const darkScrim = tokenColor(darkTheme, "scrim");
+    expect(
+      relativeLuminance(darkScrim),
+      "the dark theme's scrim must be darker than the light theme's",
+    ).toBeLessThan(relativeLuminance(lightScrim));
+    for (const theme of themes) {
+      for (const name of ["ink-on-scrim", "ink-muted-on-scrim"] as const) {
+        expect(
+          relativeLuminance(tokenColor(theme, name)),
+          `--${name} must be lighter than the scrim in the ${theme.name} theme`,
+        ).toBeGreaterThan(relativeLuminance(tokenColor(theme, "scrim")));
+      }
+    }
+  });
+
+  it("paints the focus ring inside the header and the hero with the scrim's ink, at 3:1 or better", () => {
+    // Every focusable control in the header sits on a scrim pill, so the
+    // ring there uses the scrim's own ink, which clears 3:1 on the scrim
+    // in both themes, with the global width and offset unchanged.
     const bandFocus = parseDeclarations(
       cssRuleBody(globalCss, "header :focus-visible, .hero :focus-visible"),
     );
@@ -769,16 +1031,16 @@ describe("design tokens in globals.css", () => {
       );
       expect(
         outlineColour,
-        `the band focus ring colour must resolve to a hex colour in the ${theme.name} theme`,
+        `the header focus ring colour must resolve to a hex colour in the ${theme.name} theme`,
       ).not.toBeNull();
       expect(
         outlineColour,
-        `the band focus ring must paint the band's own ink in the ${theme.name} theme`,
-      ).toEqual(tokenColor(theme, "ink-on-band"));
+        `the header focus ring must paint the scrim's own ink in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "ink-on-scrim"));
       if (outlineColour !== null) {
         expect(
-          contrastRatio(outlineColour, tokenColor(theme, "surface-band")),
-          `the focus ring on the headline band (${theme.name})`,
+          contrastRatio(outlineColour, tokenColor(theme, "scrim")),
+          `the focus ring beside the scrim (${theme.name})`,
         ).toBeGreaterThanOrEqual(3);
       }
     }
@@ -977,9 +1239,9 @@ describe("design tokens in globals.css", () => {
     ).toContain("var(--page-shell)");
 
     // ...while the reading column is driven by the measure token: every
-    // long-form block in main — paragraphs, headings, sections, the later
+    // long-form block in main â€” paragraphs, headings, sections, the later
     // illustrations, the evidence panels, the sources block, and the
-    // lifespan term list — and the hero's text block (the wide top
+    // lifespan term list â€” and the hero's text block (the wide top
     // section lives inside main, as its first element) are each capped at
     // the measure and centered in the wider page.
     const readingColumnSelectors = [
