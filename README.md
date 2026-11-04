@@ -21,3 +21,11 @@ npm ci
 The compatible runtime is Node.js >=22.12.0 and <23, declared in `engines` in `package.json` (the root `.nvmrc` pins 22.16.0). The project was tested with Node.js 22.16.0 and npm 10.9.2.
 
 The layout is in STRUCTURE.md, and the rules for agents are in AGENTS.md.
+
+## How to run
+
+Set it up: `npm install`
+
+Start it: `npm run dev`
+
+Test it: `npm test`

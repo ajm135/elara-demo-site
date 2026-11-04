@@ -24,23 +24,34 @@
  *    ending state with no next-story link on story 5; the cue link never
  *    sits ahead of the five story links in keyboard order;
  * 4. images: every <img> has a non-empty alt that is not a filename;
- * 5. headings: each page has exactly one <h1>, every <h2> appears only
- *    after that h1, and the composed hero introduces no skipped heading
- *    level;
- * 6. evidence: every page shows its reviewedOn date in a <time datetime>
- *    element, main carries at least one stable https citation link, and the
- *    number of figure.claim-evidence panels equals the claims the content
- *    model ties to that page (home instead renders its sources block);
+ * 5. headings: each page has exactly one <h1>, inside the composed hero
+ *    (the wide top section, main's first element), every <h2> appears only
+ *    after that h1, and the hero introduces no skipped heading level
+ *    (no h2-h6 inside it, no h3 or deeper anywhere before the first h2);
+ * 6. evidence: the wide top section (the hero, main's first element)
+ *    shows the reviewedOn date in a <time datetime> element, main carries
+ *    at least one stable https citation link, and the number of
+ *    figure.claim-evidence panels equals the claims the content model
+ *    ties to that page (home instead renders its sources block);
  * 7. disclaimer: the "not medical advice" disclaimer is still the last
  *    element of main;
  * 8. styles: globals.css keeps an AA-contrast body text/background pair,
  *    underlined links in an AA-contrast colour, and a :focus-visible
- *    outline of at least 2 px. The token-based editorial design replaced
- *    the old fixed colour strings (#0b3d91 / #fffdfb are gone), so these
- *    checks compute WCAG 2.2 relative-luminance contrast ratios from the
- *    design tokens in :root: 4.5:1 for body text and link text on their
- *    backgrounds, 3:1 for the focus outline against the page surface —
- *    the same or stronger safeguard, not a weaker one;
+ *    outline of at least 2 px with an offset, in both themes. The
+ *    dual-theme design declares the light palette on :root and
+ *    redeclares the same token names under the reader's system setting
+ *    (inside @media (prefers-color-scheme: dark)), so these checks
+ *    resolve each colour per theme and compute WCAG 2.2
+ *    relative-luminance contrast ratios: 4.5:1 for body text and link
+ *    text on their backgrounds (the page surface, the raised chrome,
+ *    the pale section band the citation cards sit on — the .band-alt
+ *    ground and the .sources block's own fill — the headline band, and
+ *    the evidence surface, where the citation links and their visited
+ *    colour sit), 3:1 for the focus outline against the page surface,
+ *    the raised chrome, and the headline band — the same or stronger
+ *    safeguard, not a weaker one. The light theme's page surface copies
+ *    the reference's #ffffff background
+ *    (docs/adr/0008-reference-look.md);
  * 9. privacy: the rendered markup and the CSS file contain no secret-like
  *    tokens, email addresses, or personal names.
  *
@@ -69,6 +80,7 @@ import {
 } from "../src/lib/site-content";
 import {
   contrastRatio,
+  mediaBlockBody,
   parseCustomProperties,
   parseDeclarations,
   resolveHexColor,
@@ -139,6 +151,22 @@ function mainBody(markup: string): string {
   const start = markup.indexOf(mainOpen);
   expect(start, "main#main-content must be present").toBeGreaterThan(-1);
   return markup.slice(start + mainOpen.length, markup.indexOf("</main>"));
+}
+
+/**
+ * The index just past the </div> that balances the <div open tag at
+ * `openIndex` (an index into `html`).
+ */
+function balancedDivEnd(html: string, openIndex: number): number {
+  const rest = html.slice(openIndex);
+  let depth = 0;
+  for (const match of rest.matchAll(/<div\b[^>]*>|<\/div>/g)) {
+    depth += match[0].startsWith("</") ? -1 : 1;
+    if (depth === 0) {
+      return openIndex + (match.index ?? 0) + match[0].length;
+    }
+  }
+  throw new Error("the div open tag never balances its closing tag");
 }
 
 /** The inner HTML of the labeled main navigation. */
@@ -383,10 +411,22 @@ describe("WCAG 2.2 AA essentials from source", () => {
         expect(h1Index).toBeGreaterThan(-1);
         expect(firstH2).toBeGreaterThan(h1Index);
 
-        // The hero holds exactly the h1 and no other heading level...
-        // (the hero always ends where the first section begins).
-        const heroStart = html.indexOf('<div class="hero">');
-        const hero = html.slice(heroStart, html.indexOf("<section", heroStart));
+        // The wide top section is main's first element: it starts at the
+        // hero div right after the main open tag and ends where its own
+        // div balances. It holds exactly the h1 and no other heading
+        // level...
+        const body = mainBody(html);
+        const heroStart = body.indexOf('<div class="hero">');
+        expect(
+          heroStart,
+          "the wide top section (.hero) must be present inside main",
+        ).toBeGreaterThan(-1);
+        expect(
+          body.slice(0, heroStart).trim(),
+          "the hero must be main's first element",
+        ).toBe("");
+        const hero = body.slice(heroStart, balancedDivEnd(body, heroStart));
+        expect(hero.endsWith("</div>")).toBe(true);
         expect(hero.match(/<h1[\s>]/g)?.length ?? 0).toBe(1);
         expect(hero).not.toMatch(/<h[2-6][\s>]/);
 
@@ -411,11 +451,18 @@ describe("WCAG 2.2 AA essentials from source", () => {
         }
         const body = mainBody(html);
 
-        // The reviewedOn date renders as a <time datetime="..."> element.
-        // React serialises the attribute as dateTime in static markup and
-        // the browser DOM normalises it to datetime, so match both.
+        // The reviewedOn date renders as a <time datetime="..."> element
+        // in the wide top section (the hero, main's first element). React
+        // serialises the attribute as dateTime in static markup and the
+        // browser DOM normalises it to datetime, so match both.
         if (page.reviewedOn !== undefined) {
-          expect(body).toMatch(
+          const heroStart = body.indexOf('<div class="hero">');
+          expect(
+            heroStart,
+            `${id}: the hero must be present inside main`,
+          ).toBeGreaterThan(-1);
+          const hero = body.slice(heroStart, balancedDivEnd(body, heroStart));
+          expect(hero).toMatch(
             new RegExp(`<time datetime="${page.reviewedOn}"`, "i"),
           );
         }
@@ -471,48 +518,189 @@ describe("WCAG 2.2 AA essentials from source", () => {
   });
 
   describe("contrast and keyboard focus", () => {
-    // The editorial design is token-driven: the colours these checks
-    // compare are the custom properties declared in :root, resolved the
-    // same way the browser would. tests/design-tokens.test.ts asserts the
-    // full token palette; here the AA essentials of the base rules are
-    // re-checked from the rules that actually style body, links, and
-    // keyboard focus.
-    const designTokens = parseCustomProperties(cssRule(globalCss, ":root"));
-    const pageSurface = resolveHexColor("var(--surface-page)", designTokens);
+    // The design is token-driven and dual-theme: the light theme is the
+    // :root default, and the dark theme redeclares the same colour token
+    // names inside the reader's system-setting media block. The local
+    // cssRule() helper only sees flat top-level rules, so the dark
+    // tokens are parsed the same way as in the token test: the media
+    // block's inner text is extracted first, then its :root rule is read.
+    const lightTokens = parseCustomProperties(cssRule(globalCss, ":root"));
+    const darkTokens = parseCustomProperties(
+      cssRule(mediaBlockBody(globalCss, "(prefers-color-scheme: dark)"), ":root"),
+    );
+    const themes: ReadonlyArray<{
+      readonly name: string;
+      readonly tokens: Record<string, string>;
+    }> = [
+      { name: "light theme", tokens: lightTokens },
+      { name: "dark theme (prefers-color-scheme: dark)", tokens: darkTokens },
+    ];
 
-    it("keeps an AA contrast pair on the page background and text", () => {
+    it("keeps an AA contrast pair on the page background and text in both themes", () => {
       const body = parseDeclarations(cssRule(globalCss, "body"));
-      const background = resolveHexColor(body["background-color"], designTokens);
-      const text = resolveHexColor(body["color"], designTokens);
-      expect(background).not.toBeNull();
-      expect(text).not.toBeNull();
-      if (background === null || text === null) {
-        throw new Error(
-          "body background and text must resolve to hex colours from the design tokens",
-        );
+      for (const { name, tokens } of themes) {
+        const background = resolveHexColor(body["background-color"], tokens);
+        const text = resolveHexColor(body["color"], tokens);
+        expect(background, `${name}: the page background must be a hex colour`).not.toBeNull();
+        expect(text, `${name}: the body text must be a hex colour`).not.toBeNull();
+        if (background === null || text === null) {
+          throw new Error(
+            `${name}: body background and text must resolve to hex colours from the design tokens`,
+          );
+        }
+        expect(
+          contrastRatio(text, background),
+          `${name}: body text on the page surface`,
+        ).toBeGreaterThanOrEqual(4.5);
       }
-      expect(contrastRatio(text, background)).toBeGreaterThanOrEqual(4.5);
-      // The page surface is one token in a warm set, not pure white.
-      expect(background).not.toEqual([255, 255, 255]);
+      // ADR 0008 replaces the old "the page surface is not pure white"
+      // rule: the light theme now copies the reference's own #ffffff
+      // background, so the pin is that exact value, checked in both
+      // themes below.
+      const lightPage = resolveHexColor(body["background-color"], lightTokens);
+      expect(
+        lightPage,
+        "the light page surface must copy the reference's #ffffff background",
+      ).toEqual([255, 255, 255]);
     });
 
-    it("underlines links in a colour that clears AA on the page surface", () => {
+    it("underlines links in a colour that clears AA on the page surface in both themes", () => {
       const link = parseDeclarations(cssRule(globalCss, "a"));
+      const linkVisited = parseDeclarations(cssRule(globalCss, "a:visited"));
       expect(link["text-decoration"] ?? "").toContain("underline");
-      const linkColour = resolveHexColor(link["color"], designTokens);
-      expect(linkColour).not.toBeNull();
-      expect(pageSurface).not.toBeNull();
-      if (linkColour === null || pageSurface === null) {
-        throw new Error(
-          "link colour and page surface must resolve to hex colours from the design tokens",
+      for (const { name, tokens } of themes) {
+        const linkColour = resolveHexColor(link["color"], tokens);
+        const visitedColour = resolveHexColor(linkVisited["color"], tokens);
+        const pageSurface = resolveHexColor("var(--surface-page)", tokens);
+        const raisedSurface = resolveHexColor("var(--surface-raised)", tokens);
+        const evidenceSurface = resolveHexColor("var(--surface-evidence)", tokens);
+        // The pale section band the citation cards sit on: the
+        // .band-alt sections paint it, and the .sources block carries
+        // it as its own fill.
+        const bandAltSurface = resolveHexColor(
+          parseDeclarations(cssRule(globalCss, ".band-alt"))["background-color"],
+          tokens,
         );
+        expect(linkColour, `${name}: the link colour must be a hex colour`).not.toBeNull();
+        expect(
+          visitedColour,
+          `${name}: the visited link colour must be a hex colour`,
+        ).not.toBeNull();
+        expect(pageSurface, `${name}: the page surface must be a hex colour`).not.toBeNull();
+        expect(
+          raisedSurface,
+          `${name}: the raised surface must be a hex colour`,
+        ).not.toBeNull();
+        expect(
+          evidenceSurface,
+          `${name}: the evidence surface must be a hex colour`,
+        ).not.toBeNull();
+        expect(
+          bandAltSurface,
+          `${name}: the .band-alt ground must be a hex colour`,
+        ).not.toBeNull();
+        if (
+          linkColour === null ||
+          visitedColour === null ||
+          pageSurface === null ||
+          raisedSurface === null ||
+          evidenceSurface === null ||
+          bandAltSurface === null
+        ) {
+          throw new Error(
+            `${name}: link colours and surfaces must resolve to hex colours from the design tokens`,
+          );
+        }
+        expect(
+          contrastRatio(linkColour, pageSurface),
+          `${name}: links on the page surface`,
+        ).toBeGreaterThanOrEqual(4.5);
+        // The same link colour also sits on the raised chrome (the
+        // header) and on the evidence surface (the citation links in
+        // figure.claim-evidence), so it must clear AA on those too.
+        expect(
+          contrastRatio(linkColour, raisedSurface),
+          `${name}: links on the raised chrome`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(linkColour, evidenceSurface),
+          `${name}: citation links on the evidence surface`,
+        ).toBeGreaterThanOrEqual(4.5);
+        // The citation cards sit on the pale band (the .band-alt
+        // ground, which the .sources block also uses as its own fill),
+        // so the link colour must clear AA against that band's
+        // surface, not only against the card's own fill.
+        expect(
+          contrastRatio(linkColour, bandAltSurface),
+          `${name}: citation links on the pale band the cards sit on`,
+        ).toBeGreaterThanOrEqual(4.5);
+        // The visited citations (a:visited, --accent-primary-strong)
+        // sit on the same evidence surface, so they must clear AA
+        // there too — and, like the link colour, on the page surface,
+        // the raised band surface, and the pale band the cards sit on.
+        expect(
+          contrastRatio(visitedColour, evidenceSurface),
+          `${name}: visited citation links on the evidence surface`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(visitedColour, pageSurface),
+          `${name}: visited links on the page surface`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(visitedColour, raisedSurface),
+          `${name}: visited links on the raised band surface`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(visitedColour, bandAltSurface),
+          `${name}: visited citation links on the pale band the cards sit on`,
+        ).toBeGreaterThanOrEqual(4.5);
       }
-      expect(contrastRatio(linkColour, pageSurface)).toBeGreaterThanOrEqual(
-        4.5,
-      );
     });
 
-    it("keeps a visible keyboard focus outline of at least 2 px in the accent", () => {
+    it("underlines the header links in a colour that clears AA on the headline band in both themes", () => {
+      // The top of the page is one wide colour band: the header chrome
+      // and the wide top section sit in it. The accent is the band's own
+      // colour, so the header links use the band's ink, and that ink
+      // must clear AA on the band — as must the visited link colour.
+      const headerLink = parseDeclarations(cssRule(globalCss, "nav a"));
+      const headerLinkVisited = parseDeclarations(
+        cssRule(globalCss, "nav a:visited"),
+      );
+      expect(
+        headerLink["text-decoration"] ?? "",
+        "the header links stay underlined",
+      ).toContain("underline");
+
+      for (const { name, tokens } of themes) {
+        const band = resolveHexColor("var(--surface-band)", tokens);
+        expect(band, `${name}: the headline band must be a hex colour`).not.toBeNull();
+        const linkColour = resolveHexColor(headerLink["color"], tokens);
+        const visitedColour = resolveHexColor(headerLinkVisited["color"], tokens);
+        expect(
+          linkColour,
+          `${name}: the header link colour must be a hex colour`,
+        ).not.toBeNull();
+        expect(
+          visitedColour,
+          `${name}: the visited header link colour must be a hex colour`,
+        ).not.toBeNull();
+        if (band === null || linkColour === null || visitedColour === null) {
+          throw new Error(
+            `${name}: the header link colours and the band must resolve to hex colours from the design tokens`,
+          );
+        }
+        expect(
+          contrastRatio(linkColour, band),
+          `${name}: the header links on the headline band`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(visitedColour, band),
+          `${name}: the visited header links on the headline band`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+    });
+
+    it("keeps a visible keyboard focus outline of at least 2 px in the accent that clears 3:1 in both themes", () => {
       const focus = parseDeclarations(cssRule(globalCss, ":focus-visible"));
       const outline = /(\d+(?:\.\d+)?)px\s+solid\s+(.+)$/.exec(
         focus["outline"] ?? "",
@@ -523,19 +711,63 @@ describe("WCAG 2.2 AA essentials from source", () => {
       const widthPx = Number(outline[1]);
       expect(Number.isFinite(widthPx)).toBe(true);
       expect(widthPx).toBeGreaterThanOrEqual(2);
-      const outlineColour = resolveHexColor(outline[2].trim(), designTokens);
-      expect(outlineColour).not.toBeNull();
-      expect(pageSurface).not.toBeNull();
-      if (outlineColour === null || pageSurface === null) {
-        throw new Error(
-          "focus outline colour must resolve to a hex colour from the design tokens",
-        );
-      }
-      // A focus indicator is a non-text UI boundary: 3:1 at minimum.
-      expect(contrastRatio(outlineColour, pageSurface)).toBeGreaterThanOrEqual(
-        3,
-      );
       expect(focus["outline-offset"]).toBeDefined();
+      for (const { name, tokens } of themes) {
+        const outlineColour = resolveHexColor(outline[2].trim(), tokens);
+        const pageSurface = resolveHexColor("var(--surface-page)", tokens);
+        const raisedSurface = resolveHexColor("var(--surface-raised)", tokens);
+        expect(outlineColour, `${name}: the focus outline colour must be a hex colour`).not.toBeNull();
+        expect(pageSurface, `${name}: the page surface must be a hex colour`).not.toBeNull();
+        expect(
+          raisedSurface,
+          `${name}: the raised surface must be a hex colour`,
+        ).not.toBeNull();
+        if (
+          outlineColour === null ||
+          pageSurface === null ||
+          raisedSurface === null
+        ) {
+          throw new Error(
+            `${name}: focus outline colour must resolve to a hex colour from the design tokens`,
+          );
+        }
+        // A focus indicator is a non-text UI boundary: 3:1 at minimum.
+        expect(
+          contrastRatio(outlineColour, pageSurface),
+          `${name}: focus outline on the page surface`,
+        ).toBeGreaterThanOrEqual(3);
+        // The outline also sits on the raised chrome, so it must clear
+        // 3:1 there too.
+        expect(
+          contrastRatio(outlineColour, raisedSurface),
+          `${name}: focus outline on the raised chrome`,
+        ).toBeGreaterThanOrEqual(3);
+
+        // The headline band is the accent's own colour, so the ring
+        // there uses the band's ink, which must clear 3:1 on the band.
+        const bandFocus = parseDeclarations(
+          cssRule(globalCss, "header :focus-visible, .hero :focus-visible"),
+        );
+        const bandOutline = resolveHexColor(
+          bandFocus["outline-color"] ?? "",
+          tokens,
+        );
+        const bandSurface = resolveHexColor("var(--surface-band)", tokens);
+        expect(
+          bandOutline,
+          `${name}: the band focus outline colour must be a hex colour`,
+        ).not.toBeNull();
+        expect(
+          bandSurface,
+          `${name}: the headline band must be a hex colour`,
+        ).not.toBeNull();
+        if (bandOutline !== null && bandSurface !== null) {
+          expect(
+            contrastRatio(bandOutline, bandSurface),
+            `${name}: focus outline on the headline band`,
+          ).toBeGreaterThanOrEqual(3);
+        }
+      }
     });
   });
 

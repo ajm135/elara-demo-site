@@ -34,7 +34,7 @@ to start the development server, or
 npm start
 ```
 
-to start the production server, which first builds the project (`next build`) and then serves it (`next start`). Wait until the build finishes; the server then stays running and serves the site.
+to start the production server. The `start` script (via `scripts/start-production.mjs`) serves an existing current production build (`.next/`) immediately, and runs `next build` first only when that build is missing or older than the project source inputs it depends on (`src/`, `public/`, `next.config.ts`, `tsconfig.json`, `package.json`, `package-lock.json`); the listener is always `next start --hostname 127.0.0.1 --port 3000`. If a build runs, wait until it finishes; the server then stays running and serves the site.
 
 Both commands bind explicitly to the loopback address `127.0.0.1` on port 3000, so the servers accept connections only from this computer. Port 3000 must be free before starting a server.
 
@@ -54,7 +54,7 @@ In the current version of Chrome, Edge, Firefox, or Safari, open the loopback UR
 
 ## 4. Smoke check the five routes
 
-After `npm test` and `npm run build` have both passed, confirm that the loopback production server serves all five stories. Start it — this script builds the project and then serves it, so wait for the build to finish:
+After `npm test` and `npm run build` have both passed, confirm that the loopback production server serves all five stories. Start it — this script serves the current production build immediately and builds the project first only when that build is missing or older than a source input, so if a build runs, wait for it to finish:
 
 ```
 npm start
@@ -90,7 +90,7 @@ node scripts/verify-local-only.mjs
 The script:
 
 - refuses to start anything if port 3000 is already occupied (it fails safely rather than starting another server);
-- starts `npm run dev` and then `npm run start` separately, each with a bounded ready timeout (120 s for development; 180 s for production, which builds before serving);
+- starts `npm run dev` and then `npm run start` separately, each with a bounded ready timeout (120 s for development; 180 s for production, which serves a current build immediately and builds before serving only when the build is missing or stale);
 - checks HTTP readiness by polling only `http://127.0.0.1:3000/` until it answers HTTP 2xx or 3xx;
 - reads the OS-reported TCP listeners (`netstat -ano`) for port 3000 and accepts only loopback addresses (`127.0.0.1`, `::1`), rejecting wildcard listeners (`0.0.0.0`, `::`) and any other non-loopback address;
 - cleans up only the process trees it started and waits until port 3000 is free again.
@@ -108,13 +108,13 @@ From the project root:
 - `npm test` runs the automated tests.
 - `npm run build` builds the project without starting the server.
 - `npm run verify:reading` runs the loopback HTTP reading safeguard (`scripts/verify-reading.mjs`): it starts and stops its own loopback production server and checks the five server-rendered HTTP responses for essential story content, local illustrations, citations, disclaimers, the navigation links, and the correct current-page state without executing JavaScript. Its results are safeguards, not proof of complete no-JavaScript browser behaviour or WCAG 2.2 AA conformance.
-- `docs/runbooks/accessibility-validation.md` records the project's accessibility and browser evidence: it separates the checks that were actually executed from the ones that remain explicitly unverified.
+- `docs/runbooks/accessibility-validation.md` records the project's accessibility and browser evidence for the current design — the reference look recorded in `docs/adr/0008-reference-look.md`: it separates the recorded browser results (Elara's milestone 2 checks of the current Goal, all recorded as passed on 2026-11-04 at 375, 768, and 1280 px), the milestone 3 review of the six redrawn illustrations (a review, not a browser run), the executed Node-only safeguard, and the eight manual checks still to do.
 
 ## How Elara runs the browser checks
 
-The browser-level checks for this site — keyboard navigation, the click-through reading sequence, and in-browser accessibility audits — are run only as Elara page checks, directly against `http://127.0.0.1:3000/`. They are not part of `npm test`, and no npm script runs them: npm scripts and the other command checks in this project must never launch a browser or a browser-automation tool (no Playwright, Cypress, Puppeteer, Selenium, Lighthouse, or similar from the command line). Everything in the `package.json` scripts and in `scripts/` is Node-only.
+The browser-level checks for this site — the finished home page (including the skip-link keyboard flow) and the reading journey from Home through every story to "End of the stories" — are run only as Elara page checks, directly against `http://127.0.0.1:3000/`. (The in-browser accessibility audit is not one of them: it is a manual check still to do, listed in the accessibility runbook.) They are not part of `npm test`, and no npm script runs them: npm scripts and the other command checks in this project must never launch a browser or a browser-automation tool (no Playwright, Cypress, Puppeteer, Selenium, Lighthouse, or similar from the command line). Everything in the `package.json` scripts and in `scripts/` is Node-only.
 
-What was actually executed, what remains pending Elara execution, and what is explicitly unverified is recorded in the [accessibility-validation runbook](accessibility-validation.md) (`docs/runbooks/accessibility-validation.md`). In short: the Node HTTP reading safeguard `npm run verify:reading` was executed on 2026-10-18 (exit code 0) and is a server-rendered HTTP safeguard, not browser proof; Elara's keyboard and click page checks are pending Elara execution; and native Safari, screen-reader navigation, 200% text enlargement, 400% zoom/reflow, and JavaScript-disabled browser reading are explicitly unverified. The pending and unverified checks have not been run and are not claimed to have passed, and no browser name or version is recorded anywhere in the project unless it was actually observed by Elara or by a person running the named check.
+Elara's milestone 2 browser checks of the current Goal for this site — the finished home page with the skip link reaching the main content, and the reading journey from Home through every story to "End of the stories" — have been recorded as passed in the [accessibility-validation runbook](accessibility-validation.md) (`docs/runbooks/accessibility-validation.md`) for the current design, the reference look recorded in `docs/adr/0008-reference-look.md`, with what each check covered, its widths (375, 768, and 1280 px), its date (2026-11-04), and its outcome, taken from Elara's milestone record; the milestone record names no browser, so no browser name or version is recorded for them. The Node HTTP reading safeguard `npm run verify:reading` was executed on 2026-10-18 (exit code 0) and remains a server-rendered HTTP safeguard, not browser proof; that run predates the new design and is kept in the runbook apart from the browser results. Eight manual checks remain to do — screen-reader navigation (NVDA or VoiceOver), 200% text enlargement, 400% zoom and reflow, JavaScript-off reading in a real browser, native Safari on macOS and iOS, an in-browser accessibility audit (axe or Lighthouse), the dark theme in a real browser, and reduced-motion behaviour — each listed with reproduction steps in the same runbook, and none of them is claimed to have passed. No document in the project claims complete WCAG 2.2 AA conformance or complete cross-browser verification; both remain requirements. No browser name or version is recorded anywhere in the project unless it was actually observed by Elara or by a person running the named check.
 
 ## A note about the content
 

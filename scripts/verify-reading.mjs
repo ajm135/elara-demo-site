@@ -34,16 +34,23 @@
  * ever executed and no browser is launched), for all five routes in
  * reading order: /, /how-ai-helps, /cancer, /diseases, /longevity.
  * Each GET must return HTTP 200 with a text/html body containing:
- *   - exactly one main#main-content with exactly one h1 reading the
- *     route's heading (src/lib/site-content.ts `heading` field), plus at
- *     least one body paragraph inside main;
+ *   - exactly one wide top section (<div class="hero">) that is the first
+ *     element inside the single <main id="main-content"> (only whitespace
+ *     between the main open tag and the hero open tag); the hero contains
+ *     exactly one h1 reading the route's heading (src/lib/site-content.ts
+ *     `heading` field) and a review-date <time> with a non-empty datetime
+ *     attribute (matched case-insensitively: React serialises dateTime in
+ *     static markup, the browser DOM normalises to datetime), and the
+ *     page's opening illustration; main contains that one h1 (inside the
+ *     hero) and no second h1, and at least one body paragraph inside main;
  *   - the route's title string(s) in the document <title> (for the four
  *     stories the page `title` plus the site name; for home the site name
  *     "AI and longer lives", which is the home browser title by design);
- *   - at least one local illustration: an img whose src starts with
- *     /images/ and whose alt is non-empty, and a follow-up GET of that src
- *     on the same loopback origin returning HTTP 200 with an image content
- *     type (image/svg+xml is expected);
+ *   - at least one local illustration in the document — an img whose src
+ *     starts with /images/ and whose alt is non-empty, of which at least
+ *     one sits in the hero top section — and a follow-up GET of the first
+ *     such src on the same loopback origin returning HTTP 200 with an
+ *     image content type (image/svg+xml is expected);
  *   - at least one citation anchor inside main with an https:// href;
  *   - the visible disclaimer text "not medical advice" inside main;
  *   - the shared header nav[aria-label="Main"] with exactly the five story
@@ -54,10 +61,7 @@
  *     whose href is that route, and the visible position label
  *     "Story N of 5";
  *   - the skip link (class skip-link, href #main-content, text "Skip to
- *     main content") before the header, and a main <time> with a
- *     non-empty datetime attribute (matched case-insensitively: React
- *     serialises dateTime in static markup, the browser DOM normalises to
- *     datetime);
+ *     main content") before the header;
  *   - story 5 only: the visible strings "Life expectancy", "Maximum
  *     lifespan", "Healthy lifespan" inside main, the visible ending "End
  *     of the stories", and no next-story link anywhere outside the nav;
@@ -680,15 +684,63 @@ async function checkRoute(route, contract, html) {
   const mainInner = mainEl ? mainEl.inner : '';
   const mainText = mainEl ? visibleText(mainInner) : '';
 
+  /* --- the wide top section: the hero, the first element inside main --- */
+  let heroEl = null;
+  const heroMatches = findAllTags(markup, 'div', (attrs) => (attrs.class ?? '').split(/\s+/).includes('hero'));
+  if (heroMatches.length !== 1) {
+    problems.push(`${label}: expected exactly one wide top section (<div class="hero">), found ${heroMatches.length}`);
+  } else {
+    const heroMatch = heroMatches[0];
+    // The hero div nests its own .hero-text div, so its own closing tag is
+    // the one that balances the div depth back to zero — the first
+    // </div> in the remainder is the nested block's, not the hero's.
+    const afterOpen = markup.slice(heroMatch.start + heroMatch.open.length);
+    let depth = 1;
+    let heroInner = '';
+    let heroEnd = -1;
+    for (const divTag of afterOpen.matchAll(/<div\b[^>]*>|<\/div\s*>/gi)) {
+      depth += divTag[0].startsWith('</') ? -1 : 1;
+      if (depth === 0) {
+        heroInner = afterOpen.slice(0, divTag.index);
+        heroEnd = heroMatch.start + heroMatch.open.length + divTag.index + divTag[0].length;
+        break;
+      }
+    }
+    if (heroEnd === -1) {
+      problems.push(`${label}: the hero <div> is never closed (no matching </div> after its open tag)`);
+    } else {
+      heroEl = { start: heroMatch.start, end: heroEnd, open: heroMatch.open, inner: heroInner, attrs: heroMatch.attrs };
+      if (mainEl !== null) {
+        if (heroEl.start < mainEl.start || heroEl.end > mainEl.end) {
+          problems.push(`${label}: the hero must sit inside the single <main id="main-content">`);
+        } else if (markup.slice(mainEl.start + mainEl.open.length, heroEl.start).trim() !== '') {
+          problems.push(
+            `${label}: the hero must be the first element inside <main id="main-content"> (only whitespace may sit between the main open tag and the hero open tag)`,
+          );
+        }
+      }
+    }
+  }
+  const heroInner = heroEl ? heroEl.inner : '';
+
   if (mainEl !== null) {
-    const h1s = findAllTags(mainInner, 'h1');
+    // The page's single h1 reads the route's heading and sits in the wide
+    // top section (the hero), the first element inside main — so main
+    // carries that one h1 and no second one.
+    const h1s = findAllTags(heroInner, 'h1');
     if (h1s.length !== 1) {
-      problems.push(`${label}: main must contain exactly one <h1>, found ${h1s.length}`);
+      problems.push(`${label}: the wide top section (the hero) must contain exactly one <h1>, found ${h1s.length}`);
     } else {
       const h1Text = visibleText(h1s[0].inner);
       if (h1Text !== route.heading) {
         problems.push(`${label}: the single <h1> reads "${h1Text}", expected "${route.heading}"`);
       }
+    }
+    const mainH1s = findAllTags(markup, 'h1').filter((h1) => h1.start >= mainEl.start && h1.end <= mainEl.end);
+    if (mainH1s.length !== 1) {
+      problems.push(`${label}: main must contain exactly one <h1> (the one inside the hero), found ${mainH1s.length}`);
+    } else if (heroEl === null || mainH1s[0].start < heroEl.start || mainH1s[0].end > heroEl.end) {
+      problems.push(`${label}: main's single <h1> must be the one inside the hero (no second h1 outside it)`);
     }
 
     const paragraphs = findAllTags(mainInner, 'p').filter((p) => visibleText(p.inner).length > 0);
@@ -696,13 +748,19 @@ async function checkRoute(route, contract, html) {
       problems.push(`${label}: main must contain at least one body paragraph with visible text`);
     }
 
-    const illustrations = findAllTags(mainInner, 'img').filter((image) => {
+    const illustrations = findAllTags(markup, 'img').filter((image) => {
       const src = image.attrs.src ?? '';
       return src.startsWith(contract.imageSrcPrefix) && decodeEntities(image.attrs.alt ?? '').trim().length > 0;
     });
     if (illustrations.length === 0) {
-      problems.push(`${label}: main must contain at least one <img> with a local ${contract.imageSrcPrefix}… src and a non-empty alt`);
+      problems.push(`${label}: the page must contain at least one <img> with a local ${contract.imageSrcPrefix}… src and a non-empty alt`);
     } else {
+      const heroCarriesIllustration =
+        heroEl !== null &&
+        illustrations.some((image) => image.start >= heroEl.start && image.end <= heroEl.end);
+      if (!heroCarriesIllustration) {
+        problems.push(`${label}: the wide top section (the hero) must carry the page's opening illustration`);
+      }
       const imageProblem = await checkIllustration(illustrations[0].attrs.src);
       if (imageProblem !== null) problems.push(`${label}: ${imageProblem}`);
     }
@@ -718,13 +776,14 @@ async function checkRoute(route, contract, html) {
       problems.push(`${label}: main must visibly contain the disclaimer "${contract.disclaimerText}"`);
     }
 
+    // The review date's <time> lives in the wide top section (the hero).
     // Matched case-insensitively: React serialises dateTime in static
     // markup, the browser DOM normalises it to datetime.
-    const times = findAllTags(mainInner, 'time').filter(
+    const times = findAllTags(heroInner, 'time').filter(
       (time) => time.attrs.datetime !== undefined && time.attrs.datetime.length > 0,
     );
     if (times.length === 0) {
-      problems.push(`${label}: main must contain a <time> element with a non-empty datetime attribute`);
+      problems.push(`${label}: the wide top section (the hero) must contain a <time> element with a non-empty datetime attribute`);
     }
   }
 

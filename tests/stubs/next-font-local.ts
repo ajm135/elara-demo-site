@@ -40,12 +40,26 @@ export interface LocalFontResult {
   readonly style: { readonly fontFamily: string };
 }
 
+/**
+ * The family name a font file stands for, read from its file name.
+ * Keeps the double's reported family in step with the file that was
+ * asked for, so the headings and the body do not report the same face.
+ */
+function familyNameFor(src: LocalFontOptions["src"]): string {
+  const paths = Array.isArray(src) ? src.map((entry) => entry.path) : [src];
+  const file = (paths[0] ?? "").split(/[\\/]/).pop() ?? "";
+  const base = file.replace(/\.[a-z0-9]+$/i, "").toLowerCase();
+  if (base.startsWith("asap")) return "Asap";
+  if (base.startsWith("inter")) return "Inter";
+  return base;
+}
+
 /** Stand-in for Next's localFont: echoes the variable, skips all file I/O. */
 export default function localFont(options: LocalFontOptions): LocalFontResult {
   const variable = options.variable ?? null;
   return {
     className: variable ?? "next-font-local-stub",
     variable,
-    style: { fontFamily: "Inter" },
+    style: { fontFamily: familyNameFor(options.src) },
   };
 }

@@ -1,13 +1,15 @@
 # Review handoff: Demo Site redesign and innovation-review findings
 
-This is the final finding-by-finding handoff for the Demo Site redesign (milestone 5), written on 2026-10-18. It records only what the current project files show; no command results, browser versions, citations, or pass/fail outcomes are invented here. Where a result was recorded by an earlier task, the file that records it is named. The reviewer can verify every statement below against the cited files.
+This is the final finding-by-finding handoff for the Demo Site redesign (milestone 5), written on 2026-10-18. It records only what the current project files show; no command results, browser versions, citations, or pass/fail outcomes are invented here. Where a result was recorded by an earlier task, the file that records it is named. The reviewer can verify every statement below against the cited files. The visual-design statements (section 1, finding 3, and section 5) were updated on 2026-11-04 to name the current design, the reference look recorded in `docs/adr/0008-reference-look.md`, and to point the recorded browser results at the rewritten `docs/runbooks/accessibility-validation.md`.
 
 ## 1. Redesign
 
-The five existing routes — `/`, `/how-ai-helps`, `/cancer`, `/diseases`, `/longevity` (the five `sitePages` entries in `src/lib/site-content.ts`, in reading order) — were redesigned as a light, calm 2026 science-editorial reading experience for general readers. The design is recorded in:
+The five existing routes — `/`, `/how-ai-helps`, `/cancer`, `/diseases`, `/longevity` (the five `sitePages` entries in `src/lib/site-content.ts`, in reading order) — were redesigned as a light, calm 2026 science-editorial reading experience for general readers. The redesign was recorded in:
 
 - `docs/adr/0006-editorial-design-system.md` — the token-driven design system: warm neutral surfaces, dark warm ink, a restrained teal accent, a ~60–75 character measure, underline-plus-focus-visible interaction rules, local committed type (`src/app/fonts/`, Inter, SIL OFL 1.1) wired through `next/font/local` in `src/lib/fonts.ts`, and contrast that is verified in Node by computed WCAG 2.2 ratios in `tests/design-tokens.test.ts` (4.5:1 normal-text pairs, 3:1 meaningful boundaries) instead of exact colour strings.
 - `docs/adr/0006-science-editorial-reading-progress.md` — the page composition: each route is a static server component that renders `SiteHeader` with its own path plus `StoryPage`; composed hero, framed local illustrations, evidence panels immediately after the claiming paragraph, the lifespan term list on `/longevity`, and the header-only reading-progress cluster.
+
+Since this handoff was written, the visual design has been replaced by ADR 0008, the reference look recorded in `docs/adr/0008-reference-look.md` (2026-11-04): light and dark themes chosen only by the reader's system setting, a colour band behind the headline, pill-shaped story links, 5 px rounded cards, alternating section bands, Asap headings with Inter body text, and the six illustrations as flat drawings in the new colours. ADR 0008 supersedes the visual decisions of ADR 0007 and of the two 0006 records; everything else in ADRs 0001–0007 stays in force. The six closed findings are not reopened, and the page text, citations, evidence-panel content, reading progress, routes, header-only navigation, loopback-only servers, and the commands in section 3 are unchanged. The recorded browser results in `docs/runbooks/accessibility-validation.md` are for the new reference look in ADR 0008.
 
 Preserved boundaries (unchanged by the redesign):
 
@@ -47,39 +49,43 @@ Closed in content. Per `docs/adr/0005-evidence-led-health-claims.md` and the per
 
 ### Finding 3 — Medium: accessibility promises lacked browser-level evidence — **Partially closed; must stay partial**
 
-What was executed (recorded in `docs/runbooks/accessibility-validation.md`, not re-run here):
+What was executed (a Node-only HTTP safeguard, recorded in the rewritten `docs/runbooks/accessibility-validation.md`, not re-run here):
 
-- `npm run verify:reading` (`scripts/verify-reading.mjs`) on this computer on **2026-10-18**, with Node.js 22.16.0 and npm 10.9.2. The script started and stopped its own loopback production server, fetched all five routes, and each returned **HTTP 200**; the script exited **0**. The record quotes the script's final PASS line.
+- `npm run verify:reading` (`scripts/verify-reading.mjs`) on this computer on **2026-10-18**, with Node.js 22.16.0 and npm 10.9.2. The script started and stopped its own loopback production server, fetched all five routes, and each returned **HTTP 200**; the script exited **0**. The record quotes the script's final PASS line. The run predates the new design and is kept in the record as a Node-only HTTP safeguard, apart from the browser results.
 
 What that run is, and is not: it is a **server-rendered HTTP safeguard** over the production server's rendered HTML (story content, local illustrations, citations, disclaimer, the five navigation links, current-page state). It is **not** browser evidence, **not** no-JavaScript proof, and **not** WCAG proof: a Node fetch is not a browser, and no browser was launched.
 
-Pending Elara execution (not results — a builder must not mark them passed, failed, or substituted):
+Recorded browser results (from Elara's milestone record, recorded in the rewritten `docs/runbooks/accessibility-validation.md`, not re-run here):
 
-- Elara keyboard page check (skip link through the five header links, Enter on the final story) at 375, 768, and 1280 px.
-- Elara click-through reading sequence with progress updates at 375, 768, and 1280 px.
-- In-browser accessibility audit (axe / Lighthouse / accessibility pane), if Elara runs one; otherwise it stays unverified.
+- Elara's milestone 2 page checks of the current Goal, run against the new reference look recorded in `docs/adr/0008-reference-look.md`, all recorded as **passed** on **2026-11-04**, the date of the milestone 2 record, at widths **375, 768, and 1280 px**:
+  - the finished home page, including the skip link reaching the main content;
+  - the reading journey from Home through every story to "End of the stories".
+- The milestone record names no browser and no version, so no browser name or version is recorded for these results: none was observed.
+- These supersede the earlier recorded browser results, which were for the previous look of 20 October (`docs/adr/0007-immersive-2026-design.md`), the visual design this Goal replaced: the rewritten record carries no results of that earlier design forward, because those runs are not results of this Goal.
 
-Explicitly unverified (status word is `unverified`, never "passed", each with reproduction steps in `docs/runbooks/accessibility-validation.md`):
+Manual checks still to do (each still unverified, status word `unverified`, never "passed", each with reproduction steps in `docs/runbooks/accessibility-validation.md`):
 
 - Screen-reader navigation (NVDA or VoiceOver).
 - 200% text enlargement (WCAG 2.2 AA 1.4.4).
-- 400% zoom / reflow (WCAG 2.2 AA 1.4.10).
-- JavaScript-disabled reading in a real browser.
+- 400% zoom and reflow (WCAG 2.2 AA 1.4.10).
+- JavaScript-off reading in a real browser.
 - Native Safari on macOS and iOS. **WebKit is not native Safari**: a WebKit-engine result must not be recorded as native Safari coverage.
-- In-browser axe / Lighthouse audits (if Elara does not run them).
+- In-browser accessibility audit (axe or Lighthouse).
+- The dark theme in a real browser.
+- Reduced-motion behaviour.
 
-Unchanged requirements, not completed verification: WCAG 2.2 AA, and current Chrome, Edge, Firefox, and Safari support on phone, tablet, and desktop, remain in force (ADR 0004). No browser name or version is recorded in the project except where a run actually observed it.
+Unchanged requirements, not completed verification: WCAG 2.2 AA, and current Chrome, Edge, Firefox, and Safari support on phone, tablet, and desktop, remain in force (ADR 0004). The recorded browser results and the executed safeguard are **not** complete WCAG 2.2 AA conformance or complete cross-browser verification, and no document in the project claims either. No browser name or version is recorded in the project except where a run actually observed it.
 
 ### Finding 4 — Medium: local-only operation was not enforced — **Closed**
 
 Closed in implementation:
 
-- `package.json` scripts: `dev` is `next dev --hostname 127.0.0.1 --port 3000` and `start` ends in `next start --hostname 127.0.0.1 --port 3000` — both servers bind explicitly to loopback.
+- `package.json` scripts: `dev` is `next dev --hostname 127.0.0.1 --port 3000`, and `start` runs `scripts/start-production.mjs`, which serves an existing current production build (`.next/`) immediately, runs `next build` first only when that build is missing or older than the source inputs it depends on, and always starts its listener exactly as `next start --hostname 127.0.0.1 --port 3000` — both servers bind explicitly to loopback.
 - `scripts/verify-local-only.mjs` checks the boundary against the listeners the operating system actually reports: it refuses to start if port 3000 is occupied, starts the development and production servers separately, polls only `http://127.0.0.1:3000/`, reads `netstat -ano`, accepts only loopback addresses (`127.0.0.1`, `::1`), rejects wildcard (`0.0.0.0`, `::`) and any other non-loopback listener, and cleans up only its own process trees.
 - Opening a localhost URL is **not** the boundary: it only proves this computer can reach the server. The loopback binding is the boundary, and the OS-reported listener check verifies it.
 - The runbook documents this as step 5 of `docs/runbooks/local-start.md`.
 
-Elara reconfirms this with `node scripts/verify-local-only.mjs`. This writing task did **not** run that script, so no fresh listener-run exit code is recorded here; the result is for Elara's acceptance run. (The 2026-10-18 `verify:reading` record does note that its own started server listened only on `127.0.0.1:3000`; that is part of that safeguard's record, not a re-proof of the standing boundary.)
+Elara reconfirms this with `node scripts/verify-local-only.mjs`. No fresh listener-run exit code is recorded in this document: the milestone 4 confirmation runs are not the result of record, and the result of record is Elara's acceptance run. (The 2026-10-18 `verify:reading` record does note that its own started server listened only on `127.0.0.1:3000`; that is part of that safeguard's record, not a re-proof of the standing boundary.)
 
 ### Finding 5 — Low: reading journey lacked orientation — **Closed**
 
@@ -119,7 +125,7 @@ Also named, already executed and recorded: `npm run verify:reading` — the Node
 
 None of these commands launches a browser, and no npm script in this project may launch Playwright, Cypress, Puppeteer, Selenium, Lighthouse, or any other browser-automation tool; all browser-level checks run only as Elara page checks (see `docs/runbooks/local-start.md`, "How Elara runs the browser checks").
 
-Command results recorded here: only the already-recorded 2026-10-18 `verify:reading` pass, as recorded in `docs/runbooks/accessibility-validation.md`. This writing task did not run `npm ci`, `npm test`, `npm run build`, or `node scripts/verify-local-only.mjs`; their results are for Elara's acceptance run and are **not** recorded here. No secrets or environment values are used by, or included with, any of these commands (the project needs no environment variables at all).
+Command results recorded here: only the already-recorded 2026-10-18 `verify:reading` pass, as recorded in `docs/runbooks/accessibility-validation.md`. No result for `npm ci`, `npm test`, `npm run build`, or `node scripts/verify-local-only.mjs` is recorded in this document: the milestone 4 confirmation runs are not the result of record, and Elara's acceptance run is. No secrets or environment values are used by, or included with, any of these commands (the project needs no environment variables at all).
 
 ## 4. Source-review maintenance
 
@@ -132,13 +138,13 @@ Command results recorded here: only the already-recorded 2026-10-18 `verify:read
 
 - **No high findings remain.** No high finding existed in the review, and nothing introduced by the redesign is recorded as high.
 - Medium/low residuals, all explicitly disclosed gaps:
-  - The unverified browser and assistive-technology checks from finding 3: Elara keyboard and click page checks at 375/768/1280 px (pending Elara execution), screen-reader navigation, 200% text enlargement, 400% zoom/reflow, JavaScript-disabled browser reading, native Safari on macOS and iOS, and in-browser axe/Lighthouse audits (unverified).
+  - The manual browser and assistive-technology checks from finding 3, each still unverified (reproduction steps in `docs/runbooks/accessibility-validation.md`): screen-reader navigation (NVDA or VoiceOver), 200% text enlargement, 400% zoom and reflow, JavaScript-off reading in a real browser, native Safari on macOS and iOS, an in-browser accessibility audit (axe or Lighthouse), the dark theme in a real browser, and reduced-motion behaviour.
   - The JMI abstract-only inspection limitation (finding 1).
-- These are **disclosed gaps, not failures of checks that were run**: `docs/runbooks/accessibility-validation.md` records zero failures (the one executed check passed), and an unavailable check is never recorded as "passed". They are also **not dropped requirements**: WCAG 2.2 AA and current Chrome, Edge, Firefox, and Safari support on phone, tablet, and desktop remain in force as requirements.
+- These are **disclosed gaps, not failures of checks that were run**: `docs/runbooks/accessibility-validation.md` records zero failures — the recorded milestone 2 browser checks (2026-11-04) and the milestone 3 review of the six redrawn illustrations (2026-11-04) both passed, and the executed Node-only safeguard run (2026-10-18) passed — and a check that is still to do is never recorded as "passed". They are also **not dropped requirements**: WCAG 2.2 AA and current Chrome, Edge, Firefox, and Safari support on phone, tablet, and desktop remain in force as requirements, without any claim that either is fully verified.
 - No verification gap was closed by substitution: Node-rendered or string-parsed HTML, and any headless accessibility tree, are not treated as browser or assistive-technology results anywhere in the project.
 
 ## 6. Layout and hygiene
 
 - This handoff lives at `docs/runbooks/review-handoff.md`, the folder for operations guides. Creating it added **no new folder**.
-- This writing task created or changed no other file: application source, tests, `package.json`, scripts, `AGENTS.md`, and `STRUCTURE.md` are untouched here.
+- The original 2026-10-18 writing task created or changed no other file. The 2026-11-04 update of the visual-design statements changed only this handoff, `docs/runbooks/local-start.md`, and the `description` field of `tests/e2e/reading-experience.json` (no selector, route, expected string, viewport, `serverContract`, or `unverifiedGaps` entry was changed); application source, `package.json`, scripts, `AGENTS.md`, and `STRUCTURE.md` are untouched by it.
 - This file contains no secrets, no real settings or environment values, no personal data, and no generated build output.

@@ -24,6 +24,101 @@ function mainHtml(page: SitePage): string {
   );
 }
 
+/**
+ * The index just past the </div> that balances the <div open tag at
+ * `openIndex`.
+ */
+function balancedDivEnd(html: string, openIndex: number): number {
+  const rest = html.slice(openIndex);
+  let depth = 0;
+  for (const match of rest.matchAll(/<div\b[^>]*>|<\/div>/g)) {
+    depth += match[0].startsWith("</") ? -1 : 1;
+    if (depth === 0) {
+      return openIndex + (match.index ?? 0) + match[0].length;
+    }
+  }
+  throw new Error("the div open tag never balances its closing tag");
+}
+
+/**
+ * The wide top section as rendered: the single balanced hero element the
+ * component emits inside <main id="main-content" tabindex="-1"> — main's
+ * first element.
+ *
+ * React 19's server renderer hoists an auto-injected
+ * <link rel="preload" as="image"> for every native <img> to the very start
+ * of the component render (in the full page it lands in <head>); aside
+ * from those renderer-injected links, nothing else may sit ahead of main.
+ * After the main open tag, only whitespace may sit ahead of the hero. The
+ * hero must be a single balanced div that ends before the page's first
+ * .story-illustration figure, section, or disclaimer — never at the main
+ * open tag.
+ */
+function heroHtml(page: SitePage): string {
+  const html = renderToStaticMarkup(<StoryPage page={page} />);
+  const mainStart = html.indexOf(mainOpen);
+  expect(mainStart, `${page.id}: main#main-content must be present`).toBeGreaterThan(-1);
+
+  // Ahead of main: only the auto-injected image preloads (and whitespace).
+  const prefix = html.slice(0, mainStart);
+  for (const tag of prefix.match(/<[^>]+>/g) ?? []) {
+    expect(
+      /^<link [^>]*\brel="preload"[^>]*\bas="image"[^>]*\/>$/.test(tag),
+      `${page.id}: only auto-injected image preloads may precede main, found: ${tag}`,
+    ).toBe(true);
+  }
+  expect(
+    prefix.replace(
+      /<link [^>]*\brel="preload"[^>]*\bas="image"[^>]*\/>/g,
+      "",
+    ).trim(),
+    `${page.id}: nothing but auto-injected image preloads may precede main`,
+  ).toBe("");
+
+  const mainEnd = html.indexOf("</main>");
+  expect(
+    mainEnd,
+    `${page.id}: </main> must close the landmark`,
+  ).toBeGreaterThan(mainStart);
+  const body = html.slice(mainStart + mainOpen.length, mainEnd);
+
+  // The hero is main's first element: only whitespace may sit between the
+  // main open tag and the hero div.
+  const heroStart = body.indexOf('<div class="hero">');
+  expect(
+    heroStart,
+    `${page.id}: the hero must be present inside main`,
+  ).toBeGreaterThan(-1);
+  expect(
+    body.slice(0, heroStart).trim(),
+    `${page.id}: the hero must be the first element inside main`,
+  ).toBe("");
+
+  // The hero is a single balanced div...
+  const hero = body.slice(heroStart, balancedDivEnd(body, heroStart));
+  expect(
+    hero.match(/<div\b/g)?.length ?? 0,
+    `${page.id}: the hero must balance its own divs`,
+  ).toBe(hero.match(/<\/div>/g)?.length ?? 0);
+
+  // ...and it ends before the page's first .story-illustration figure,
+  // section, or disclaimer — none of those may sit inside it.
+  expect(
+    hero.indexOf('<figure class="story-illustration">'),
+    `${page.id}: the hero must end before the first .story-illustration`,
+  ).toBe(-1);
+  expect(
+    hero.indexOf("<section"),
+    `${page.id}: the hero must end before the first section`,
+  ).toBe(-1);
+  expect(
+    hero.indexOf(`<p>${escapeHtml(page.disclaimer)}</p>`),
+    `${page.id}: the hero must end before the disclaimer`,
+  ).toBe(-1);
+
+  return hero;
+}
+
 describe("story page", () => {
   it("renders exactly one focusable main with id main-content and exactly one h1", () => {
     for (const page of sitePages) {
@@ -35,34 +130,42 @@ describe("story page", () => {
     }
   });
 
-  it("opens main with the composed hero: kicker, single h1, summary, in that order", () => {
+  it("opens main with the composed hero as its first element: kicker, single h1, summary, review date, in that order", () => {
     for (const page of sitePages) {
-      const body = mainHtml(page);
-      expect(body.startsWith('<div class="hero">')).toBe(true);
+      const hero = heroHtml(page);
 
-      const heroTextStart = body.indexOf('<div class="hero-text">');
+      // The wide top section is main's first element: a single balanced
+      // hero div right after the main open tag, ending before the page
+      // body (illustrations, sections, disclaimer) begins.
+      expect(hero.startsWith('<div class="hero">')).toBe(true);
+      expect(hero.endsWith("</div>")).toBe(true);
+      expect(hero.match(/<div\b/g)?.length ?? 0).toBe(
+        hero.match(/<\/div>/g)?.length ?? 0,
+      );
+
+      const heroTextStart = hero.indexOf('<div class="hero-text">');
       const kicker = `<p class="hero-kicker">${escapeHtml(page.navLabel)}</p>`;
       const heading = `<h1>${escapeHtml(page.heading)}</h1>`;
       const summary = `<p class="hero-summary">${escapeHtml(page.summary)}</p>`;
-      const kickerStart = body.indexOf(kicker);
-      const headingStart = body.indexOf(heading);
-      const summaryStart = body.indexOf(summary);
+      const kickerStart = hero.indexOf(kicker);
+      const headingStart = hero.indexOf(heading);
+      const summaryStart = hero.indexOf(summary);
 
       // The hero text block leads with the story's navigation label as a
       // kicker, then the single h1, then the summary — the editorial
-      // hierarchy replaces the old flat label-first paragraph stack.
+      // hierarchy of the wide top section.
       expect(heroTextStart).toBeGreaterThan(-1);
       expect(kickerStart).toBeGreaterThan(heroTextStart);
       expect(headingStart).toBeGreaterThan(kickerStart);
       expect(summaryStart).toBeGreaterThan(headingStart);
 
-      // The review date is a <time datetime> element inside the hero
-      // (the hero always ends where the first section begins).
+      // The review date is a <time datetime> element inside that hero,
+      // after the summary.
       if (page.reviewedOn !== undefined) {
-        const hero = body.slice(0, body.indexOf("<section"));
-        expect(hero).toMatch(
+        const reviewStart = hero.search(
           new RegExp(`<time datetime="${page.reviewedOn}"`, "i"),
         );
+        expect(reviewStart).toBeGreaterThan(summaryStart);
       }
     }
   });
