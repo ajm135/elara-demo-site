@@ -94,22 +94,23 @@
   --ink-heading: #272727;
   --ink-body: #434445;
   --ink-muted: #666666;
-  /* The reference's blue accent, darkened about 25% so links, the
-     keyboard focus outline, and the active-story cue clear 4.5:1 on
-     every surface; the strong step carries hover, visited links, and
-     the focus outline. */
-  --accent-primary: #1f6f99;
+  /* The reference's blue accent, darkened about 25% per channel, then a
+     further about 6% per channel toward the recorded strong step, so
+     links — including the citation links inside the cards that sit on
+     the pale band — clear 4.5:1 on every surface with margin; the
+     strong step carries hover, visited links, and the focus outline. */
+  --accent-primary: #1d6890;
   --accent-primary-strong: #1c6288;
   /* Rules: a soft hairline for decorative dividers (copied from the
      reference) and a stronger rule that clears 3:1 where a boundary
      carries meaning. */
   --rule: #858585;
   --rule-soft: #e5e5e5;
-  /* The headline band: the reference's accent used as a large fill, with
-     the inks that sit on it. The muted band ink is lightened a little
-     from the first record so that it keeps a safe margin over 4.5:1 on
-     the band (4.77:1). */
-  --surface-band: #1f6f99;
+  /* The headline band: the accent used as a large fill (darkened as
+     recorded above), with the inks that sit on it. The muted band ink
+     is lightened a little from the first record so that it keeps a
+     safe margin over 4.5:1 on the band (5.27:1 on the final band). */
+  --surface-band: #1d6890;
   --ink-on-band: #ffffff;
   --ink-muted-on-band: #e3f0f9;
   /* The reference's remaining accents, kept for the illustrations and

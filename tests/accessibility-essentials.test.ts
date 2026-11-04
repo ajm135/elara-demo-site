@@ -44,11 +44,13 @@
  *    resolve each colour per theme and compute WCAG 2.2
  *    relative-luminance contrast ratios: 4.5:1 for body text and link
  *    text on their backgrounds (the page surface, the raised chrome,
- *    the headline band, and the evidence surface, where the citation
- *    links and their visited colour sit), 3:1 for the focus outline
- *    against the page surface, the raised chrome, and the headline band
- *    — the same or stronger safeguard, not a weaker one. The light
- *    theme's page surface copies the reference's #ffffff background
+ *    the pale section band the citation cards sit on — the .band-alt
+ *    ground and the .sources block's own fill — the headline band, and
+ *    the evidence surface, where the citation links and their visited
+ *    colour sit), 3:1 for the focus outline against the page surface,
+ *    the raised chrome, and the headline band — the same or stronger
+ *    safeguard, not a weaker one. The light theme's page surface copies
+ *    the reference's #ffffff background
  *    (docs/adr/0008-reference-look.md);
  * 9. privacy: the rendered markup and the CSS file contain no secret-like
  *    tokens, email addresses, or personal names.
@@ -572,6 +574,13 @@ describe("WCAG 2.2 AA essentials from source", () => {
         const pageSurface = resolveHexColor("var(--surface-page)", tokens);
         const raisedSurface = resolveHexColor("var(--surface-raised)", tokens);
         const evidenceSurface = resolveHexColor("var(--surface-evidence)", tokens);
+        // The pale section band the citation cards sit on: the
+        // .band-alt sections paint it, and the .sources block carries
+        // it as its own fill.
+        const bandAltSurface = resolveHexColor(
+          parseDeclarations(cssRule(globalCss, ".band-alt"))["background-color"],
+          tokens,
+        );
         expect(linkColour, `${name}: the link colour must be a hex colour`).not.toBeNull();
         expect(
           visitedColour,
@@ -586,12 +595,17 @@ describe("WCAG 2.2 AA essentials from source", () => {
           evidenceSurface,
           `${name}: the evidence surface must be a hex colour`,
         ).not.toBeNull();
+        expect(
+          bandAltSurface,
+          `${name}: the .band-alt ground must be a hex colour`,
+        ).not.toBeNull();
         if (
           linkColour === null ||
           visitedColour === null ||
           pageSurface === null ||
           raisedSurface === null ||
-          evidenceSurface === null
+          evidenceSurface === null ||
+          bandAltSurface === null
         ) {
           throw new Error(
             `${name}: link colours and surfaces must resolve to hex colours from the design tokens`,
@@ -612,12 +626,33 @@ describe("WCAG 2.2 AA essentials from source", () => {
           contrastRatio(linkColour, evidenceSurface),
           `${name}: citation links on the evidence surface`,
         ).toBeGreaterThanOrEqual(4.5);
+        // The citation cards sit on the pale band (the .band-alt
+        // ground, which the .sources block also uses as its own fill),
+        // so the link colour must clear AA against that band's
+        // surface, not only against the card's own fill.
+        expect(
+          contrastRatio(linkColour, bandAltSurface),
+          `${name}: citation links on the pale band the cards sit on`,
+        ).toBeGreaterThanOrEqual(4.5);
         // The visited citations (a:visited, --accent-primary-strong)
         // sit on the same evidence surface, so they must clear AA
-        // there too.
+        // there too — and, like the link colour, on the page surface,
+        // the raised band surface, and the pale band the cards sit on.
         expect(
           contrastRatio(visitedColour, evidenceSurface),
           `${name}: visited citation links on the evidence surface`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(visitedColour, pageSurface),
+          `${name}: visited links on the page surface`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(visitedColour, raisedSurface),
+          `${name}: visited links on the raised band surface`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(visitedColour, bandAltSurface),
+          `${name}: visited citation links on the pale band the cards sit on`,
         ).toBeGreaterThanOrEqual(4.5);
       }
     });

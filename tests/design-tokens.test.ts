@@ -26,8 +26,10 @@
  *    visited), citations, the skip-link text, the header progress text,
  *    the headline band's inks, and the painted accent pairs — the hero
  *    kicker, the header links and the next-story cue on the headline
- *    band, and the active story link on its own filled pill — meets
- *    WCAG 2.2 AA in both themes: 4.5:1 for normal text;
+ *    band, the active story link on its own filled pill, and the
+ *    citation-link rules on the pale band the citation cards sit on
+ *    (not only on the cards' own fills) — meets WCAG 2.2 AA in both
+ *    themes: 4.5:1 for normal text;
  * 4. UI boundaries meet the 3:1 non-text minimum in both themes: the
  *    meaningful rule on every surface and the accent colours where they
  *    carry a meaningful border, the active-story indicator, or the focus
@@ -216,14 +218,14 @@ const textPairs = [
   [
     "accent-primary",
     "surface-raised",
-    "the accent on the raised chrome (the raised cards and illustration frames)",
+    "the accent on the raised chrome (the raised cards and illustration frames), and the citation links on the cards that sit on the pale band",
   ],
   ["accent-primary", "surface-evidence", "citations in the evidence panel"],
   ["accent-primary-strong", "surface-page", "visited links on the page"],
   [
     "accent-primary-strong",
     "surface-raised",
-    "the strong accent on the raised chrome (the skip-link border)",
+    "the strong accent on the raised chrome (the skip-link border), and the visited citation links on the cards that sit on the pale band",
   ],
   ["accent-primary-strong", "surface-evidence", "visited citations in the panel"],
   [
@@ -478,6 +480,129 @@ describe("design tokens in globals.css", () => {
           contrastRatio(borderColour, background),
           `${theme.name}: the .sources card border on its raised background`,
         ).toBeGreaterThanOrEqual(3);
+      }
+    }
+  });
+
+  it("paints the citation links — and their visited colour — at least 4.5:1 on the pale band the cards sit on, as well as on the cards' own fills, in both themes", () => {
+    // The token-level text pairs above only prove the *tokens* clear
+    // 4.5:1; this check pins the colours the link rules actually paint.
+    // The cards that carry the citation links sit on the pale section
+    // band: the .sources block paints the raised surface itself, and
+    // the .claim-evidence cards live inside the .band-alt sections,
+    // whose ground is the same raised surface — so the link colour and
+    // the visited colour must clear 4.5:1 against that band's surface,
+    // not only against the card's own fill. A foreground or ground that
+    // does not resolve to a hex colour fails the check in either theme
+    // rather than being skipped.
+    const link = parseDeclarations(cssRuleBody(globalCss, "a"));
+    const linkVisited = parseDeclarations(cssRuleBody(globalCss, "a:visited"));
+    const bandAlt = parseDeclarations(cssRuleBody(globalCss, ".band-alt"));
+    const sources = parseDeclarations(cssRuleBody(globalCss, ".sources"));
+    const evidenceCard = parseDeclarations(cssRuleBody(globalCss, ".claim-evidence"));
+
+    for (const theme of themes) {
+      const linkColour = resolveHexColor(
+        link["color"] ?? "",
+        theme.effectiveTokens,
+      );
+      const visitedColour = resolveHexColor(
+        linkVisited["color"] ?? "",
+        theme.effectiveTokens,
+      );
+      const bandAltSurface = resolveHexColor(
+        bandAlt["background-color"] ?? "",
+        theme.effectiveTokens,
+      );
+      const sourcesSurface = resolveHexColor(
+        sources["background-color"] ?? "",
+        theme.effectiveTokens,
+      );
+      const evidenceSurface = resolveHexColor(
+        evidenceCard["background-color"] ?? "",
+        theme.effectiveTokens,
+      );
+      const pageSurface = tokenColor(theme, "surface-page");
+      expect(
+        linkColour,
+        `the citation link colour must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      expect(
+        visitedColour,
+        `the visited citation link colour must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      expect(
+        bandAltSurface,
+        `the .band-alt ground must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      expect(
+        sourcesSurface,
+        `the .sources ground must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      expect(
+        evidenceSurface,
+        `the .claim-evidence ground must resolve to a hex colour in the ${theme.name} theme`,
+      ).not.toBeNull();
+      if (
+        linkColour === null ||
+        visitedColour === null ||
+        bandAltSurface === null ||
+        sourcesSurface === null ||
+        evidenceSurface === null
+      ) {
+        throw new Error(
+          `${theme.name}: the citation link colours and their surfaces must resolve to hex colours`,
+        );
+      }
+
+      // The link rules paint the accent pair...
+      expect(
+        linkColour,
+        `the citation links must paint --accent-primary in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "accent-primary"));
+      expect(
+        visitedColour,
+        `the visited citation links must paint --accent-primary-strong in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "accent-primary-strong"));
+      // ...and the card grounds are the raised band (the sources block
+      // and the .band-alt ground the cards sit on) and the evidence
+      // surface (the claim panels), so the band's surface is the raised
+      // one.
+      expect(
+        bandAltSurface,
+        `the .band-alt ground must paint the raised surface in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "surface-raised"));
+      expect(
+        sourcesSurface,
+        `the .sources card must paint the raised surface in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "surface-raised"));
+      expect(
+        evidenceSurface,
+        `the .claim-evidence card must paint the evidence surface in the ${theme.name} theme`,
+      ).toEqual(tokenColor(theme, "surface-evidence"));
+
+      // Both accent steps clear 4.5:1 on the band the cards sit on, on
+      // each card's own fill, and on the page surface.
+      for (const [label, colour] of [
+        ["the citation links", linkColour],
+        ["the visited citation links", visitedColour],
+      ] as const) {
+        expect(
+          contrastRatio(colour, bandAltSurface),
+          `${theme.name}: ${label} on the pale band the cards sit on`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(colour, sourcesSurface),
+          `${theme.name}: ${label} on the .sources card's own fill`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(colour, evidenceSurface),
+          `${theme.name}: ${label} on the .claim-evidence card's own fill`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(colour, pageSurface),
+          `${theme.name}: ${label} on the page surface`,
+        ).toBeGreaterThanOrEqual(4.5);
       }
     }
   });
