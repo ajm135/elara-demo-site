@@ -1,20 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <title>A stylized cell with a darker nucleus being studied inside a circular microscope field, with a ring of short data marks around the field</title>
-  <rect x="0" y="0" width="1200" height="630" rx="48" fill="#f6f1e7"/>
+  <title>A stylized cell with a contrasting darker nucleus being studied inside a circular microscope field, with a ring of short data marks around the field</title>
+  <!--
+    Flat drawing in the ADR 0008 palette. The light theme is drawn with
+    literal fills (the reference's white and pale blue-grey surfaces, its
+    blue accent and its remaining accent colours). The dark theme swaps
+    the light surfaces for the reference's dark surfaces and the dark ink
+    for the light ink, and lifts the blue accent to the reference's light
+    blue, so the drawing reads the same way in both themes. No JavaScript:
+    the dark rule is a CSS rule inside the file.
+  -->
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .field { fill: #191919; }
+      .sky { fill: #2c343b; }
+      .panel { fill: #272727; }
+      .paper { fill: #f1f3f9; }
+      .nucleus { fill: #2c343b; }
+      .accent { fill: #55bbeb; }
+      .s-accent { stroke: #55bbeb; }
+    }
+  </style>
+  <!-- full-canvas field -->
+  <rect x="0" y="0" width="1200" height="630" rx="48" fill="#ffffff" class="field"/>
   <!-- overlapping translucent shapes -->
-  <circle cx="880" cy="140" r="170" fill="#0e6b63" opacity="0.10"/>
-  <circle cx="240" cy="500" r="130" fill="#c9842a" opacity="0.12"/>
+  <circle cx="880" cy="140" r="170" fill="#1f6f99" class="accent" opacity="0.12"/>
+  <circle cx="240" cy="500" r="130" fill="#f5bf2f" opacity="0.12"/>
   <!-- microscope field of view -->
-  <circle cx="600" cy="315" r="210" fill="#d7e6e3" stroke="#0a544e" stroke-width="12"/>
-  <circle cx="600" cy="315" r="162" fill="none" stroke="#0e6b63" stroke-width="4" opacity="0.5"/>
-  <!-- stylized cell with darker nucleus -->
-  <circle cx="585" cy="320" r="118" fill="#0e6b63"/>
-  <circle cx="617" cy="297" r="48" fill="#0a544e"/>
-  <circle cx="545" cy="362" r="11" fill="#0a544e" opacity="0.55"/>
-  <circle cx="642" cy="372" r="8" fill="#0a544e" opacity="0.55"/>
-  <circle cx="556" cy="262" r="7" fill="#f6f1e7" opacity="0.7"/>
+  <circle cx="600" cy="315" r="210" fill="#f1f3f9" stroke="#1f6f99" class="sky s-accent" stroke-width="12"/>
+  <circle cx="600" cy="315" r="162" fill="none" stroke="#1f6f99" class="s-accent" stroke-width="4" opacity="0.5"/>
+  <!-- stylized cell with a darker nucleus -->
+  <circle cx="585" cy="320" r="118" fill="#1f6f99" class="accent"/>
+  <circle cx="617" cy="297" r="48" fill="#272727" class="nucleus"/>
+  <circle cx="545" cy="362" r="11" fill="#272727" class="nucleus" opacity="0.55"/>
+  <circle cx="642" cy="372" r="8" fill="#272727" class="nucleus" opacity="0.55"/>
+  <circle cx="556" cy="262" r="7" fill="#ffffff" class="paper" opacity="0.7"/>
   <!-- ring of short data marks around the field -->
-  <g stroke="#0a544e" stroke-width="7" stroke-linecap="round">
+  <g fill="none" stroke="#1f6f99" class="s-accent" stroke-width="7" stroke-linecap="round">
     <line x1="838" y1="315" x2="868" y2="315"/>
     <line x1="806.1" y1="434" x2="821.7" y2="443"/>
     <line x1="719" y1="521.1" x2="734" y2="547.1"/>
@@ -27,10 +48,10 @@
     <line x1="719" y1="108.9" x2="734" y2="82.9"/>
     <line x1="806.1" y1="196" x2="821.7" y2="187"/>
   </g>
-  <g stroke="#c9842a" stroke-width="7" stroke-linecap="round">
+  <g fill="none" stroke="#f5bf2f" stroke-width="7" stroke-linecap="round">
     <line x1="600" y1="553" x2="600" y2="571"/>
   </g>
   <!-- a few stray data marks -->
-  <circle cx="320" cy="490" r="9" fill="#0e6b63"/>
-  <circle cx="876" cy="122" r="8" fill="#c9842a"/>
+  <circle cx="320" cy="490" r="9" fill="#1f6f99" class="accent"/>
+  <circle cx="876" cy="122" r="8" fill="#f5bf2f"/>
 </svg>

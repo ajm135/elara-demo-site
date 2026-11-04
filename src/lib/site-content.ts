@@ -689,7 +689,7 @@ const homePage: SitePage = {
     {
       id: "hopeful-future",
       src: "/images/hopeful-future.svg",
-      alt: "A rising amber sun with short rays over a low landscape of rounded teal laboratory and hospital blocks, with a pale path leading toward them, symbolising a hopeful future for medicine",
+      alt: "A rising golden sun with short rays over a low landscape of rounded blue laboratory and hospital blocks, with a pale path leading toward them, symbolising a hopeful future for medicine",
       width: 1200,
       height: 630,
     },
@@ -811,14 +811,14 @@ const cancerPage: SitePage = {
     {
       id: "cancer-research",
       src: "/images/cancer-research.svg",
-      alt: "A stylized cell with a darker nucleus being studied inside a circular microscope field, with a ring of short data marks around the field",
+      alt: "A stylized cell with a contrasting darker nucleus being studied inside a circular microscope field, with a ring of short data marks around the field",
       width: 1200,
       height: 630,
     },
     {
       id: "cancer-hope",
       src: "/images/cancer-hope.svg",
-      alt: "Two simple geometric hands cupping a small amber light with a soft glow in a deep teal field, symbolising hope in the fight against cancer",
+      alt: "Two simple geometric hands cupping a small golden light with a soft glow in a deep field, symbolising hope in the fight against cancer",
       width: 800,
       height: 600,
     },
@@ -935,7 +935,7 @@ const longevityPage: SitePage = {
     {
       id: "longer-lives",
       src: "/images/longer-lives.svg",
-      alt: "A long road narrowing toward the horizon under a wide pale sky, with trees of stacked round canopies on both sides that grow taller toward the foreground",
+      alt: "A long road narrowing toward the horizon under a wide sky, with trees of stacked round canopies on both sides that grow taller toward the foreground",
       width: 1200,
       height: 630,
     },

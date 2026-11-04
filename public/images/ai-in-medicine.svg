@@ -1,48 +1,71 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <title>A small network of connected dots linking three large rounded panels showing a stethoscope, a laboratory flask, and a medical scan with a simple waveform</title>
-  <rect x="0" y="0" width="1200" height="630" rx="48" fill="#f6f1e7"/>
+  <!--
+    Flat drawing in the ADR 0008 palette. The light theme is drawn with
+    literal fills (the reference's white and pale blue-grey surfaces, its
+    blue accent and its remaining accent colours). The dark theme swaps
+    the light surfaces for the reference's dark surfaces and the dark ink
+    for the light ink, and lifts the blue accent to the reference's light
+    blue, so the drawing reads the same way in both themes. No JavaScript:
+    the dark rule is a CSS rule inside the file.
+  -->
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .field { fill: #191919; }
+      .sky { fill: #2c343b; }
+      .panel { fill: #272727; }
+      .paper { fill: #f1f3f9; }
+      .screen { fill: #191919; }
+      .ink-strong { fill: #ffffff; }
+      .accent { fill: #55bbeb; }
+      .s-ink-strong { stroke: #ffffff; }
+      .s-accent { stroke: #55bbeb; }
+    }
+  </style>
+  <!-- full-canvas field -->
+  <rect x="0" y="0" width="1200" height="630" rx="48" fill="#ffffff" class="field"/>
   <!-- overlapping translucent shapes -->
-  <circle cx="295" cy="505" r="150" fill="#0e6b63" opacity="0.10"/>
-  <circle cx="965" cy="115" r="120" fill="#c9842a" opacity="0.14"/>
-  <circle cx="455" cy="240" r="70" fill="#d7e6e3" opacity="0.85"/>
+  <circle cx="295" cy="505" r="150" fill="#1f6f99" class="accent" opacity="0.12"/>
+  <circle cx="965" cy="115" r="120" fill="#f5bf2f" opacity="0.14"/>
+  <circle cx="455" cy="240" r="70" fill="#f1f3f9" class="sky" opacity="0.85"/>
   <!-- network lines between the panels -->
-  <g stroke="#171310" stroke-width="6" stroke-linecap="round" opacity="0.8">
+  <g fill="none" stroke="#1f6f99" class="s-accent" stroke-width="6" stroke-linecap="round" opacity="0.8">
     <line x1="440" y1="180" x2="440" y2="350"/>
     <line x1="780" y1="180" x2="780" y2="350"/>
     <line x1="440" y1="180" x2="610" y2="196"/>
     <line x1="610" y1="196" x2="780" y2="180"/>
   </g>
   <!-- panel: stethoscope -->
-  <rect x="110" y="100" width="320" height="320" rx="64" fill="#d7e6e3"/>
-  <g fill="none" stroke="#0a544e" stroke-width="14" stroke-linecap="round">
+  <rect x="110" y="100" width="320" height="320" rx="64" fill="#f1f3f9" class="sky"/>
+  <g fill="none" stroke="#272727" class="s-ink-strong" stroke-width="14" stroke-linecap="round">
     <path d="M200 158 v52 a70 70 0 0 0 140 0 v-52"/>
     <path d="M270 280 v54"/>
   </g>
-  <circle cx="200" cy="152" r="11" fill="#c9842a"/>
-  <circle cx="340" cy="152" r="11" fill="#c9842a"/>
-  <circle cx="270" cy="372" r="36" fill="#0e6b63"/>
-  <circle cx="270" cy="372" r="16" fill="#f6f1e7"/>
+  <circle cx="200" cy="152" r="11" fill="#f54b0f"/>
+  <circle cx="340" cy="152" r="11" fill="#f54b0f"/>
+  <circle cx="270" cy="372" r="36" fill="#1f6f99" class="accent"/>
+  <circle cx="270" cy="372" r="16" fill="#ffffff" class="paper"/>
   <!-- panel: laboratory flask -->
-  <rect x="450" y="240" width="320" height="320" rx="64" fill="#0a544e"/>
-  <circle cx="610" cy="400" r="118" fill="#f6f1e7" opacity="0.08"/>
-  <rect x="584" y="272" width="52" height="14" rx="7" fill="#c9842a"/>
-  <rect x="592" y="282" width="36" height="52" rx="8" fill="#f6f1e7"/>
-  <path d="M592 330 L545 464 Q538 486 560 494 Q570 498 582 498 H638 Q650 498 660 494 Q682 486 675 464 L628 330 Z" fill="#f6f1e7"/>
-  <path d="M561 424 L552 462 Q546 484 566 490 Q576 494 588 494 H632 Q644 494 654 490 Q674 484 668 462 L659 424 Z" fill="#c9842a"/>
-  <circle cx="592" cy="452" r="7" fill="#f6f1e7"/>
-  <circle cx="622" cy="464" r="5" fill="#f6f1e7"/>
-  <circle cx="610" cy="438" r="4" fill="#f6f1e7"/>
+  <rect x="450" y="240" width="320" height="320" rx="64" fill="#2c343b"/>
+  <circle cx="610" cy="400" r="118" fill="#55bbeb" opacity="0.16"/>
+  <rect x="584" y="272" width="52" height="14" rx="7" fill="#f5bf2f"/>
+  <rect x="592" y="282" width="36" height="52" rx="8" fill="#ffffff" class="paper"/>
+  <path d="M592 330 L545 464 Q538 486 560 494 Q570 498 582 498 H638 Q650 498 660 494 Q682 486 675 464 L628 330 Z" fill="#ffffff" class="paper"/>
+  <path d="M561 424 L552 462 Q546 484 566 490 Q576 494 588 494 H632 Q644 494 654 490 Q674 484 668 462 L659 424 Z" fill="#f5bf2f"/>
+  <circle cx="592" cy="452" r="7" fill="#272727" class="ink-strong"/>
+  <circle cx="622" cy="464" r="5" fill="#272727" class="ink-strong"/>
+  <circle cx="610" cy="438" r="4" fill="#272727" class="ink-strong"/>
   <!-- panel: medical scan -->
-  <rect x="790" y="100" width="320" height="320" rx="64" fill="#d7e6e3"/>
-  <rect x="830" y="150" width="240" height="170" rx="28" fill="#171310"/>
-  <path d="M856 235 h34 l16 -30 l24 54 l16 -24 h54" fill="none" stroke="#c9842a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="1044" cy="172" r="8" fill="#0e6b63"/>
-  <rect x="880" y="352" width="120" height="14" rx="7" fill="#0a544e"/>
-  <circle cx="1022" cy="359" r="8" fill="#c9842a"/>
+  <rect x="790" y="100" width="320" height="320" rx="64" fill="#f1f3f9" class="sky"/>
+  <rect x="830" y="150" width="240" height="170" rx="28" fill="#272727" class="screen"/>
+  <path d="M856 235 h34 l16 -30 l24 54 l16 -24 h54" fill="none" stroke="#f5bf2f" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="1044" cy="172" r="8" fill="#84c450"/>
+  <rect x="880" y="352" width="120" height="14" rx="7" fill="#272727" class="ink-strong"/>
+  <circle cx="1022" cy="359" r="8" fill="#f5bf2f"/>
   <!-- network dots -->
-  <circle cx="440" cy="180" r="10" fill="#c9842a"/>
-  <circle cx="440" cy="350" r="8" fill="#0e6b63"/>
-  <circle cx="610" cy="196" r="8" fill="#0a544e"/>
-  <circle cx="780" cy="350" r="8" fill="#0e6b63"/>
-  <circle cx="780" cy="180" r="10" fill="#c9842a"/>
+  <circle cx="440" cy="180" r="10" fill="#f5bf2f"/>
+  <circle cx="440" cy="350" r="8" fill="#1f6f99" class="accent"/>
+  <circle cx="610" cy="196" r="8" fill="#272727" class="ink-strong"/>
+  <circle cx="780" cy="350" r="8" fill="#1f6f99" class="accent"/>
+  <circle cx="780" cy="180" r="10" fill="#f5bf2f"/>
 </svg>
