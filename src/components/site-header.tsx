@@ -30,11 +30,16 @@ import {
  * the current page. The path is resolved with the pure `sitePageForPath`
  * helper, and exactly one link — the current story's — carries
  * `aria-current="page"`. The other four links never carry it. The active
- * treatment is not colour alone: globals.css adds weight and an inset rule
- * to `nav a[aria-current="page"]`. When `currentPath` is omitted (for
- * example in source-level tests that render the header on its own) no link
- * is marked current and the progress cluster is not rendered, but the
- * skip link and the five story links are always present.
+ * treatment is not colour alone: globals.css gives
+ * `nav a[aria-current="page"]` the heavier weight, an inset rule, and the
+ * one filled pill of the row. The header itself paints no ground — the
+ * headline band colour is painted by the navigation list and the
+ * progress cluster inside it, so the chrome and the page's wide top
+ * section read as one continuous band (docs/adr/0008-reference-look.md).
+ * When `currentPath` is omitted (for example in source-level tests that
+ * render the header on its own) no link is marked current and the
+ * progress cluster is not rendered, but the skip link and the five story
+ * links are always present.
  *
  * Note on request APIs: in this Next 16 project `headers()` inside a
  * server component exposes only the incoming browser headers

@@ -41,7 +41,11 @@ import ClaimEvidence from "./claim-evidence";
  *    paragraphs), a plain `<p>` per paragraph, and — immediately after
  *    any paragraph that makes a consequential claim — one `ClaimEvidence`
  *    block per claim, still inside that section, styled by globals.css as
- *    a readable evidence panel;
+ *    a readable evidence panel. Each section sits in a plain,
+ *    non-focusable `.band` wrapper that carries the page's alternating
+ *    full-width section bands (docs/adr/0008-reference-look.md): the
+ *    band holds no text of its own, so the reading order, the headings,
+ *    and the keyboard order are unchanged;
  * 4. the page's optional sources block (`section.sources`): rendered only
  *    when the page data carries one (currently the home page, which makes
  *    no consequential claim of its own), with the block's heading, its
@@ -56,6 +60,18 @@ import ClaimEvidence from "./claim-evidence";
  * (rendered by the route's page) is the way between pages, and everything
  * here reads with JavaScript disabled.
  */
+/**
+ * The alternating section band a block of the page sits on: the
+ * reference's stack of full-width horizontal bands, the plain page
+ * surface and the pale band in turn, separated by whitespace rather than
+ * by rules (docs/adr/0008-reference-look.md). The band is a plain,
+ * non-focusable wrapper: it carries no text of its own, so the reading
+ * order, the headings, and the keyboard order are unchanged.
+ */
+function bandClass(index: number): string {
+  return index % 2 === 1 ? "band band-alt" : "band";
+}
+
 export default function StoryPage({ page }: { page: SitePage }) {
   const [heroImage, ...additionalImages] = page.images;
   return (
@@ -94,47 +110,53 @@ export default function StoryPage({ page }: { page: SitePage }) {
           />
         </figure>
       ))}
-      {page.sections.map((section) => (
-        <section key={section.id}>
-          <h2>{section.heading}</h2>
-          {section.terms !== undefined && (
-            <dl className="lifespan-terms">
-              {section.terms.map((entry) => (
-                <Fragment key={entry.term}>
-                  <dt>{entry.term}</dt>
-                  <dd>{entry.definition}</dd>
-                </Fragment>
-              ))}
-            </dl>
-          )}
-          {section.paragraphs.map((paragraph, index) => (
-            <Fragment key={index}>
-              <p>{paragraph}</p>
-              {claimsForParagraph(page.id, section.id, paragraph).map((claim) => (
-                <ClaimEvidence key={claim.id} claim={claim} />
-              ))}
-            </Fragment>
-          ))}
-        </section>
+      {page.sections.map((section, index) => (
+        <div key={section.id} className={bandClass(index)}>
+          <section>
+            <h2>{section.heading}</h2>
+            {section.terms !== undefined && (
+              <dl className="lifespan-terms">
+                {section.terms.map((entry) => (
+                  <Fragment key={entry.term}>
+                    <dt>{entry.term}</dt>
+                    <dd>{entry.definition}</dd>
+                  </Fragment>
+                ))}
+              </dl>
+            )}
+            {section.paragraphs.map((paragraph, paragraphIndex) => (
+              <Fragment key={paragraphIndex}>
+                <p>{paragraph}</p>
+                {claimsForParagraph(page.id, section.id, paragraph).map(
+                  (claim) => (
+                    <ClaimEvidence key={claim.id} claim={claim} />
+                  ),
+                )}
+              </Fragment>
+            ))}
+          </section>
+        </div>
       ))}
       {page.sources !== undefined && (
-        <section className="sources">
-          <h2>{page.sources.heading}</h2>
-          <p>{page.sources.intro}</p>
-          <ul>
-            {resolvePageSourceReferences(page.sources.referenceIds).map(
-              (reference) => (
-                <li key={reference.id}>
-                  <cite>{reference.title}</cite>, {reference.publisher},{" "}
-                  {formatIsoDate(reference.publishedOn)}.{" "}
-                  <a href={referenceHref(reference)}>
-                    {referenceLocatorLabel(reference)}
-                  </a>
-                </li>
-              ),
-            )}
-          </ul>
-        </section>
+        <div className={bandClass(page.sections.length)}>
+          <section className="sources">
+            <h2>{page.sources.heading}</h2>
+            <p>{page.sources.intro}</p>
+            <ul>
+              {resolvePageSourceReferences(page.sources.referenceIds).map(
+                (reference) => (
+                  <li key={reference.id}>
+                    <cite>{reference.title}</cite>, {reference.publisher},{" "}
+                    {formatIsoDate(reference.publishedOn)}.{" "}
+                    <a href={referenceHref(reference)}>
+                      {referenceLocatorLabel(reference)}
+                    </a>
+                  </li>
+                ),
+              )}
+            </ul>
+          </section>
+        </div>
       )}
       <p>{page.disclaimer}</p>
     </main>

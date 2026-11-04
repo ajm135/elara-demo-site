@@ -27,25 +27,35 @@
  * the WCAG 2.2 contrast ratios (4.5:1 for normal text, 3:1 for UI
  * boundaries) in both themes.
  *
- * Layout: the page is wide — the wide top section (.hero, main's first
- * element) and the page itself (main) both span the shared page shell
- * (--page-shell) — while every long-form block in main
- * (paragraphs, headings, sections, the evidence panels, the sources
- * block, the lifespan term list, and the later illustrations) and the
- * hero's text block stay in a centered reading column capped at --measure
- * (about 60 to 75 characters per line). Every page opens with the wide
- * top section as main's first element: kicker, large display headline,
- * summary, review date, and the page's framed illustration, which may use
- * the width the text column gives up. Evidence panels, the sources block,
- * and the illustration frames are rounded cards (--radius-card).
+ * Layout (the look recorded in docs/adr/0008-reference-look.md):
+ * - the top of the page is one wide colour band (--surface-band): the
+ *   header chrome sits in it, and the wide top section (.hero, main's
+ *   first element) continues it with the kicker, the single h1, the
+ *   summary, the review date, and the page's framed illustration. The
+ *   band's own inks (--ink-on-band, --ink-muted-on-band) are the only
+ *   colours that may carry text there, because the accent itself is the
+ *   band;
+ * - below it the page is an alternating stack of full-width section
+ *   bands — the page surface, then the pale band, then the page surface
+ *   again — separated by whitespace rather than by rules, with centred
+ *   section headings, as the reference lays its page out;
+ * - the wide page (main and .hero) spans the shared page shell
+ *   (--page-shell), while every long-form block in main stays in a
+ *   centered reading column capped at --measure (about 60 to 75
+ *   characters per line);
+ * - the reference's two-shape language: 5 px rounded rectangles for the
+ *   cards, the boxes and the illustration frames (--radius-card), and a
+ *   23 px pill (--radius-pill) for the story links in the header.
  *
  * Structural rules covered here:
  * - no sideways scrolling at 320 to 1920 px: border-box everywhere, width
  *   100%, no viewport-width units, no min-width larger than 320 px, no
- *   overflowing negative margins;
+ *   overflowing negative margins (the bands cancel main's own 1 rem
+ *   side padding, so they end exactly at the page shell's edges);
  * - WCAG 2.2 AA in both themes: underlined links (colour is never the
  *   only cue), a :focus-visible outline of at least 2 px in the accent
- *   with an offset, a skip link that is off-screen until focused,
+ *   with an offset (and the band's own ink on the band, where the accent
+ *   cannot clear 3:1), a skip link that is off-screen until focused,
  *   navigation targets of at least 44x44 px, and comfortable reading
  *   rhythm (line-height at least 1.5, body font-size at least 1rem,
  *   long-form measure of about 40rem);
@@ -57,9 +67,9 @@
  * - no text-transform anywhere: navigation labels and kickers stay
  *   exactly their copy;
  * - reusable rules for the header progress cluster, a composed hero
- *   (text plus framed illustration), evidence panels, and the content
- *   stack. There is exactly one navigation (header-only): no hamburger,
- *   no second nav, nothing that needs JavaScript.
+ *   (text plus framed illustration), the section bands, evidence panels,
+ *   and the content stack. There is exactly one navigation (header-only):
+ *   no hamburger, no second nav, nothing that needs JavaScript.
  */
 
 /*
@@ -71,9 +81,10 @@
 :root {
   color-scheme: light;
   /* Surfaces copied from the reference: the page copies its white
-     background, the raised chrome its pale blue-grey band, and the
-     evidence panels the reference's second pale band, so panels and
-     chrome read apart from the page. */
+     background, the pale band is the reference's own section band (the
+     alternating section background), and the evidence panels take the
+     reference's second pale band, so panels and bands read apart from
+     the page. */
   --surface-page: #ffffff;
   --surface-raised: #f1f3f9;
   --surface-evidence: #edeff4;
@@ -95,10 +106,12 @@
   --rule: #858585;
   --rule-soft: #e5e5e5;
   /* The headline band: the reference's accent used as a large fill, with
-     the inks that sit on it. */
+     the inks that sit on it. The muted band ink is lightened a little
+     from the first record so that it keeps a safe margin over 4.5:1 on
+     the band (4.77:1). */
   --surface-band: #1f6f99;
   --ink-on-band: #ffffff;
-  --ink-muted-on-band: #dbeaf4;
+  --ink-muted-on-band: #e3f0f9;
   /* The reference's remaining accents, kept for the illustrations and
      the accent palette. They are decorative fills, not text colours. */
   --accent-secondary: #8668ad;
@@ -108,12 +121,14 @@
   /* Long-form measure: about 60 to 75 characters per line — the cap on
      the reading column that sits inside the wider page. */
   --measure: 40rem;
-  /* Wide page shell: the page itself (main) and the header chrome span
-     it; the reading column stays capped at --measure. */
+  /* Wide page shell: the page itself (main), the bands, and the header
+     chrome span it; the reading column stays capped at --measure. */
   --page-shell: 75rem;
-  /* Rounded card corners for evidence panels, the sources block, and
-     the illustration frames. */
-  --radius-card: 0.875rem;
+  /* The reference's two box shapes: a 5 px rounded rectangle for the
+     cards, the boxes and the illustration frames, and a 23 px pill for
+     the story links. */
+  --radius-card: 0.3125rem;
+  --radius-pill: 1.4375rem;
 }
 
 /*
@@ -126,8 +141,8 @@
   :root {
     color-scheme: dark;
     /* The reference's dark surfaces, pairwise distinct: the page is the
-       deepest, the raised chrome one step up, and the evidence surface a
-       separate step, so panels and chrome read apart from the page
+       deepest, the pale band one step up, and the evidence surface a
+       separate step, so panels and bands read apart from the page
        exactly as they do in the light theme. */
     --surface-page: #191919;
     --surface-raised: #272727;
@@ -222,9 +237,21 @@ a:visited {
 }
 
 /*
+ * Inside the headline band the accent cannot clear 3:1 against the band
+ * itself (it is the band's colour), so the focus ring there uses the
+ * band's own ink, which clears it comfortably in both themes.
+ */
+header :focus-visible,
+.hero :focus-visible {
+  outline-color: var(--ink-on-band);
+}
+
+/*
  * Skip link: off-screen until it receives keyboard focus, then visible at
  * the top-left of the page. The skip target is main#main-content, which
- * the layout makes focusable (tabindex="-1").
+ * the layout makes focusable (tabindex="-1"). It keeps its own opaque
+ * card so that its text and its focus ring stay readable wherever it
+ * lands, including over the band.
  */
 .skip-link {
   position: absolute;
@@ -245,59 +272,70 @@ a:visited {
 
 /*
  * Header and the single site navigation (header-only, no hamburger, no
- * second nav). The header sits on the raised surface with a soft
- * decorative rule under it, and its chrome spans the wide page shell.
+ * second nav). The header itself is transparent: the band colour is
+ * painted by the navigation list and the progress cluster below, so the
+ * chrome, the wide top section, and the band read as one continuous
+ * colour block across the top of the page, exactly the page width.
  */
 header {
   width: 100%;
-  background-color: var(--surface-raised);
-  border-bottom: 1px solid var(--rule-soft);
+  background-color: transparent;
 }
 
 nav {
   width: 100%;
-  padding: 0.5rem 0;
 }
 
 nav ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 0.5rem;
   list-style: none;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0.75rem 1rem;
   max-width: var(--page-shell);
+  background-color: var(--surface-band);
 }
 
 /*
- * Padding keeps every navigation target at least 44x44 CSS px. Links stay
- * underlined here too: colour is never the only cue, and the underline is
- * the same cue readers learn on the page.
+ * The story links: the reference's pill shape (a 23 px radius), still
+ * underlined, and never smaller than 44x44 CSS px. Their ink is the
+ * band's own ink, because the accent is the band's colour and could not
+ * carry text there.
  */
 nav a {
   display: inline-flex;
   align-items: center;
   min-width: 44px;
   min-height: 44px;
-  padding: 0.5rem 0.875rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--ink-muted-on-band);
+  border-radius: var(--radius-pill);
+  color: var(--ink-on-band);
+  text-decoration: underline;
+}
+
+nav a:visited {
+  color: var(--ink-muted-on-band);
 }
 
 /*
- * The one active link in the header. The inset bar under the label and the
- * heavier weight mean colour is never the only indicator of the current
- * story.
+ * The one active link in the header. The filled pill and the heavier
+ * weight mean colour is never the only indicator of the current story.
  */
 nav a[aria-current="page"] {
-  color: var(--accent-primary-strong);
+  color: var(--surface-band);
+  background-color: var(--ink-on-band);
+  border-color: var(--ink-on-band);
   font-weight: 700;
-  box-shadow: inset 0 -2px 0 var(--accent-primary);
+  box-shadow: inset 0 -2px 0 var(--surface-band);
 }
 
 /*
  * Header progress cluster: the "Story N of 5" position, the current
  * story's label, and the next-story cue (or the ending state on the last
- * story) live in one small group beside the navigation, spanning the same
- * wide page shell.
+ * story) live in one small group beside the navigation, on the same band
+ * and spanning the same wide page shell.
  */
 .progress-cluster {
   display: flex;
@@ -305,31 +343,39 @@ nav a[aria-current="page"] {
   align-items: baseline;
   gap: 0.25rem 1rem;
   margin: 0 auto;
-  padding: 0 1rem 0.5rem;
+  padding: 0 1rem 0.75rem;
   max-width: var(--page-shell);
   font-size: 0.875rem;
+  background-color: var(--surface-band);
+  color: var(--ink-on-band);
 }
 
 .progress-cluster .story-position {
-  color: var(--ink-muted);
+  color: var(--ink-on-band);
+  font-weight: 700;
 }
 
 .progress-cluster .next-story-cue {
-  color: var(--accent-primary);
+  color: var(--ink-on-band);
+}
+
+.progress-cluster .next-story-cue a,
+.progress-cluster .next-story-cue a:visited {
+  color: var(--ink-on-band);
 }
 
 .progress-cluster .progress-ending {
-  color: var(--ink-muted);
+  color: var(--ink-on-band);
 }
 
 /*
  * Content stack: the wider page. main spans the shared page shell
  * (max-width --page-shell) and is centered; its first
- * element, the wide top section (.hero), opens the page with its own top
- * padding and spans main's content width with the same side inset as the
- * rest of the page. It is not capped at the measure: the long-form text
- * inside it stays narrow through the reading-column rules below, which
- * cap each block at --measure and center it in the wider page.
+ * element, the wide top section (.hero), opens the page with the band
+ * behind it and spans main's content width. It is not capped at the
+ * measure: the long-form text inside it stays narrow through the
+ * reading-column rules below, which cap each block at --measure and
+ * center it in the wider page.
  */
 main {
   display: block;
@@ -368,6 +414,7 @@ main img {
   margin: 0 0 1rem;
   font-size: clamp(2.5rem, 1.7rem + 2.4vw, 4.5rem);
   line-height: 1.1;
+  color: var(--ink-on-band);
 }
 
 main h2 {
@@ -376,15 +423,33 @@ main h2 {
   margin-inline: auto;
   font-size: 1.5rem;
   line-height: 1.3;
+  text-align: center;
 }
 
 /* Reading column: each content section (its heading, its term list, its
    paragraphs, and its evidence panels) stays in the measure, centered
-   in the wider page. */
+   in the wider page. The band around it carries the page's rhythm. */
 main section {
-  margin-top: 2.5rem;
+  margin-top: 0;
   max-width: var(--measure);
   margin-inline: auto;
+}
+
+/*
+ * The alternating section bands: the reference's stack of full-width
+ * horizontal bands, white then pale, separated by whitespace rather than
+ * by rules. The band's negative side margins cancel main's own 1 rem
+ * padding, so a band spans the page shell exactly and never overflows
+ * it.
+ */
+.band {
+  margin-inline: -1rem;
+  padding: 3.5rem 1rem;
+  background-color: var(--surface-page);
+}
+
+.band-alt {
+  background-color: var(--surface-raised);
 }
 
 /* The per-page disclaimer: set apart by a soft decorative rule. */
@@ -398,23 +463,23 @@ main > p:last-child {
 /*
  * Wide top section (the hero): the kicker, large display headline,
  * summary, and review date on one side, the page's framed illustration
- * on the other. It is main's first element and spans the same wider page
- * shell as main — wider than the reading column, with no horizontal
- * overflow — stacked below 768px and in two columns at 768px and up. Its
- * top padding opens the page; it carries no horizontal padding of its
- * own, so the wide top section spans main's content width with the same
- * side inset as the rest of the page and nothing scrolls sideways from
- * 320 to 1920 px. The frame is a raised, rounded card with a meaningful
- * rule, so the illustration reads as a composed element and may use the
- * remaining width the text column gives up.
+ * on the other, all on the headline band. It is main's first element and
+ * spans the same wider page shell as main — wider than the reading
+ * column, with no horizontal overflow — stacked below 768px and in two
+ * columns at 768px and up. Its band reaches the page shell's edges (the
+ * negative side margins cancel main's padding), and its content keeps
+ * the same 1 rem inset, so nothing scrolls sideways from 320 to
+ * 1920 px. The frame is a 5 px rounded card with a meaningful rule, so
+ * the illustration reads as a composed element.
  */
 .hero {
   display: grid;
   gap: 2rem;
   width: 100%;
   max-width: var(--page-shell);
-  margin-inline: auto;
-  padding: 2rem 0 0;
+  margin-inline: -1rem;
+  padding: 3rem 1rem;
+  background-color: var(--surface-band);
 }
 
 @media (min-width: 768px) {
@@ -426,21 +491,23 @@ main > p:last-child {
 
 /* The hero's text column, in reading order: capped at the measure so the
    headline, summary, and review date stay 60 to 75 characters, centered
-   in the space the wide top section gives it. */
+   in the space the wide top section gives it. Its ink is the band's own
+   ink. */
 .hero-text {
   min-width: 0;
   max-width: var(--measure);
   margin-inline: auto;
+  color: var(--ink-on-band);
 }
 
-/* The kicker: the story's nav label, set small and in the accent. No
+/* The kicker: the story's nav label, set small and in the band's ink. No
    text-transform — navigation labels stay exactly their copy. */
 .hero-kicker {
   margin: 0 0 0.5rem;
   font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--accent-primary);
+  color: var(--ink-on-band);
 }
 
 /* The hero summary: one step up from body text, still inside the measure. */
@@ -454,7 +521,7 @@ main > p:last-child {
 .hero-review {
   margin: 0;
   font-size: 0.875rem;
-  color: var(--ink-muted);
+  color: var(--ink-muted-on-band);
 }
 
 .hero-media {
@@ -472,9 +539,9 @@ main > p:last-child {
 }
 
 /*
- * A page's further illustrations (beyond the hero's): the same rounded
- * frame as the hero media, set apart in the content stack, in the
- * reading column.
+ * A page's further illustrations (beyond the hero's): the same 5 px
+ * rounded frame as the hero media, set apart in the content stack, in
+ * the reading column.
  */
 .story-illustration {
   margin: 2.5rem 0;
@@ -497,11 +564,11 @@ main > p:last-child {
 /*
  * The home page's sources block: the site-wide evidence base, rendered
  * after the reading map and before the disclaimer. It sits on the raised
- * surface in a rounded card whose border is the strong rule, so the card
- * boundary clears 3:1 on the raised surface in both themes. It reads as a
- * composed block in the content stack rather than a footnote. The long
- * publication URLs wrap through the inherited overflow-wrap, so 320 px
- * viewports never scroll sideways.
+ * surface in a 5 px rounded card whose border is the strong rule, so the
+ * card boundary clears 3:1 on the raised surface in both themes. It
+ * reads as a composed block in the content stack rather than a footnote.
+ * The long publication URLs wrap through the inherited overflow-wrap, so
+ * 320 px viewports never scroll sideways.
  */
 .sources {
   padding: 1rem 1.25rem;
@@ -524,9 +591,9 @@ main > p:last-child {
 /*
  * Evidence panel: the readable home of a claim's evidence stage,
  * last-reviewed date, and linked publications. It sits on the distinct
- * evidence surface in a rounded card with a strong left edge in the
+ * evidence surface in a 5 px rounded card with a strong left edge in the
  * accent, so it is recognisable at a glance and legible without colour
- * alone.
+ * alone: the stage itself is written out as text in the caption.
  */
 .claim-evidence {
   margin: 1.5rem 0;
@@ -557,7 +624,7 @@ main > p:last-child {
  * The lifespan-terms definition list (longevity story only): the three
  * lifespan distinctions as exact, visible term labels beside the
  * paragraphs that already explain them. It sits on the distinct evidence
- * surface in a rounded card with the same strong left edge as the
+ * surface in a 5 px rounded card with the same strong left edge as the
  * evidence panels. Terms are set in the heading ink at the heavier weight
  * (so the cue is never colour-only), definitions in the body ink; both
  * clear 4.5:1 on the evidence surface in both themes. The list flows in

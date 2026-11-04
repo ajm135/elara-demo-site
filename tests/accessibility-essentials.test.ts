@@ -44,11 +44,12 @@
  *    resolve each colour per theme and compute WCAG 2.2
  *    relative-luminance contrast ratios: 4.5:1 for body text and link
  *    text on their backgrounds (the page surface, the raised chrome,
- *    and the evidence surface, where the citation links and their
- *    visited colour sit), 3:1 for the focus outline against the page
- *    surface and the raised chrome — the same or stronger safeguard,
- *    not a weaker one. The light theme's page surface copies the
- *    reference's #ffffff background (docs/adr/0008-reference-look.md);
+ *    the headline band, and the evidence surface, where the citation
+ *    links and their visited colour sit), 3:1 for the focus outline
+ *    against the page surface, the raised chrome, and the headline band
+ *    — the same or stronger safeguard, not a weaker one. The light
+ *    theme's page surface copies the reference's #ffffff background
+ *    (docs/adr/0008-reference-look.md);
  * 9. privacy: the rendered markup and the CSS file contain no secret-like
  *    tokens, email addresses, or personal names.
  *
@@ -621,6 +622,49 @@ describe("WCAG 2.2 AA essentials from source", () => {
       }
     });
 
+    it("underlines the header links in a colour that clears AA on the headline band in both themes", () => {
+      // The top of the page is one wide colour band: the header chrome
+      // and the wide top section sit in it. The accent is the band's own
+      // colour, so the header links use the band's ink, and that ink
+      // must clear AA on the band — as must the visited link colour.
+      const headerLink = parseDeclarations(cssRule(globalCss, "nav a"));
+      const headerLinkVisited = parseDeclarations(
+        cssRule(globalCss, "nav a:visited"),
+      );
+      expect(
+        headerLink["text-decoration"] ?? "",
+        "the header links stay underlined",
+      ).toContain("underline");
+
+      for (const { name, tokens } of themes) {
+        const band = resolveHexColor("var(--surface-band)", tokens);
+        expect(band, `${name}: the headline band must be a hex colour`).not.toBeNull();
+        const linkColour = resolveHexColor(headerLink["color"], tokens);
+        const visitedColour = resolveHexColor(headerLinkVisited["color"], tokens);
+        expect(
+          linkColour,
+          `${name}: the header link colour must be a hex colour`,
+        ).not.toBeNull();
+        expect(
+          visitedColour,
+          `${name}: the visited header link colour must be a hex colour`,
+        ).not.toBeNull();
+        if (band === null || linkColour === null || visitedColour === null) {
+          throw new Error(
+            `${name}: the header link colours and the band must resolve to hex colours from the design tokens`,
+          );
+        }
+        expect(
+          contrastRatio(linkColour, band),
+          `${name}: the header links on the headline band`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastRatio(visitedColour, band),
+          `${name}: the visited header links on the headline band`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+    });
+
     it("keeps a visible keyboard focus outline of at least 2 px in the accent that clears 3:1 in both themes", () => {
       const focus = parseDeclarations(cssRule(globalCss, ":focus-visible"));
       const outline = /(\d+(?:\.\d+)?)px\s+solid\s+(.+)$/.exec(
@@ -663,6 +707,31 @@ describe("WCAG 2.2 AA essentials from source", () => {
           contrastRatio(outlineColour, raisedSurface),
           `${name}: focus outline on the raised chrome`,
         ).toBeGreaterThanOrEqual(3);
+
+        // The headline band is the accent's own colour, so the ring
+        // there uses the band's ink, which must clear 3:1 on the band.
+        const bandFocus = parseDeclarations(
+          cssRule(globalCss, "header :focus-visible, .hero :focus-visible"),
+        );
+        const bandOutline = resolveHexColor(
+          bandFocus["outline-color"] ?? "",
+          tokens,
+        );
+        const bandSurface = resolveHexColor("var(--surface-band)", tokens);
+        expect(
+          bandOutline,
+          `${name}: the band focus outline colour must be a hex colour`,
+        ).not.toBeNull();
+        expect(
+          bandSurface,
+          `${name}: the headline band must be a hex colour`,
+        ).not.toBeNull();
+        if (bandOutline !== null && bandSurface !== null) {
+          expect(
+            contrastRatio(bandOutline, bandSurface),
+            `${name}: focus outline on the headline band`,
+          ).toBeGreaterThanOrEqual(3);
+        }
       }
     });
   });
