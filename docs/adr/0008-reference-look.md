@@ -116,13 +116,13 @@ Only the values below differ from the reference's own values. Every other colour
 | `--ink-heading` | `#272727` | `#272727` | copied, no change | 14.94 / 13.46 / 12.98 |
 | `--ink-body` | `#434445` | `#434445` | copied, no change | 9.76 / 8.80 / 8.48 |
 | `--ink-muted` | `#868686` | `#666666` | **darkened 25 %** per channel; the reference value reaches only 3.64:1 on white, 3.28:1 on the band and 3.16:1 on the evidence surface — all below 4.5:1 | 5.74 / 5.18 / 4.99 |
-| `--accent-primary` (links, primary button fill) | `#2a93c9` | `#1f6f99` | **darkened about 25 %** per channel; the reference value reaches only 3.43:1 on white, 3.10:1 on the band, 2.98:1 on the evidence surface and 3.43:1 with white button text | 5.54 / 4.99 / 4.81; white on it 5.54 |
+| `--accent-primary` (links, primary button fill) | `#2a93c9` | `#1d6890` | **darkened about 25 %** per channel, then a **further about 6 % per channel** (one step toward the recorded strong step `#1c6288`) in the milestone 4 contrast fix, so the citation links inside the cards that sit on the pale band clear 4.5:1 with margin as well as on the page and the evidence surface; the reference value reaches only 3.43:1 on white, 3.10:1 on the band, 2.98:1 on the evidence surface and 3.43:1 with white button text, and the first darkened value `#1f6f99` (5.54 / 4.99 / 4.81) was deepened for the same reason | 6.11 / 5.51 / 5.31; white on it 6.11 |
 | `--accent-primary-strong` (hover, focus outline) | `#21749f` | `#1c6288` | **darkened about 15 %**; the reference hover tone reaches 4.49:1 on the evidence surface `#edeff4` — just under the 4.5:1 floor for a link colour — and is deepened so the hover tone and the focus outline hold on every band | 6.66 / 6.01 / 5.79 |
 | `--rule` (meaningful borders) | `#bdbdbd` | `#858585` | **darkened about 30 %**; the reference grey is only 1.88:1 / 1.69:1 / 1.63:1 and cannot carry a meaningful boundary | 3.69 / 3.33 / 3.21 |
 | `--rule-soft` (decorative separators only) | `#e5e5e5` | `#e5e5e5` | copied; decorative only, never the sole cue for a boundary | n/a |
-| `--surface-band` (band behind the headline) | `#2a93c9` | `#1f6f99` | the reference accent used as a large fill needs the darkened value to carry white text | white on it 5.54 |
-| `--ink-on-band` | `#ffffff` | `#ffffff` | copied | 5.54 |
-| `--ink-muted-on-band` | — | `#e3f0f9` | new value needed for the band; the reference's `#868686` on `#2a93c9` is only 1.06:1. The first value, `#dbeaf4`, reached 4.51:1 — over the floor, but with so little margin that the milestone-2 build lightened it to `#e3f0f9` | 4.77 |
+| `--surface-band` (band behind the headline) | `#2a93c9` | `#1d6890` | the accent used as a large fill, darkened as recorded above so that it carries white text | white on it 6.11 |
+| `--ink-on-band` | `#ffffff` | `#ffffff` | copied | 6.11 |
+| `--ink-muted-on-band` | — | `#e3f0f9` | new value needed for the band; the reference's `#868686` on `#2a93c9` is only 1.06:1. The first value, `#dbeaf4`, reached 4.51:1 — over the floor, but with so little margin that the milestone-2 build lightened it to `#e3f0f9` (4.77:1 on the first band, 5.27:1 on the final band) | 5.27 |
 | `--accent-secondary` (purple) | `#8668ad` | `#8668ad` | copied; white text on it is 4.57:1 | 4.57 |
 | `--accent-tertiary` (green) | `#84c450` | `#84c450` | copied; **used with dark ink `#272727` (7.11:1), not white** — white on it would be only 2.10:1 | 7.11 |
 | `--accent-warm` (amber) | `#f5bf2f` | `#f5bf2f` | copied; **used with dark ink `#272727` (8.80:1), not white** — white on it would be only 1.70:1 | 8.80 |
@@ -176,9 +176,9 @@ This record replaces the following **visual** decisions, and only those:
 
 **From `docs/adr/0006-editorial-design-system.md`:**
 
-1. The warm neutral surfaces, the distinct evidence surface `#e9efe9` and the teal accent with its depth step are replaced by the new surfaces and the `#1f6f99` / `#55bbeb` accent pair.
+1. The warm neutral surfaces, the distinct evidence surface `#e9efe9` and the teal accent with its depth step are replaced by the new surfaces and the `#1d6890` / `#55bbeb` accent pair.
 2. "The page surface is not pure white" is replaced: the light theme's page surface is now the reference's `#ffffff`.
-3. The navy-to-teal link decision is replaced by the reference's `#2a93c9` accent, darkened to `#1f6f99` in the light theme and lightened to `#55bbeb` in the dark theme for contrast.
+3. The navy-to-teal link decision is replaced by the reference's `#2a93c9` accent, darkened to `#1d6890` in the light theme and lightened to `#55bbeb` in the dark theme for contrast.
 4. Inter for headings (weight 700) is replaced by Asap for headings; Inter stays the body face.
 5. The focus outline and the underline-everywhere rule stay; only the accent colour the outline uses changes to the new accent pair.
 
@@ -223,7 +223,16 @@ The reference's page is one long alternating stack of full-width bands. The site
 | `--ink-on-band` on `--surface-band` (the focus ring inside the band) | 5.54:1 | 8.12:1 | 3:1 |
 | `--accent-primary` on `--surface-band` (not used: the accent is the band) | 1.00:1 | 1.00:1 | — |
 
-The only token changed by this milestone is the light theme's `--ink-muted-on-band` (`#dbeaf4` → `#e3f0f9`, 4.51:1 → 4.77:1), for the reason recorded in the light-theme table above. No other palette value changed, and no colour was weakened.
+The only token changed by this milestone is the light theme's `--ink-muted-on-band` (`#dbeaf4` → `#e3f0f9`, 4.51:1 → 4.77:1), for the reason recorded in the light-theme table above. No other palette value changed, and no colour was weakened. (The light-theme figures in that table are for the band colour at milestone 2; the band's final colour after the milestone 4 darkening step is recorded in the light-theme table above and in the section below.)
+
+## Milestone 4: the light-theme accent darkening step
+
+The Goal requires the citation links inside the evidence cards (and the home page's sources block, which has the same nesting) to clear 4.5:1 against the pale section band `--surface-raised` `#f1f3f9` as well as against the page surface and the cards' own fills. The milestone 4 review recorded the light-theme citation links on the cards that sit on the pale band at about 4.32:1, under the 4.5:1 floor. The light-theme accent was therefore darkened one further step, and the band (which is the accent itself) follows it:
+
+- **Changed:** `--accent-primary` and `--surface-band`, `#1f6f99` → `#1d6890` — about 6 % darker per channel (6.5 % / 6.3 % / 5.9 %), one step toward the already-recorded strong step `#1c6288`. `--accent-primary-strong` is unchanged, so the light theme keeps its two-step accent, as the dark theme does.
+- **Result:** the link colour clears 4.5:1 with margin on every surface a link can sit on — the page `#ffffff` (6.11:1), the pale band `#f1f3f9` (5.51:1) and the evidence surface `#edeff4` (5.31:1) — and the visited colour `#1c6288` clears 6.66 / 6.01 / 5.79 on the same surfaces. White on the band is now 6.11:1, the muted band ink on it 5.27:1, and the active story link's band-coloured text on its own white pill 6.11:1. The light-theme table above records these final values.
+- **Unchanged:** the dark theme (the reference's own light blue `#55bbeb` already clears 4.5:1 on every dark surface at 8.12 / 6.90 / 5.83), the body copy, the routes, and the six illustrations, which keep the first recorded blue `#1f6f99` as a flat decorative fill (never as text) inside each SVG.
+- The step only strengthened contrast: no colour was lightened, and the safeguard tests were extended to compute both accent steps against the pale band the cards sit on, not only against the cards' own fills.
 
 ## Notes
 
