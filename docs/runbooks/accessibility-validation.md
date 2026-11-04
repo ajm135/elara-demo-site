@@ -15,7 +15,7 @@ A **failure** is a check that was run and did not meet its expectation. This rec
 ## Environment
 
 - Computer: Windows, the machine the site runs on; the site is loopback-only and has no deployment.
-- Server: the loopback-only production server started with `npm start` — `next build`, then `next start --hostname 127.0.0.1 --port 3000`. Base URL `http://127.0.0.1:3000/`. Loopback binding is documented in [local-start.md](local-start.md) and is not re-proved here.
+- Server: the loopback-only production server started with `npm start`, which serves an existing current production build (`.next/`) immediately and runs `next build` first only when that build is missing or older than the source inputs it depends on; the listener is always `next start --hostname 127.0.0.1 --port 3000`. Base URL `http://127.0.0.1:3000/`. Loopback binding is documented in [local-start.md](local-start.md) and is not re-proved here.
 - Design under test: the reference look recorded in `docs/adr/0008-reference-look.md` (dated 2026-11-04), which replaces the visual design of 20 October (`docs/adr/0007-immersive-2026-design.md`). Described only as that record describes it:
   - light and dark themes chosen **only** by the reader's system setting (`prefers-color-scheme`) — no switch, no toggle, no JavaScript; the theme closest to the reference's background (the light theme) copies it, and the dark theme uses the same accent colours;
   - a full-width **colour band behind each page's headline**, with the header sitting above it in the same band;

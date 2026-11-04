@@ -80,7 +80,7 @@ Unchanged requirements, not completed verification: WCAG 2.2 AA, and current Chr
 
 Closed in implementation:
 
-- `package.json` scripts: `dev` is `next dev --hostname 127.0.0.1 --port 3000` and `start` ends in `next start --hostname 127.0.0.1 --port 3000` — both servers bind explicitly to loopback.
+- `package.json` scripts: `dev` is `next dev --hostname 127.0.0.1 --port 3000`, and `start` runs `scripts/start-production.mjs`, which serves an existing current production build (`.next/`) immediately, runs `next build` first only when that build is missing or older than the source inputs it depends on, and always starts its listener exactly as `next start --hostname 127.0.0.1 --port 3000` — both servers bind explicitly to loopback.
 - `scripts/verify-local-only.mjs` checks the boundary against the listeners the operating system actually reports: it refuses to start if port 3000 is occupied, starts the development and production servers separately, polls only `http://127.0.0.1:3000/`, reads `netstat -ano`, accepts only loopback addresses (`127.0.0.1`, `::1`), rejects wildcard (`0.0.0.0`, `::`) and any other non-loopback listener, and cleans up only its own process trees.
 - Opening a localhost URL is **not** the boundary: it only proves this computer can reach the server. The loopback binding is the boundary, and the OS-reported listener check verifies it.
 - The runbook documents this as step 5 of `docs/runbooks/local-start.md`.
