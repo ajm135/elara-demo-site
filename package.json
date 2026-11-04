@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1 --port 3000",
-    "start": "set \"PATH=%ProgramFiles%\\nodejs;node_modules\\.bin\" && next build && next start --hostname 127.0.0.1 --port 3000",
+    "start": "set \"PATH=%ProgramFiles%\\nodejs;node_modules\\.bin\" && node scripts/start-production.mjs",
     "build": "set \"PATH=%ProgramFiles%\\nodejs;node_modules\\.bin\" && next build",
     "test": "set \"PATH=%ProgramFiles%\\nodejs;node_modules\\.bin\" && vitest run",
     "verify:reading": "set \"PATH=%ProgramFiles%\\nodejs;node_modules\\.bin\" && node scripts/verify-reading.mjs"

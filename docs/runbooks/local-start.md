@@ -34,7 +34,7 @@ to start the development server, or
 npm start
 ```
 
-to start the production server, which first builds the project (`next build`) and then serves it (`next start`). Wait until the build finishes; the server then stays running and serves the site.
+to start the production server. The `start` script (via `scripts/start-production.mjs`) serves an existing current production build (`.next/`) immediately, and runs `next build` first only when that build is missing or older than the project source inputs it depends on (`src/`, `public/`, `next.config.ts`, `tsconfig.json`, `package.json`, `package-lock.json`); the listener is always `next start --hostname 127.0.0.1 --port 3000`. If a build runs, wait until it finishes; the server then stays running and serves the site.
 
 Both commands bind explicitly to the loopback address `127.0.0.1` on port 3000, so the servers accept connections only from this computer. Port 3000 must be free before starting a server.
 
@@ -54,7 +54,7 @@ In the current version of Chrome, Edge, Firefox, or Safari, open the loopback UR
 
 ## 4. Smoke check the five routes
 
-After `npm test` and `npm run build` have both passed, confirm that the loopback production server serves all five stories. Start it — this script builds the project and then serves it, so wait for the build to finish:
+After `npm test` and `npm run build` have both passed, confirm that the loopback production server serves all five stories. Start it — this script serves the current production build immediately and builds the project first only when that build is missing or older than a source input, so if a build runs, wait for it to finish:
 
 ```
 npm start
@@ -90,7 +90,7 @@ node scripts/verify-local-only.mjs
 The script:
 
 - refuses to start anything if port 3000 is already occupied (it fails safely rather than starting another server);
-- starts `npm run dev` and then `npm run start` separately, each with a bounded ready timeout (120 s for development; 180 s for production, which builds before serving);
+- starts `npm run dev` and then `npm run start` separately, each with a bounded ready timeout (120 s for development; 180 s for production, which serves a current build immediately and builds before serving only when the build is missing or stale);
 - checks HTTP readiness by polling only `http://127.0.0.1:3000/` until it answers HTTP 2xx or 3xx;
 - reads the OS-reported TCP listeners (`netstat -ano`) for port 3000 and accepts only loopback addresses (`127.0.0.1`, `::1`), rejecting wildcard listeners (`0.0.0.0`, `::`) and any other non-loopback address;
 - cleans up only the process trees it started and waits until port 3000 is free again.
